@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Presentes — Luana &amp; Heitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bege: #F3E6D2;
+    --bege-areia: #D9C3A5;
+    --rosa: #E91E9A;
+    --laranja: #FF6A1A;
+    --amarelo: #FFD21F;
+    --texto: #5A4638;
+    --texto-suave: #8A7763;
+    --branco: #FFFCF7;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Montserrat', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    font-weight: 300;
+    color: var(--texto);
+    background: var(--bege);
+    overflow-x: hidden;
+    letter-spacing: 0.01em;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: relative;
+    padding: 4.5rem 2rem 3.5rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .header-watercolor { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    font-size: 0.7rem;
+    color: var(--texto-suave);
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    opacity: 0.75;
+    transition: opacity 0.3s, letter-spacing 0.3s;
+    position: relative;
+    z-index: 1;
+  }
+  .back-btn:hover { opacity: 1; letter-spacing: 0.18em; }
+
+  .header-tag {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--rosa);
+    margin-bottom: 1.6rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  header h1 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    color: var(--texto);
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.01em;
+  }
+
+  header p {
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    max-width: 460px;
+    margin: 0 auto;
+    line-height: 1.9;
+    position: relative;
+    z-index: 1;
+  }
+
+  .divider {
+    width: 1px;
+    height: 50px;
+    background: var(--texto-suave);
+    opacity: 0.35;
+    margin: 1.8rem auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem 6rem; position: relative; z-index: 1; }
+
+  .section-label {
+    font-family: var(--font-body);
+    font-size: 0.66rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    font-weight: 400;
+    margin-bottom: 1.8rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--bege-areia);
+  }
+
+  /* ===== GIFT GRID ===== */
+  .gifts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.6rem;
+    margin-bottom: 4.5rem;
+  }
+
+  .gift-card {
+    background: var(--branco);
+    overflow: hidden;
+    border: 1px solid var(--bege-areia);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .gift-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(90,70,56,0.08);
+    border-color: var(--rosa);
+  }
+
+  .gift-illustration {
+    height: 170px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--bege-areia);
+  }
+
+  .gift-body { padding: 1.5rem 1.5rem 1.6rem; flex: 1; display: flex; flex-direction: column; }
+
+  .gift-name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--texto);
+    margin-bottom: 0.6rem;
+    line-height: 1.35;
+  }
+
+  .gift-desc {
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.7;
+    flex: 1;
+    margin-bottom: 1.4rem;
+  }
+
+  .gift-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--bege);
+  }
+
+  .gift-price {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--texto);
+  }
+
+  .buy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--rosa);
+    border: 1px solid var(--rosa);
+    border-radius: 0;
+    padding: 9px 18px;
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+    text-decoration: none;
+  }
+  .buy-btn:hover { background: var(--rosa); color: var(--branco); }
+
+  /* ===== PIX SECTION ===== */
+  .pix-section {
+    background: var(--branco);
+    padding: 3.5rem 2.5rem;
+    text-align: center;
+    border: 1px solid var(--bege-areia);
+    margin-top: 1rem;
+    position: relative;
+  }
+  .pix-ornament {
+    width: 40px;
+    height: 1px;
+    background: var(--rosa);
+    margin: 0 auto 1.4rem;
+  }
+  .pix-section h2 {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-style: italic;
+    font-size: 2rem;
+    color: var(--texto);
+    margin-bottom: 0.7rem;
+  }
+  .pix-section p { font-size: 0.85rem; font-weight: 300; color: var(--texto-suave); margin-bottom: 2rem; line-height: 1.8; }
+  .pix-key-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bege);
+    border: 1px solid var(--bege-areia);
+    padding: 16px 26px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--texto);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    margin-bottom: 0.7rem;
+  }
+  .pix-key-box:hover { border-color: var(--rosa); }
+  .copy-hint { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--texto-suave); opacity: 0.7; }
+  .copy-ok { color: var(--rosa); font-size: 0.78rem; opacity: 0; transition: opacity 0.3s; margin-top: 0.6rem; font-weight: 300; }
+  .copy-ok.show { opacity: 1; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(90,70,56,0.45);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--branco);
+    border: 1px solid var(--bege-areia);
+    padding: 3rem 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: popIn 0.35s ease;
+  }
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-close {
+    position: absolute;
+    top: 1.2rem; right: 1.2rem;
+    background: none; border: none;
+    font-size: 1.1rem; font-weight: 300; cursor: pointer; color: var(--texto-suave);
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--rosa); }
+  .modal h3 { font-family: var(--font-display); font-weight: 400; font-style: italic; font-size: 1.7rem; margin: 1.2rem 0 0.6rem; color: var(--texto); line-height: 1.3; }
+  .modal p { font-size: 0.82rem; font-weight: 300; color: var(--texto-suave); margin-bottom: 1.4rem; line-height: 1.75; }
+  .modal .modal-price { font-family: var(--font-display); font-size: 2.1rem; font-weight: 400; color: var(--rosa); margin-bottom: 1.4rem; }
+  .modal .pix-key-box { font-size: 0.8rem; }
+  .modal-thanks { font-size: 0.76rem; color: var(--texto-suave); margin-top: 1.2rem; }
+
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    border-top: 1px solid var(--bege-areia);
+    letter-spacing: 0.03em;
+  }
+  footer span { color: var(--rosa); font-family: var(--font-display); font-style: italic; font-size: 0.95rem; }
+
+  @media (max-width: 600px) {
+    .gifts-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .gift-illustration { height: 130px; }
+    .gift-body { padding: 1.1rem 1.1rem 1.3rem; }
+    .gift-name { font-size: 1.05rem; }
+    .gift-desc { font-size: 0.72rem; }
+    .gift-price { font-size: 1.1rem; }
+    .buy-btn { padding: 7px 12px; font-size: 0.6rem; }
+    .pix-section { padding: 2.2rem 1.4rem; }
+    main { padding: 1rem 1rem 4rem; }
+    header { padding: 3.5rem 1.5rem 2.5rem; }
+  }
+  @media (max-width: 400px) {
+    .gifts-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="header-watercolor" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="wcblur1"><feGaussianBlur stdDeviation="22"/></filter>
+      <filter id="wcblur2"><feGaussianBlur stdDeviation="14"/></filter>
+    </defs>
+    <ellipse cx="80" cy="60" rx="170" ry="130" fill="#E91E9A" opacity="0.07" filter="url(#wcblur1)"/>
+    <ellipse cx="920" cy="440" rx="190" ry="140" fill="#FF6A1A" opacity="0.07" filter="url(#wcblur1)"/>
+    <ellipse cx="900" cy="50" rx="110" ry="80" fill="#FFD21F" opacity="0.09" filter="url(#wcblur2)"/>
+    <ellipse cx="60" cy="460" rx="120" ry="90" fill="#FFD21F" opacity="0.07" filter="url(#wcblur2)"/>
+    <ellipse cx="500" cy="10" rx="80" ry="40" fill="#E91E9A" opacity="0.04" filter="url(#wcblur2)"/>
+  </svg>
+  <a class="back-btn" href="casamento-luana-heitor.html">← Voltar ao site</a>
+  <div class="header-tag">Lista de presentes</div>
+  <h1>Presenteie com carinho</h1>
+  <div class="divider"></div>
+  <p>Sua presença já é o maior presente. Mas se quiser nos mimar, escolha algo aqui com muito amor.</p>
+</header>
+
+<main>
+
+  <div class="section-label">Presentes especiais</div>
+
+  <div class="gifts-grid" id="giftsGrid"></div>
+
+  <div class="section-label">Contribuição via Pix</div>
+
+  <div class="pix-section">
+    <div class="pix-ornament"></div>
+    <h2>Presente via Pix</h2>
+    <p>Prefere contribuir com qualquer valor? Use nossa chave Pix.<br>Qualquer coisa é recebida com muito amor.</p>
+    <div class="pix-key-box" onclick="copyPix()">
+      <span id="pixKeyText">meupix.luana@gmail.com</span>
+    </div>
+    <br>
+    <span class="copy-hint">Toque para copiar</span>
+    <p class="copy-ok" id="copyOk">Chave copiada com sucesso</p>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalIllustration" style="margin:0 auto 0.5rem;width:110px;height:110px;"></div>
+    <h3 id="modalName"></h3>
+    <p id="modalDesc"></p>
+    <div class="modal-price" id="modalPrice"></div>
+    <p style="font-size:0.78rem;color:var(--texto-suave);margin-bottom:0.9rem;font-weight:300;">Pague via Pix para os noivos:</p>
+    <div class="pix-key-box" onclick="copyPix()" style="justify-content:center;width:100%">
+      <span>meupix.luana@gmail.com</span>
+    </div>
+    <p class="modal-thanks">Após o pagamento, é só avisar os noivos com o nome do presente.</p>
+  </div>
+</div>
+
+<footer>
+  <p>Feito com amor para <span>Luana &amp; Heitor</span> · 10.10.2026</p>
+</footer>
+
+<script>
+/* Paleta para as ilustrações em aquarela, alinhada à identidade visual */
+const PALETTE = {
+  rosa: "#E91E9A",
+  laranja: "#FF6A1A",
+  amarelo: "#FFD21F",
+  bege: "#F3E6D2",
+  bege2: "#D9C3A5",
+  texto: "#5A4638"
+};
+
+/* Gera uma ilustração de "mancha" de aquarela genérica e elegante,
+   variando a cor principal (sempre uma cor fixa da paleta) e um ícone
+   de traço fino (line art) no centro */
+function watercolorCard(mainColor, iconPathFn, seed) {
+  const c = mainColor;
+  return `<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="wc${seed}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <ellipse cx="74" cy="84" rx="50" ry="40" fill="${c}" opacity="0.16" filter="url(#wc${seed})"/>
+    <ellipse cx="96" cy="62" rx="30" ry="24" fill="${c}" opacity="0.13" filter="url(#wc${seed})"/>
+    <g stroke="${PALETTE.texto}" stroke-width="1.1" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+      ${iconPathFn}
+    </g>
+  </svg>`;
+}
+
+const gifts = [
+  {
+    name: "Open de Whisky para a Festa",
+    desc: "Para brindar o amor, a alegria e a noite inesquecível que está por vir.",
+    price: "R$ 150",
+    color: PALETTE.amarelo,
+    icon: `<rect x="62" y="50" width="36" height="62" rx="3"/><line x1="62" y1="68" x2="98" y2="68"/><line x1="70" y1="42" x2="70" y2="50"/><line x1="90" y1="42" x2="90" y2="50"/><line x1="68" y1="42" x2="92" y2="42"/>`
+  },
+  {
+    name: "Vale Jantar Feito pelo Noivo",
+    desc: "Uma noite especial com o chef mais apaixonado da cidade. Tempero secreto: amor.",
+    price: "R$ 80",
+    color: PALETTE.laranja,
+    icon: `<circle cx="80" cy="84" r="26"/><path d="M68 84 a12 12 0 0 1 24 0"/><line x1="62" y1="50" x2="62" y2="68"/><line x1="68" y1="50" x2="68" y2="64"/><line x1="74" y1="50" x2="74" y2="68"/><path d="M96 50 v22 a6 6 0 0 1 -6 6 v-28"/>`
+  },
+  {
+    name: 'Cota "Luana Quer, Heitor Concorda"',
+    desc: 'Para financiar aquela compra que começou com "é rapidinho" e terminou em 12 parcelas.',
+    price: "R$ 80",
+    color: PALETTE.rosa,
+    icon: `<rect x="48" y="62" width="64" height="42" rx="4"/><line x1="48" y1="76" x2="112" y2="76"/><line x1="58" y1="90" x2="80" y2="90"/><path d="M92 96 l6 6 12 -14"/>`
+  },
+  {
+    name: 'Cota "Paz no Lar"',
+    desc: "Para comprar o que evita pequenas DRs domésticas.",
+    price: "R$ 100",
+    color: PALETTE.amarelo,
+    icon: `<path d="M80 40 L112 64 V108 H48 V64 Z"/><path d="M68 108 V84 H92 V108"/><path d="M60 80 Q80 64 100 80"/>`
+  },
+  {
+    name: 'Cota "Heitor, Respira Fundo"',
+    desc: "Porque casar com a Luana é uma aventura linda, mas intensa.",
+    price: "R$ 120",
+    color: PALETTE.rosa,
+    icon: `<path d="M44 84 Q56 64 68 84 T92 84 T116 84"/><path d="M50 96 Q62 80 74 96 T98 96 T110 96" opacity="0.6"/><path d="M58 64 Q62 50 58 38" opacity="0.5"/>`
+  },
+  {
+    name: 'Cota "Luana Está Certa"',
+    desc: "Presente oficial para quem já entendeu a dinâmica do casal.",
+    price: "R$ 150",
+    color: PALETTE.amarelo,
+    icon: `<path d="M80 38 L88 62 L114 62 L93 77 L101 101 L80 86 L59 101 L67 77 L46 62 L72 62 Z"/>`
+  },
+  {
+    name: 'Cota "Primeira Briga Boba"',
+    desc: "Para o casal pedir comida e fingir que nada aconteceu.",
+    price: "R$ 90",
+    color: PALETTE.laranja,
+    icon: `<rect x="46" y="68" width="28" height="36" rx="4"/><rect x="86" y="68" width="28" height="36" rx="4"/><path d="M76 50 Q80 38 84 50"/><circle cx="80" cy="56" r="3"/>`
+  },
+  {
+    name: 'Cota "Jantar Sem Queimar Nada"',
+    desc: "Para garantir um date em casa com mais amor e menos fumaça.",
+    price: "R$ 130",
+    color: PALETTE.laranja,
+    icon: `<rect x="44" y="86" width="72" height="10" rx="2"/><rect x="54" y="96" width="52" height="22" rx="3"/><path d="M58 86 Q56 74 58 62"/><path d="M68 86 Q66 74 68 62"/><path d="M92 86 Q90 74 92 62"/><path d="M102 86 Q100 74 102 62"/>`
+  },
+  {
+    name: 'Cota "Delivery Pós-Festa"',
+    desc: "Porque depois do casamento ninguém merece cozinhar.",
+    price: "R$ 70",
+    color: PALETTE.rosa,
+    icon: `<circle cx="58" cy="100" r="10"/><circle cx="106" cy="100" r="10"/><path d="M58 100 L70 70 H90"/><path d="M90 70 L106 100"/><rect x="84" y="56" width="20" height="14" rx="2"/>`
+  },
+  {
+    name: 'Cota "Não Vamos Morar Juntos, Mas Já Aceitamos Presentes"',
+    desc: "Um clássico exclusivo Luana e Heitor.",
+    price: "R$ 200",
+    color: PALETTE.amarelo,
+    icon: `<path d="M44 76 L58 60 L72 76 V104 H44 Z"/><path d="M88 76 L102 60 L116 76 V104 H88 Z"/><path d="M75 88 q5 -6 10 0" />`
+  },
+  {
+    name: 'Cota "Lua de Mel ou Boleto?"',
+    desc: "Ajuda simbólica para uma escolha difícil da vida adulta.",
+    price: "R$ 180",
+    color: PALETTE.laranja,
+    icon: `<path d="M58 50 a26 26 0 1 0 0 52 30 30 0 0 1 0 -52Z"/><rect x="86" y="56" width="34" height="26" rx="3"/><line x1="86" y1="66" x2="120" y2="66"/>`
+  },
+  {
+    name: 'Cota "Casal Tropical Chique"',
+    desc: "Para manter o clima fúcsia, laranja, amarelo e muito amor.",
+    price: "R$ 160",
+    color: PALETTE.laranja,
+    icon: `<circle cx="80" cy="60" r="16"/><path d="M58 90 Q80 70 102 90 Q98 112 80 116 Q62 112 58 90Z"/>`
+  },
+  {
+    name: 'Cota "Heitor Calmo, Luana Prática"',
+    desc: "Para equilibrar o casal mais complementar do rolê.",
+    price: "R$ 110",
+    color: PALETTE.rosa,
+    icon: `<circle cx="62" cy="74" r="22"/><circle cx="98" cy="74" r="22"/><path d="M70 100 Q80 110 90 100"/>`
+  },
+  {
+    name: 'Cota "Uma Taça Para Cada Surto"',
+    desc: "Porque todo casal precisa de taças bonitas e terapia líquida ocasional.",
+    price: "R$ 140",
+    color: PALETTE.rosa,
+    icon: `<path d="M58 44 L66 78 Q68 88 78 90 V108 H66 V112 H90 V108 H78 V90 Q88 88 90 78 L98 44 Z"/>`
+  },
+  {
+    name: 'Cota "Kit Sobrevivência Pós-Casamento"',
+    desc: "Café, chocolate, paciência e um pouco de silêncio.",
+    price: "R$ 95",
+    color: PALETTE.amarelo,
+    icon: `<rect x="48" y="70" width="32" height="34" rx="4"/><path d="M80 78 q12 -2 10 12 q-2 10 -10 8"/><path x1="56" y1="60" x2="56" y2="70"/><path d="M58 50 Q60 56 58 62"/><path d="M70 50 Q72 56 70 62"/><rect x="92" y="64" width="26" height="40" rx="3"/>`
+  },
+  {
+    name: 'Cota "Mais Uma Decoração Que a Luana Amou"',
+    desc: 'Para aquela peça linda que ela viu e disse: "preciso".',
+    price: "R$ 220",
+    color: PALETTE.amarelo,
+    icon: `<rect x="42" y="44" width="76" height="58" rx="3"/><path d="M50 84 Q70 60 90 78 Q100 64 110 80"/><circle cx="60" cy="58" r="5"/>`
+  },
+  {
+    name: 'Cota "Heitor Não Opinou, Mas Aprovou"',
+    desc: "Para presentes escolhidos pela noiva e aceitos com carinho pelo noivo.",
+    price: "R$ 170",
+    color: PALETTE.laranja,
+    icon: `<circle cx="80" cy="74" r="30"/><path d="M64 96 q16 14 32 0"/><path d="M96 100 v18 q0 4 4 4 h3 q4 0 6 -4 l5 -16"/>`
+  },
+  {
+    name: 'Cota "Domingo de Churrasco"',
+    desc: "Para manter a tradição de comida boa, família e risada.",
+    price: "R$ 250",
+    color: PALETTE.laranja,
+    icon: `<ellipse cx="80" cy="84" rx="34" ry="8"/><line x1="58" y1="84" x2="58" y2="100"/><line x1="102" y1="84" x2="102" y2="100"/><path d="M64 76 Q70 58 76 76"/><path d="M76 74 Q82 54 88 74"/><path d="M88 76 Q94 58 100 76"/>`
+  },
+  {
+    name: 'Cota "Piscina, Sol e Zero Problemas"',
+    desc: "Para o casal curtir o pós-casamento no mood tropical.",
+    price: "R$ 300",
+    color: PALETTE.amarelo,
+    icon: `<circle cx="80" cy="48" r="14"/><path d="M40 84 Q56 72 72 84 Q88 96 104 84 Q112 78 120 82"/><path d="M40 84 V104 H120 V82"/>`
+  },
+  {
+    name: 'Cota "Terapia de Casal Preventiva"',
+    desc: "Brincadeira, gente. Ou não.",
+    price: "R$ 120",
+    color: PALETTE.rosa,
+    icon: `<rect x="42" y="50" width="50" height="34" rx="14"/><path d="M58 84 L52 96 L66 84"/><rect x="74" y="74" width="44" height="30" rx="14"/><path d="M92 104 L98 116 L106 104"/>`
+  },
+  {
+    name: 'Cota "O Amor Venceu o Orçamento"',
+    desc: "Para ajudar os noivos a fingirem que tudo saiu dentro do planejado.",
+    price: "R$ 350",
+    color: PALETTE.amarelo,
+    icon: `<line x1="44" y1="104" x2="116" y2="104"/><rect x="50" y="84" width="14" height="20"/><rect x="68" y="72" width="14" height="32"/><rect x="86" y="78" width="14" height="26"/><rect x="104" y="62" width="10" height="42"/><path d="M48 80 Q70 60 90 70 Q104 78 112 56"/>`
+  },
+  {
+    name: 'Cota "A Festa Foi Linda, Agora Paguem"',
+    desc: "Direta, sincera e necessária.",
+    price: "R$ 500",
+    color: PALETTE.rosa,
+    icon: `<rect x="46" y="56" width="68" height="48" rx="4"/><line x1="46" y1="68" x2="114" y2="68"/><text x="80" y="92" text-anchor="middle" font-size="20" fill="${PALETTE.texto}" stroke="none" font-family="Cormorant Garamond, serif">R$</text>`
+  }
+];
+
+function buildGrid() {
+  const grid = document.getElementById('giftsGrid');
+  gifts.forEach((g, i) => {
+    const bgStyle = `background: radial-gradient(circle at 50% 45%, var(--branco) 35%, var(--bege) 100%)`;
+    const card = document.createElement('div');
+    card.className = 'gift-card';
+    card.innerHTML = `
+      <div class="gift-illustration" style="${bgStyle}">
+        ${watercolorCard(g.color, g.icon, i)}
+      </div>
+      <div class="gift-body">
+        <h3 class="gift-name">${g.name}</h3>
+        <p class="gift-desc">${g.desc}</p>
+        <div class="gift-footer">
+          <span class="gift-price">${g.price}</span>
+          <button class="buy-btn" onclick="openModal(${i})">Presentear</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function openModal(i) {
+  const g = gifts[i];
+  document.getElementById('modalIllustration').innerHTML = watercolorCard(g.color, g.icon, 'm' + i);
+  document.getElementById('modalIllustration').style.background = 'radial-gradient(circle at 50% 45%, var(--branco) 35%, var(--bege) 100%)';
+  document.getElementById('modalIllustration').style.border = '1px solid var(--bege-areia)';
+  document.getElementById('modalIllustration').style.padding = '10px';
+  document.getElementById('modalName').textContent = g.name;
+  document.getElementById('modalDesc').textContent = g.desc;
+  document.getElementById('modalPrice').textContent = g.price;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function copyPix() {
+  navigator.clipboard.writeText('meupix.luana@gmail.com').then(() => {
+    const ok = document.getElementById('copyOk');
+    if (ok) { ok.classList.add('show'); setTimeout(() => ok.classList.remove('show'), 2500); }
+  });
+}
+
+buildGrid();
+</script>
+</body>
+</html>

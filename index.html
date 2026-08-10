@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Luana &amp; Heitor — 10.10.2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bege: #F3E6D2;
+    --bege-areia: #D9C3A5;
+    --rosa: #E91E9A;
+    --laranja: #FF6A1A;
+    --amarelo: #FFD21F;
+    --texto: #5A4638;
+    --texto-suave: #8A7763;
+    --branco: #FFFCF7;
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body: 'Montserrat', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    font-weight: 300;
+    color: var(--texto);
+    background: var(--bege);
+    overflow-x: hidden;
+    letter-spacing: 0.01em;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(255,252,247,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bege-areia);
+    padding: 0 2.5rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.3rem;
+    color: var(--texto);
+    letter-spacing: 0.03em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--texto-suave);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--rosa); }
+
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+  }
+
+  .nav-toggle span {
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--texto);
+    transition: all 0.3s;
+  }
+
+  /* ===== HERO ===== */
+  #home {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 90px 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+    background: var(--bege);
+  }
+
+  .hero-watercolor { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--rosa);
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.9s ease both;
+  }
+
+  .hero-names {
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 10vw, 6.4rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.08;
+    text-align: center;
+    color: var(--texto);
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1s 0.1s ease both;
+  }
+
+  .hero-names span.amp {
+    color: var(--rosa);
+    display: block;
+    font-size: 0.5em;
+    font-style: normal;
+    font-weight: 300;
+    margin: 0.2em 0;
+  }
+
+  .hero-date {
+    margin-top: 1.6rem;
+    font-size: clamp(0.85rem, 2.4vw, 1.05rem);
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    color: var(--texto-suave);
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1.1s 0.2s ease both;
+  }
+
+  .hero-divider {
+    margin: 2.2rem auto;
+    width: 1px;
+    height: 50px;
+    background: var(--texto-suave);
+    opacity: 0.35;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1.1s 0.3s ease both;
+  }
+
+  /* COUNTDOWN */
+  .countdown {
+    display: flex;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 1.1s 0.4s ease both;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .cd-unit {
+    text-align: center;
+    min-width: 64px;
+  }
+
+  .cd-num {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1;
+    color: var(--texto);
+  }
+
+  .cd-label {
+    display: block;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+    margin-top: 6px;
+  }
+
+  .cd-sep {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-style: italic;
+    color: var(--rosa);
+    opacity: 0.45;
+    align-self: flex-start;
+    margin-top: 4px;
+  }
+
+  /* ===== SECTIONS COMMON ===== */
+  section:not(#home) {
+    padding: 6rem 2rem;
+    position: relative;
+  }
+
+  .section-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    color: var(--rosa);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--texto);
+    line-height: 1.25;
+    margin-bottom: 0.8rem;
+  }
+
+  .section-sub {
+    font-size: 0.88rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    margin-bottom: 3rem;
+    line-height: 1.85;
+    max-width: 520px;
+  }
+
+  /* ===== INFORMAÇÕES ===== */
+  #informacoes {
+    background: var(--bege);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-card {
+    background: var(--branco);
+    padding: 1.8rem 1.6rem;
+    border: 1px solid var(--bege-areia);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  }
+
+  .info-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(90,70,56,0.08); border-color: var(--rosa); }
+
+  .info-icon-wrap {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 1.1rem;
+  }
+
+  .info-card h3 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: var(--texto);
+    margin-bottom: 0.5rem;
+  }
+
+  .info-card p {
+    font-size: 0.8rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.7;
+  }
+
+  .info-card p strong { font-weight: 500; color: var(--texto); }
+
+  .info-card-clickable { cursor: pointer; }
+
+  .info-card-link {
+    display: inline-block;
+    margin-top: 0.8rem;
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--rosa);
+    transition: letter-spacing 0.3s;
+  }
+
+  .info-card-clickable:hover .info-card-link { letter-spacing: 0.14em; }
+
+  /* ===== DATA E LOCAL ===== */
+  #local {
+    background: var(--texto);
+    color: var(--branco);
+  }
+
+  #local .section-title { color: var(--branco); }
+  #local .section-sub { color: rgba(255,252,247,0.55); }
+  #local .section-tag { color: var(--amarelo); }
+
+  .local-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .local-item {
+    display: flex;
+    gap: 1.2rem;
+    margin-bottom: 1.8rem;
+    align-items: flex-start;
+  }
+
+  .local-icon {
+    width: 1px;
+    height: 44px;
+    background: var(--amarelo);
+    opacity: 0.5;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  .local-item h4 {
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,252,247,0.4);
+    margin-bottom: 0.4rem;
+  }
+
+  .local-item p {
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: rgba(255,252,247,0.92);
+    line-height: 1.7;
+  }
+
+  .map-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--amarelo);
+    text-decoration: none;
+    border: 1px solid var(--amarelo);
+    padding: 12px 26px;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.7rem;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .map-btn:hover { background: var(--amarelo); color: var(--texto); }
+
+  .map-preview {
+    border: 1px solid rgba(255,252,247,0.15);
+    background: rgba(255,252,247,0.04);
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2.2rem;
+    gap: 1rem;
+  }
+
+  .map-preview svg { opacity: 0.85; }
+
+  .map-preview p {
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: rgba(255,252,247,0.45);
+    line-height: 1.7;
+  }
+
+  .map-preview .place-name {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--branco);
+  }
+
+  /* ===== LISTA DE PRESENTES ===== */
+  #presentes {
+    background: var(--bege);
+  }
+
+  .presentes-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.6rem;
+  }
+
+  .presente-card {
+    background: var(--branco);
+    padding: 2.4rem 2rem;
+    text-align: center;
+    border: 1px solid var(--bege-areia);
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .presente-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(90,70,56,0.08); border-color: var(--rosa); }
+
+  .presente-icon { width: 54px; height: 54px; margin: 0 auto 1.2rem; }
+
+  .presente-card h3 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--texto);
+    margin-bottom: 0.6rem;
+  }
+
+  .presente-card p {
+    font-size: 0.82rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.75;
+    margin-bottom: 1.6rem;
+  }
+
+  .pix-key {
+    background: var(--bege);
+    border: 1px solid var(--bege-areia);
+    padding: 14px 18px;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: var(--texto);
+    word-break: break-all;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  .pix-key:hover { border-color: var(--rosa); }
+
+  .pix-copy-msg {
+    font-size: 0.72rem;
+    color: var(--rosa);
+    opacity: 0;
+    transition: opacity 0.3s;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .pix-copy-msg.show { opacity: 1; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+  }
+
+  .btn-outline-laranja {
+    background: transparent;
+    color: var(--laranja);
+    border-color: var(--laranja);
+  }
+  .btn-outline-laranja:hover { background: var(--laranja); color: var(--branco); }
+
+  .btn-outline-rosa {
+    background: transparent;
+    color: var(--rosa);
+    border-color: var(--rosa);
+  }
+  .btn-outline-rosa:hover { background: var(--rosa); color: var(--branco); }
+
+  /* ===== MENSAGEM AOS NOIVOS ===== */
+  #mensagem {
+    background: var(--branco);
+  }
+
+  .msg-form {
+    background: var(--bege);
+    padding: 3rem 2.6rem;
+    border: 1px solid var(--bege-areia);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-group label {
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 13px 16px;
+    border: 1px solid var(--bege-areia);
+    background: var(--branco);
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 0.85rem;
+    color: var(--texto);
+    transition: border-color 0.3s;
+    outline: none;
+    width: 100%;
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder { color: var(--texto-suave); opacity: 0.6; }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--rosa);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 120px; }
+
+  .form-submit {
+    margin-top: 1.6rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .success-msg {
+    display: none;
+    background: var(--branco);
+    color: var(--rosa);
+    padding: 14px 20px;
+    font-size: 0.82rem;
+    font-weight: 300;
+    margin-top: 1.2rem;
+    text-align: center;
+    border: 1px solid var(--rosa);
+  }
+
+  .success-msg.show { display: block; }
+
+  /* ===== CONFIRMAÇÃO ===== */
+  #confirmacao {
+    background: var(--bege);
+  }
+
+  .confirm-cta {
+    background: var(--branco);
+    padding: 3rem 2.5rem;
+    border: 1px solid var(--bege-areia);
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .confirm-cta p {
+    font-size: 0.88rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.8;
+    margin: 1.2rem 0 1.6rem;
+  }
+
+  /* ===== MODALS (Traje / Padrinhos) ===== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(90,70,56,0.5);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--branco);
+    border: 1px solid var(--bege-areia);
+    padding: 3rem 2.6rem;
+    max-width: 560px;
+    width: 100%;
+    max-height: 86vh;
+    overflow-y: auto;
+    position: relative;
+    animation: popIn 0.35s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1.3rem; right: 1.3rem;
+    background: none; border: none;
+    font-size: 1.1rem; font-weight: 300; cursor: pointer; color: var(--texto-suave);
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--rosa); }
+
+  .modal-tag {
+    font-size: 0.64rem;
+    font-weight: 400;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--rosa);
+    display: block;
+    margin-bottom: 0.8rem;
+  }
+
+  .modal-box h2 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 300;
+    font-size: 1.9rem;
+    color: var(--texto);
+    margin-bottom: 1.4rem;
+    line-height: 1.3;
+  }
+
+  .modal-box .traje-block { margin-bottom: 1.8rem; }
+  .modal-box .traje-block:last-child { margin-bottom: 0; }
+
+  .modal-box .traje-block h4 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.25rem;
+    color: var(--texto);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-box .traje-block p {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.85;
+  }
+
+  .traje-divider {
+    width: 30px; height: 1px;
+    background: var(--bege-areia);
+    margin: 1.6rem 0;
+  }
+
+  /* Padrinhos modal */
+  .padrinhos-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+    margin-top: 0.5rem;
+  }
+
+  .padrinho-item {
+    display: flex;
+    gap: 1.3rem;
+    align-items: flex-start;
+  }
+
+  .padrinho-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid var(--bege-areia);
+    overflow: hidden;
+  }
+
+  .padrinho-info h4 {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.15rem;
+    color: var(--texto);
+    margin-bottom: 0.3rem;
+  }
+
+  .padrinho-info p {
+    font-size: 0.8rem;
+    font-weight: 300;
+    color: var(--texto-suave);
+    line-height: 1.7;
+  }
+  /* ===== FOOTER ===== */
+  footer {
+    background: var(--texto);
+    color: rgba(255,252,247,0.5);
+    text-align: center;
+    padding: 2.6rem 2rem;
+    font-size: 0.74rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  footer span {
+    color: var(--amarelo);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 680px) {
+    nav { padding: 0 1.3rem; }
+    .nav-links { display: none; position: absolute; top: 64px; left: 0; right: 0; background: var(--branco); flex-direction: column; padding: 1.2rem 2rem 1.6rem; gap: 1.1rem; border-bottom: 1px solid var(--bege-areia); }
+    .nav-links.open { display: flex; }
+    .nav-toggle { display: flex; }
+
+    section:not(#home) { padding: 4rem 1.3rem; }
+
+    .local-wrap { grid-template-columns: 1fr; gap: 2rem; }
+    .map-preview { height: 200px; }
+    .presentes-wrap { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .msg-form { padding: 1.8rem 1.4rem; }
+    .confirm-cta { padding: 2rem 1.4rem; }
+    .modal-box { padding: 2.2rem 1.6rem; }
+    .cd-num { font-size: 1.9rem; }
+    .cd-unit { min-width: 48px; }
+    .countdown { gap: 1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-logo">L &amp; H</div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home">Início</a></li>
+    <li><a href="#informacoes">Informações</a></li>
+    <li><a href="#local">Local</a></li>
+    <li><a href="#presentes">Presentes</a></li>
+    <li><a href="#mensagem">Mensagem</a></li>
+    <li><a href="#confirmacao">Confirmação</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="home">
+  <svg class="hero-watercolor" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="hwblur1"><feGaussianBlur stdDeviation="40"/></filter>
+      <filter id="hwblur2"><feGaussianBlur stdDeviation="26"/></filter>
+    </defs>
+    <ellipse cx="80" cy="80" rx="220" ry="180" fill="#E91E9A" opacity="0.08" filter="url(#hwblur1)"/>
+    <ellipse cx="930" cy="900" rx="240" ry="190" fill="#FF6A1A" opacity="0.08" filter="url(#hwblur1)"/>
+    <ellipse cx="920" cy="100" rx="150" ry="110" fill="#FFD21F" opacity="0.1" filter="url(#hwblur2)"/>
+    <ellipse cx="60" cy="900" rx="160" ry="120" fill="#FFD21F" opacity="0.08" filter="url(#hwblur2)"/>
+    <ellipse cx="500" cy="960" rx="120" ry="60" fill="#E91E9A" opacity="0.05" filter="url(#hwblur2)"/>
+  </svg>
+  <div class="hero-tag">Save the date</div>
+  <h1 class="hero-names">
+    Luana
+    <span class="amp">&amp;</span>
+    Heitor
+  </h1>
+  <p class="hero-date">10 · 10 · 2026</p>
+  <div class="hero-divider"></div>
+  <div class="countdown" id="countdown">
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-days">000</span>
+      <span class="cd-label">dias</span>
+    </div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-hours">00</span>
+      <span class="cd-label">horas</span>
+    </div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-mins">00</span>
+      <span class="cd-label">minutos</span>
+    </div>
+    <span class="cd-sep">:</span>
+    <div class="cd-unit">
+      <span class="cd-num" id="cd-secs">00</span>
+      <span class="cd-label">segundos</span>
+    </div>
+  </div>
+</section>
+
+<!-- INFORMAÇÕES -->
+<section id="informacoes">
+  <div class="section-inner">
+    <span class="section-tag">Informações importantes</span>
+    <h2 class="section-title">Tudo que você precisa saber</h2>
+    <p class="section-sub">Separamos as principais informações para que o seu dia seja perfeito também.</p>
+    <div class="info-grid">
+      <div class="info-card info-card-clickable" onclick="openTrajeModal()">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 8 L22 14 L30 8 L34 14 L30 18 V36 H14 V18 L10 14 Z" stroke="#E91E9A" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Traje</h3>
+        <p>Festa / Passeio completo. Capriche na produção, esse dia merece.</p>
+        <span class="info-card-link">Saiba mais →</span>
+      </div>
+      <div class="info-card">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="20" width="32" height="12" rx="3" stroke="#FF6A1A" stroke-width="1.2"/>
+            <circle cx="13" cy="34" r="2.6" stroke="#FF6A1A" stroke-width="1.2"/>
+            <circle cx="31" cy="34" r="2.6" stroke="#FF6A1A" stroke-width="1.2"/>
+            <path d="M9 20 L13 11 H31 L35 20" stroke="#FF6A1A" stroke-width="1.2" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Estacionamento</h3>
+        <p>O local conta com estacionamento gratuito. Fique à vontade para ir de carro.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 6 C29 6 34 11 34 18 C34 27 22 38 22 38 C22 38 10 27 10 18 C10 11 15 6 22 6 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="22" cy="18" r="4.5" stroke="#FFD21F" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3>Como chegar</h3>
+        <p>O local fica na Estrada Guarulhos-Nazaré km 42,2, em Mairiporã - SP. Recomendamos o Google Maps para melhor orientação.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="22" cy="22" r="16" stroke="#5A4638" stroke-width="1.2"/>
+            <path d="M22 13 V22 L29 26" stroke="#5A4638" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Horário</h3>
+        <p>A celebração começa às <strong>17h</strong>. Pedimos pontualidade para que todos aproveitem cada momento.</p>
+      </div>
+      <div class="info-card info-card-clickable" onclick="openPadrinhosModal()">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="17" r="6" stroke="#FF6A1A" stroke-width="1.2"/>
+            <circle cx="29" cy="17" r="6" stroke="#E91E9A" stroke-width="1.2"/>
+            <path d="M6 38 C6 30 10.5 26 16 26 C18 26 19.8 26.9 21 28.3" stroke="#FF6A1A" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M38 38 C38 30 33.5 26 28 26 C26 26 24.2 26.9 23 28.3" stroke="#E91E9A" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Padrinhos</h3>
+        <p>Conheça algumas pessoas especiais que farão parte dessa história.</p>
+        <span class="info-card-link">Conhecer →</span>
+      </div>
+      <div class="info-card">
+        <div class="info-icon-wrap">
+          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 7 C16 7 12 12 12 17.5 C12 22 14.5 24.5 16 27 C17 28.6 17.5 30 17.5 32 H26.5 C26.5 30 27 28.6 28 27 C29.5 24.5 32 22 32 17.5 C32 12 28 7 22 7 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
+            <line x1="17.5" y1="35" x2="26.5" y2="35" stroke="#FFD21F" stroke-width="1.2"/>
+            <line x1="19" y1="38" x2="25" y2="38" stroke="#FFD21F" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <h3>Dicas</h3>
+        <p>A celebração será em uma região mais reservada. Combinar caronas, cotar uma van em grupo ou buscar hospedagens próximas pode tornar a chegada mais tranquila.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA E LOCAL -->
+<section id="local">
+  <div class="section-inner">
+    <span class="section-tag">Data &amp; Local</span>
+    <h2 class="section-title">O grande dia</h2>
+    <p class="section-sub">Mal podemos esperar para celebrar com vocês nesse lugar incrível.</p>
+    <div class="local-wrap">
+      <div class="local-details">
+        <div class="local-item">
+          <div class="local-icon"></div>
+          <div>
+            <h4>Data</h4>
+            <p>Sábado, 10 de Outubro de 2026</p>
+          </div>
+        </div>
+        <div class="local-item">
+          <div class="local-icon"></div>
+          <div>
+            <h4>Horário</h4>
+            <p>A partir das 17h00</p>
+          </div>
+        </div>
+        <div class="local-item">
+          <div class="local-icon"></div>
+          <div>
+            <h4>Local</h4>
+            <p>Estrada Guarulhos-Nazaré km 42,2<br>Tapera Grande — Mairiporã, SP<br>CEP 07600-000</p>
+          </div>
+        </div>
+        <a class="map-btn" href="https://maps.google.com/?q=Estrada+Guarulhos-Nazaré+km+42,2,+Mairiporã+SP" target="_blank">
+          Abrir no Google Maps
+        </a>
+      </div>
+      <div class="map-preview">
+        <svg width="48" height="48" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 6 C29 6 34 11 34 18 C34 27 22 38 22 38 C22 38 10 27 10 18 C10 11 15 6 22 6 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
+          <circle cx="22" cy="18" r="4.5" stroke="#FFD21F" stroke-width="1.2"/>
+        </svg>
+        <p class="place-name">Mairiporã, SP</p>
+        <p>Estrada Guarulhos-Nazaré km 42,2<br>Tapera Grande</p>
+        <a class="map-btn" href="https://maps.google.com/?q=Estrada+Guarulhos-Nazaré+km+42,2,+Mairiporã+SP" target="_blank" style="margin-top:0.3rem; font-size:0.66rem; padding:10px 22px;">
+          Ver no mapa
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTA DE PRESENTES -->
+<section id="presentes">
+  <div class="section-inner">
+    <span class="section-tag">Lista de presentes</span>
+    <h2 class="section-title">Presenteie com carinho</h2>
+    <p class="section-sub">Sua presença já é o maior presente, mas se quiser nos mimar, aqui estão as opções.</p>
+    <div class="presentes-wrap">
+      <div class="presente-card">
+        <div class="presente-icon">
+          <svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="12" y="22" width="30" height="24" rx="2" stroke="#FF6A1A" stroke-width="1.1"/>
+            <path d="M16 22 L20 10 H34 L38 22" stroke="#FF6A1A" stroke-width="1.1" stroke-linejoin="round"/>
+            <circle cx="27" cy="16" r="3" stroke="#FF6A1A" stroke-width="1.1"/>
+          </svg>
+        </div>
+        <h3>Lista de presentes</h3>
+        <p>Acesse nossa lista completa e escolha o presente ideal para nos acompanhar nessa nova fase.</p>
+        <a class="btn btn-outline-laranja" href="lista-presentes-luana-heitor.html" target="_blank">Ver lista de presentes</a>
+      </div>
+      <div class="presente-card">
+        <div class="presente-icon">
+          <svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M27 42 C18 35 10 28 10 19.5 C10 13.7 14.7 9 20.5 9 C23.6 9 26.3 10.6 27 13 C27.7 10.6 30.4 9 33.5 9 C39.3 9 44 13.7 44 19.5 C44 28 36 35 27 42 Z" stroke="#E91E9A" stroke-width="1.1" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Presente via Pix</h3>
+        <p>Se preferir, também aceitamos contribuições via Pix. Qualquer valor é recebido com muito amor.</p>
+        <p style="font-size:0.72rem; color:var(--texto-suave); margin-bottom:0.6rem; margin-top:-0.9rem; font-weight:300;">Toque para copiar a chave:</p>
+        <div class="pix-key" id="pixKey" onclick="copyPix()">meupix.luana@gmail.com</div>
+        <p class="pix-copy-msg" id="pixCopyMsg">Chave copiada com sucesso</p>
+        <button class="btn btn-outline-rosa" onclick="copyPix()" style="margin-top:0.8rem">Copiar chave Pix</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENSAGEM AOS NOIVOS -->
+<section id="mensagem">
+  <div class="section-inner">
+    <span class="section-tag">Mensagem</span>
+    <h2 class="section-title">Deixe seu carinho</h2>
+    <p class="section-sub">Escreva uma mensagem especial para Luana &amp; Heitor. Guardaremos cada palavra com muito amor.</p>
+    <div class="msg-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Seu nome</label>
+          <input type="text" id="msgNome" placeholder="Como você se chama?">
+        </div>
+        <div class="form-group">
+          <label>Seu e-mail (opcional)</label>
+          <input type="email" id="msgEmail" placeholder="seu@email.com">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:1.2rem">
+        <label>Sua mensagem</label>
+        <textarea id="msgTexto" placeholder="Escreva algo lindo para os noivos"></textarea>
+      </div>
+      <div class="form-submit">
+        <button class="btn btn-outline-laranja" onclick="sendMessage()">Enviar mensagem</button>
+      </div>
+      <div class="success-msg" id="msgSuccess">
+        Mensagem enviada com muito amor. Luana &amp; Heitor agradecem de coração.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONFIRMAÇÃO DE PRESENÇA -->
+<section id="confirmacao">
+  <div class="section-inner">
+    <span class="section-tag">Confirmação</span>
+    <h2 class="section-title">Confirme sua presença</h2>
+    <p class="section-sub">Busque pelo nome da sua família e confirme quem vai estar presente nesse dia especial.</p>
+
+    <div class="confirm-cta">
+      <svg width="40" height="40" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 22 L18 30 L34 12" stroke="#E91E9A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>Reservamos um espaço especial para você confirmar quem da sua família estará presente.</p>
+      <a class="btn btn-outline-rosa" href="confirmacao.html">Confirmar presença</a>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL TRAJE -->
+<div class="modal-overlay" id="trajeModalOverlay" onclick="closeModalOutside(event, 'trajeModalOverlay')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('trajeModalOverlay')">✕</button>
+    <span class="modal-tag">Traje</span>
+    <h2>Festa &amp; Passeio completo</h2>
+
+    <div class="traje-block">
+      <h4>Traje de festa</h4>
+      <p>Para os homens, terno completo (com ou sem gravata) em tons sóbrios ou estampas discretas. Para as mulheres, vestido longo ou midi, em tecidos nobres como seda, cetim ou renda. Acessórios refinados são bem-vindos.</p>
+    </div>
+
+    <div class="traje-divider"></div>
+
+    <div class="traje-block">
+      <h4>Passeio completo</h4>
+      <p>Uma opção mais leve, porém elegante. Para os homens, calça social com camisa, blazer opcional. Para as mulheres, vestido curto ou midi, macacão ou conjunto sofisticado. O importante é manter um visual cuidado e alinhado ao clima da celebração.</p>
+    </div>
+
+    <div class="traje-divider"></div>
+
+    <div class="traje-block">
+      <h4>Algumas observações</h4>
+      <p>Evitem branco, off-white e tons muito próximos ao do vestido da noiva. A cerimônia será ao ar livre, então recomendamos sapatos confortáveis para grama e um casaco leve para o fim da noite.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PADRINHOS -->
+<div class="modal-overlay" id="padrinhosModalOverlay" onclick="closeModalOutside(event, 'padrinhosModalOverlay')">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('padrinhosModalOverlay')">✕</button>
+    <span class="modal-tag">Padrinhos</span>
+    <h2>Conheça algumas pessoas especiais que farão parte dessa história</h2>
+
+    <div class="padrinhos-list" id="padrinhosList"></div>
+  </div>
+</div>
+
+<footer>
+  <p>Feito com muito amor para <span>Luana &amp; Heitor</span> · 10.10.2026</p>
+</footer>
+
+<script>
+// MODAIS (Traje / Padrinhos)
+function openTrajeModal() {
+  document.getElementById('trajeModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function avatarPlaceholder(seed, color) {
+  return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+    <rect width="64" height="64" fill="${color}" opacity="0.18"/>
+    <circle cx="32" cy="26" r="11" fill="none" stroke="#5A4638" stroke-width="1.2"/>
+    <path d="M14 56 C14 42 21 36 32 36 C43 36 50 42 50 56" fill="none" stroke="#5A4638" stroke-width="1.2"/>
+  </svg>`;
+}
+
+const padrinhos = [
+  {
+    nome: "Marina &amp; Thiago",
+    cor: "#E91E9A",
+    historia: "Amigos de Luana desde a faculdade, estiveram presentes em cada etapa importante da vida dela. Marina foi quem apresentou Luana e Heitor numa festa de aniversário."
+  },
+  {
+    nome: "Bruno &amp; Camila",
+    cor: "#FF6A1A",
+    historia: "Bruno é amigo de infância de Heitor — se conhecem desde os 8 anos de idade. Camila entrou no grupo depois, mas hoje é tão próxima quanto se fizesse parte desde sempre."
+  },
+  {
+    nome: "Renata",
+    cor: "#FFD21F",
+    historia: "Irmã mais velha de Luana e sua maior confidente. Acompanhou de perto cada detalhe do planejamento do casamento, com muito carinho e paciência."
+  },
+  {
+    nome: "Felipe",
+    cor: "#E91E9A",
+    historia: "Melhor amigo de Heitor desde o colégio. Os dois compartilham a paixão por churrasco de domingo e já viajaram juntos para mais de dez países."
+  }
+];
+
+function openPadrinhosModal() {
+  const list = document.getElementById('padrinhosList');
+  list.innerHTML = '';
+  padrinhos.forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'padrinho-item';
+    item.innerHTML = `
+      <div class="padrinho-photo">${avatarPlaceholder(i, p.cor)}</div>
+      <div class="padrinho-info">
+        <h4>${p.nome}</h4>
+        <p>${p.historia}</p>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+  document.getElementById('padrinhosModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOutside(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+// COUNTDOWN
+function updateCountdown() {
+  const wedding = new Date('2026-10-10T17:00:00');
+  const now = new Date();
+  const diff = wedding - now;
+  if (diff <= 0) {
+    document.getElementById('countdown').innerHTML = '<p style="font-family:var(--font-display);font-style:italic;font-weight:300;font-size:1.5rem;color:var(--rosa)">Hoje é o grande dia</p>';
+    return;
+  }
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-days').textContent = String(days).padStart(3,'0');
+  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
+  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
+  document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// NAV TOGGLE
+document.getElementById('navToggle').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// PIX COPY
+function copyPix() {
+  navigator.clipboard.writeText('meupix.luana@gmail.com').then(() => {
+    const msg = document.getElementById('pixCopyMsg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 2500);
+  });
+}
+
+// MENSAGEM
+function sendMessage() {
+  const nome = document.getElementById('msgNome').value.trim();
+  const texto = document.getElementById('msgTexto').value.trim();
+  if (!nome || !texto) {
+    alert('Por favor, preencha seu nome e mensagem.');
+    return;
+  }
+  document.getElementById('msgSuccess').classList.add('show');
+  document.getElementById('msgNome').value = '';
+  document.getElementById('msgEmail').value = '';
+  document.getElementById('msgTexto').value = '';
+  setTimeout(() => document.getElementById('msgSuccess').classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
