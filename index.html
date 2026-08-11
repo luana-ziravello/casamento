@@ -4,1214 +4,624 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Luana &amp; Heitor — 10.10.2026</title>
+<meta name="description" content="Celebre com a gente o casamento de Luana &amp; Heitor, 10 de outubro de 2026, em Mairiporã — SP.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23FCF5E9%27/%3E%3Ccircle cx=%2726%27 cy=%2732%27 r=%2716%27 fill=%27%23FF6A2E%27 opacity=%27.9%27/%3E%3Ccircle cx=%2738%27 cy=%2732%27 r=%2716%27 fill=%27%23E8146F%27 opacity=%27.85%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=3">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bege: #F3E6D2;
-    --bege-areia: #D9C3A5;
-    --rosa: #E91E9A;
-    --laranja: #FF6A1A;
-    --amarelo: #FFD21F;
-    --texto: #5A4638;
-    --texto-suave: #8A7763;
-    --branco: #FFFCF7;
-    --font-display: 'Cormorant Garamond', Georgia, serif;
-    --font-body: 'Montserrat', sans-serif;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: var(--font-body);
-    font-weight: 300;
-    color: var(--texto);
-    background: var(--bege);
-    overflow-x: hidden;
-    letter-spacing: 0.01em;
-  }
-
-  /* ===== NAV ===== */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(255,252,247,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--bege-areia);
-    padding: 0 2.5rem;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .nav-logo {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.3rem;
-    color: var(--texto);
-    letter-spacing: 0.03em;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 2.2rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    text-decoration: none;
-    font-size: 0.68rem;
-    font-weight: 400;
-    color: var(--texto-suave);
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    transition: color 0.3s;
-  }
-
-  .nav-links a:hover { color: var(--rosa); }
-
-  .nav-toggle {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 4px;
-  }
-
-  .nav-toggle span {
-    display: block;
-    width: 20px;
-    height: 1px;
-    background: var(--texto);
-    transition: all 0.3s;
-  }
-
-  /* ===== HERO ===== */
-  #home {
+  /* ===== hero (tela cheia, foto de fundo, composição centralizada) ===== */
+  .hero-cena {
+    position: relative;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 90px 2rem 4rem;
-    position: relative;
-    overflow: hidden;
-    background: var(--bege);
+  }
+  .hero-fundo { position: absolute; inset: 0; z-index: 0; }
+  .hero-fundo img { width: 100%; height: 100%; object-fit: cover; animation: aproximarFundo 12s ease-out both; }
+  .hero-veu {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(58% 48% at 50% 42%, rgba(28,18,10,.4) 0%, rgba(28,18,10,0) 74%),
+      linear-gradient(180deg, rgba(28,18,10,.6) 0%, rgba(28,18,10,.34) 28%, rgba(28,18,10,.5) 60%, rgba(28,18,10,.9) 100%);
   }
 
-  .hero-watercolor { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-
-  .hero-tag {
-    display: inline-block;
-    font-size: 0.66rem;
-    font-weight: 400;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--rosa);
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 0.9s ease both;
-  }
-
-  .hero-names {
-    font-family: var(--font-display);
-    font-size: clamp(3.2rem, 10vw, 6.4rem);
-    font-weight: 300;
-    font-style: italic;
-    line-height: 1.08;
+  .hero-conteudo {
+    position: relative; z-index: 1;
     text-align: center;
-    color: var(--texto);
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 1s 0.1s ease both;
+    color: var(--tinta-clara);
+    padding: 150px clamp(1.2rem, 5vw, 3rem) 130px;
+    max-width: 780px;
+  }
+  .hero-monograma {
+    height: 46px; width: auto;
+    margin: 0 auto var(--sp-lg);
+    filter: brightness(0) invert(1);
+    opacity: .9;
+    animation: subirDesvanecer .9s ease both;
+  }
+  .hero-boasvindas {
+    font-size: .72rem; font-weight: 600; letter-spacing: .32em; text-transform: uppercase;
+    color: var(--tinta-clara);
+    display: inline-flex; align-items: center; gap: .9em;
+    margin-bottom: var(--sp-md);
+    text-shadow: 0 2px 4px rgba(0,0,0,.7), 0 4px 18px rgba(0,0,0,.55);
+    animation: subirDesvanecer .9s .1s ease both;
+  }
+  .hero-boasvindas::before, .hero-boasvindas::after {
+    content: ''; width: 26px; height: 1px;
+    background: rgba(255,255,255,.6);
+    box-shadow: 0 1px 4px rgba(0,0,0,.5);
   }
 
-  .hero-names span.amp {
-    color: var(--rosa);
-    display: block;
-    font-size: 0.5em;
-    font-style: normal;
+  .hero-nomes {
+    font-family: var(--f-nomes);
     font-weight: 300;
-    margin: 0.2em 0;
+    font-size: clamp(3.1rem, 9vw, 6.6rem);
+    line-height: 1.05;
+    color: var(--tinta-clara);
+    text-shadow: 0 6px 30px rgba(0,0,0,.5), 0 1px 4px rgba(0,0,0,.35);
+  }
+  .hero-nomes span { display: inline-block; opacity: 0; transform: translateY(60%); animation: subirDesvanecer .9s cubic-bezier(.16,.84,.28,1) both; animation-delay: calc(.2s + var(--i, 0) * .12s); }
+  .hero-nomes .amp { font-style: italic; color: var(--amarelo); font-size: .56em; padding: 0 .2em; }
+
+  .hero-data-extenso {
+    margin-top: var(--sp-md);
+    font-family: var(--f-display); font-style: italic;
+    font-size: 1.06rem; color: var(--tinta-clara); letter-spacing: .02em;
+    text-shadow: 0 2px 16px rgba(0,0,0,.5);
+    animation: subirDesvanecer 1s .5s ease both;
   }
 
-  .hero-date {
-    margin-top: 1.6rem;
-    font-size: clamp(0.85rem, 2.4vw, 1.05rem);
-    font-weight: 300;
-    letter-spacing: 0.3em;
-    color: var(--texto-suave);
-    text-transform: uppercase;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 1.1s 0.2s ease both;
+  .hero-ctas { margin-top: var(--sp-xl); display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; animation: subirDesvanecer 1.05s .6s ease both; }
+  .hero-ctas .btn { background: rgba(28,18,10,.38); backdrop-filter: blur(10px); }
+  .hero-ctas .btn-primario { color: var(--tinta-clara); border-color: rgba(255,255,255,.6); }
+  .hero-ctas .btn-primario::before { --btn-fill: var(--gradiente-luxo); }
+  .hero-ctas .btn-fantasma { color: var(--tinta-clara); border-color: rgba(255,255,255,.42); }
+
+  .hero-contagem {
+    margin-top: var(--sp-2xl);
+    display: inline-flex; gap: 1.5rem;
+    padding: 1.1rem 1.9rem;
+    background: rgba(38,26,16,.32);
+    border: 1px solid rgba(251,243,231,.28);
+    backdrop-filter: blur(8px);
+    animation: subirDesvanecer 1.1s .7s ease both;
+  }
+  .cd-unidade { text-align: center; min-width: 48px; }
+  .cd-numero { font-family: var(--f-display); font-weight: 400; font-size: 1.65rem; color: var(--tinta-clara); line-height: 1; font-variant-numeric: tabular-nums; }
+  .cd-rotulo { display: block; font-size: .58rem; letter-spacing: .13em; text-transform: uppercase; color: var(--tinta-clara-soft); margin-top: 5px; }
+  .cd-sep { align-self: center; font-family: var(--f-display); font-style: italic; color: var(--amarelo); font-size: 1.05rem; }
+
+  .hero-scroll {
+    position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%);
+    z-index: 1; display: flex; flex-direction: column; align-items: center; gap: .55rem;
+    color: rgba(255,255,255,.75); font-size: .6rem; letter-spacing: .22em; text-transform: uppercase;
+    animation: flutuarSeta 2.4s ease-in-out infinite;
+  }
+  .hero-scroll::after { content: ''; width: 1px; height: 32px; background: linear-gradient(180deg, currentColor, transparent); }
+
+  @keyframes subirDesvanecer { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes aproximarFundo { from { transform: scale(1.08); } to { transform: scale(1); } }
+  @keyframes flutuarSeta { 0%, 100% { transform: translate(-50%, 0); opacity: .55; } 50% { transform: translate(-50%, 8px); opacity: .9; } }
+  @media (prefers-reduced-motion: reduce) { .hero-fundo img, .hero-scroll { animation: none; } }
+
+  @media (max-width: 480px) {
+    .hero-contagem { gap: .85rem; padding: 1rem 1.2rem; }
+    .cd-numero { font-size: 1.3rem; }
   }
 
-  .hero-divider {
-    margin: 2.2rem auto;
-    width: 1px;
-    height: 50px;
-    background: var(--texto-suave);
-    opacity: 0.35;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 1.1s 0.3s ease both;
+  /* ===== nav sobre a foto do hero: links claros até rolar a página ===== */
+  .nav:not(.is-solid) .nav-links a { color: var(--tinta-clara); text-shadow: 0 1px 6px rgba(0,0,0,.55); }
+  .nav:not(.is-solid) .nav-links a:hover, .nav:not(.is-solid) .nav-links a:focus-visible { color: var(--amarelo); }
+  .nav:not(.is-solid) .nav-toggle span { background: var(--tinta-clara); box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  @media (max-width: 860px) {
+    .nav:not(.is-solid) .nav-links.is-open { background: var(--tinta-clara); }
+    .nav:not(.is-solid) .nav-links.is-open a { color: var(--tinta-suave); text-shadow: none; }
   }
 
-  /* COUNTDOWN */
-  .countdown {
-    display: flex;
-    gap: 2rem;
-    margin-top: 0.5rem;
-    position: relative;
-    z-index: 1;
-    animation: fadeUp 1.1s 0.4s ease both;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .cd-unit {
-    text-align: center;
-    min-width: 64px;
-  }
-
-  .cd-num {
-    display: block;
-    font-family: var(--font-display);
-    font-size: 2.6rem;
-    font-weight: 400;
-    font-style: italic;
-    line-height: 1;
-    color: var(--texto);
-  }
-
-  .cd-label {
-    display: block;
-    font-size: 0.62rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--texto-suave);
-    margin-top: 6px;
-  }
-
-  .cd-sep {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-style: italic;
-    color: var(--rosa);
-    opacity: 0.45;
-    align-self: flex-start;
-    margin-top: 4px;
-  }
-
-  /* ===== SECTIONS COMMON ===== */
-  section:not(#home) {
-    padding: 6rem 2rem;
-    position: relative;
-  }
-
-  .section-inner {
-    max-width: 860px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  .section-tag {
-    display: inline-block;
-    font-size: 0.66rem;
-    font-weight: 400;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-    color: var(--rosa);
-  }
-
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 4vw, 2.8rem);
-    font-weight: 300;
-    font-style: italic;
-    color: var(--texto);
-    line-height: 1.25;
-    margin-bottom: 0.8rem;
-  }
-
-  .section-sub {
-    font-size: 0.88rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    margin-bottom: 3rem;
-    line-height: 1.85;
-    max-width: 520px;
-  }
-
-  /* ===== INFORMAÇÕES ===== */
-  #informacoes {
-    background: var(--bege);
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.4rem;
-    margin-bottom: 1rem;
-  }
-
-  .info-card {
-    background: var(--branco);
-    padding: 1.8rem 1.6rem;
-    border: 1px solid var(--bege-areia);
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-  }
-
-  .info-card:hover { transform: translateY(-3px); box-shadow: 0 16px 36px rgba(90,70,56,0.08); border-color: var(--rosa); }
-
-  .info-icon-wrap {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 1.1rem;
-  }
-
-  .info-card h3 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.2rem;
-    color: var(--texto);
-    margin-bottom: 0.5rem;
-  }
-
-  .info-card p {
-    font-size: 0.8rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    line-height: 1.7;
-  }
-
-  .info-card p strong { font-weight: 500; color: var(--texto); }
-
-  .info-card-clickable { cursor: pointer; }
-
-  .info-card-link {
-    display: inline-block;
-    margin-top: 0.8rem;
-    font-size: 0.66rem;
-    font-weight: 400;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--rosa);
-    transition: letter-spacing 0.3s;
-  }
-
-  .info-card-clickable:hover .info-card-link { letter-spacing: 0.14em; }
-
-  /* ===== DATA E LOCAL ===== */
-  #local {
-    background: var(--texto);
-    color: var(--branco);
-  }
-
-  #local .section-title { color: var(--branco); }
-  #local .section-sub { color: rgba(255,252,247,0.55); }
-  #local .section-tag { color: var(--amarelo); }
-
-  .local-wrap {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    align-items: start;
-  }
-
-  .local-item {
-    display: flex;
-    gap: 1.2rem;
-    margin-bottom: 1.8rem;
-    align-items: flex-start;
-  }
-
-  .local-icon {
-    width: 1px;
-    height: 44px;
-    background: var(--amarelo);
-    opacity: 0.5;
-    flex-shrink: 0;
-    margin-top: 4px;
-  }
-
-  .local-item h4 {
-    font-size: 0.64rem;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(255,252,247,0.4);
-    margin-bottom: 0.4rem;
-  }
-
-  .local-item p {
-    font-size: 0.92rem;
-    font-weight: 300;
-    color: rgba(255,252,247,0.92);
-    line-height: 1.7;
-  }
-
-  .map-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: transparent;
-    color: var(--amarelo);
-    text-decoration: none;
-    border: 1px solid var(--amarelo);
-    padding: 12px 26px;
-    font-size: 0.7rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-top: 0.7rem;
-    transition: background 0.3s, color 0.3s;
-  }
-
-  .map-btn:hover { background: var(--amarelo); color: var(--texto); }
-
-  .map-preview {
-    border: 1px solid rgba(255,252,247,0.15);
-    background: rgba(255,252,247,0.04);
-    height: 280px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2.2rem;
-    gap: 1rem;
-  }
-
-  .map-preview svg { opacity: 0.85; }
-
-  .map-preview p {
-    font-size: 0.82rem;
-    font-weight: 300;
-    color: rgba(255,252,247,0.45);
-    line-height: 1.7;
-  }
-
-  .map-preview .place-name {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.4rem;
-    color: var(--branco);
-  }
-
-  /* ===== LISTA DE PRESENTES ===== */
-  #presentes {
-    background: var(--bege);
-  }
-
-  .presentes-wrap {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.6rem;
-  }
-
-  .presente-card {
-    background: var(--branco);
-    padding: 2.4rem 2rem;
-    text-align: center;
-    border: 1px solid var(--bege-areia);
-    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .presente-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(90,70,56,0.08); border-color: var(--rosa); }
-
-  .presente-icon { width: 54px; height: 54px; margin: 0 auto 1.2rem; }
-
-  .presente-card h3 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.4rem;
-    color: var(--texto);
-    margin-bottom: 0.6rem;
-  }
-
-  .presente-card p {
-    font-size: 0.82rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    line-height: 1.75;
-    margin-bottom: 1.6rem;
-  }
-
-  .pix-key {
-    background: var(--bege);
-    border: 1px solid var(--bege-areia);
-    padding: 14px 18px;
-    font-size: 0.82rem;
-    font-weight: 400;
-    color: var(--texto);
-    word-break: break-all;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: border-color 0.3s;
-  }
-
-  .pix-key:hover { border-color: var(--rosa); }
-
-  .pix-copy-msg {
-    font-size: 0.72rem;
-    color: var(--rosa);
-    opacity: 0;
-    transition: opacity 0.3s;
-    margin-top: 4px;
-    font-weight: 300;
-  }
-
-  .pix-copy-msg.show { opacity: 1; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 28px;
-    font-size: 0.68rem;
-    font-weight: 400;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: background 0.3s, color 0.3s, border-color 0.3s;
-  }
-
-  .btn-outline-laranja {
-    background: transparent;
-    color: var(--laranja);
-    border-color: var(--laranja);
-  }
-  .btn-outline-laranja:hover { background: var(--laranja); color: var(--branco); }
-
-  .btn-outline-rosa {
-    background: transparent;
-    color: var(--rosa);
-    border-color: var(--rosa);
-  }
-  .btn-outline-rosa:hover { background: var(--rosa); color: var(--branco); }
-
-  /* ===== MENSAGEM AOS NOIVOS ===== */
-  #mensagem {
-    background: var(--branco);
-  }
-
-  .msg-form {
-    background: var(--bege);
-    padding: 3rem 2.6rem;
-    border: 1px solid var(--bege-areia);
-  }
-
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.2rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .form-group label {
-    font-size: 0.66rem;
-    font-weight: 400;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--texto-suave);
-  }
-
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 13px 16px;
-    border: 1px solid var(--bege-areia);
-    background: var(--branco);
-    font-family: var(--font-body);
-    font-weight: 300;
-    font-size: 0.85rem;
-    color: var(--texto);
-    transition: border-color 0.3s;
-    outline: none;
-    width: 100%;
-  }
-
-  .form-group input::placeholder,
-  .form-group textarea::placeholder { color: var(--texto-suave); opacity: 0.6; }
-
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
-    border-color: var(--rosa);
-  }
-
-  .form-group textarea { resize: vertical; min-height: 120px; }
-
-  .form-submit {
-    margin-top: 1.6rem;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .success-msg {
-    display: none;
-    background: var(--branco);
-    color: var(--rosa);
-    padding: 14px 20px;
-    font-size: 0.82rem;
-    font-weight: 300;
-    margin-top: 1.2rem;
-    text-align: center;
-    border: 1px solid var(--rosa);
-  }
-
-  .success-msg.show { display: block; }
-
-  /* ===== CONFIRMAÇÃO ===== */
-  #confirmacao {
-    background: var(--bege);
-  }
-
-  .confirm-cta {
-    background: var(--branco);
-    padding: 3rem 2.5rem;
-    border: 1px solid var(--bege-areia);
-    text-align: center;
-    max-width: 480px;
-    margin: 0 auto;
-  }
-
-  .confirm-cta p {
-    font-size: 0.88rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    line-height: 1.8;
-    margin: 1.2rem 0 1.6rem;
-  }
-
-  /* ===== MODALS (Traje / Padrinhos) ===== */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(90,70,56,0.5);
-    z-index: 300;
-    align-items: center;
-    justify-content: center;
-    padding: 1.2rem;
-  }
-  .modal-overlay.open { display: flex; }
-
-  .modal-box {
-    background: var(--branco);
-    border: 1px solid var(--bege-areia);
-    padding: 3rem 2.6rem;
-    max-width: 560px;
-    width: 100%;
-    max-height: 86vh;
-    overflow-y: auto;
-    position: relative;
-    animation: popIn 0.35s ease;
-  }
-
-  @keyframes popIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .modal-close {
+  /* ===== marca d'água decorativa (motivo do convite, espalhado pelo site) ===== */
+  .marca-dagua {
     position: absolute;
-    top: 1.3rem; right: 1.3rem;
-    background: none; border: none;
-    font-size: 1.1rem; font-weight: 300; cursor: pointer; color: var(--texto-suave);
-    transition: color 0.2s;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+    opacity: .35;
   }
-  .modal-close:hover { color: var(--rosa); }
+  section { isolation: isolate; }
+  .rodape { position: relative; overflow: hidden; isolation: isolate; }
 
-  .modal-tag {
-    font-size: 0.64rem;
-    font-weight: 400;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    color: var(--rosa);
-    display: block;
-    margin-bottom: 0.8rem;
+  /* ===== grande dia (linha do tempo) ===== */
+  .grandedia-composicao {
+    position: relative;
+    display: flex; justify-content: center;
+    padding: var(--sp-md) 0 var(--sp-2xl);
   }
 
-  .modal-box h2 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1.9rem;
-    color: var(--texto);
-    margin-bottom: 1.4rem;
-    line-height: 1.3;
+  .linha-tempo {
+    position: relative; z-index: 1;
+    list-style: none;
+    display: flex; flex-direction: column; gap: var(--sp-lg);
+    padding: var(--sp-md) 0;
+    max-width: 380px; width: 100%;
+  }
+  .linha-tempo::before { content: ''; position: absolute; left: 6px; top: 10px; bottom: 10px; width: 1px; background: var(--linha-forte); }
+  .linha-tempo-item { position: relative; padding-left: 2.5rem; }
+  .linha-tempo-ponto { position: absolute; left: 0; top: 6px; width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--dourado); background: var(--areia-0); }
+  .linha-tempo-rotulo { display: block; font-size: .64rem; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--rosa-texto); }
+  .linha-tempo-valor { font-family: var(--f-display); font-style: italic; font-size: 1.4rem; color: var(--tinta); margin-top: .35rem; }
+
+  /* ===== local: ícone + pílulas + mapa ===== */
+  .local-cartao { position: relative; z-index: 1; text-align: center; max-width: 620px; margin: 0 auto; }
+  .local-icone {
+    width: 44px; height: 44px; margin: 0 auto var(--sp-sm);
+    color: var(--rosa-texto);
+  }
+  .local-rotulo { display: block; font-size: .68rem; font-weight: 600; letter-spacing: .28em; text-transform: uppercase; color: var(--rosa-texto); margin-bottom: .8rem; }
+  .endereco-linha { font-family: var(--f-display); font-style: italic; font-size: 1.05rem; color: var(--tinta-suave); line-height: 1.9; margin-bottom: var(--sp-lg); }
+  .endereco-ctas { display: flex; justify-content: center; gap: .8rem; flex-wrap: wrap; margin-bottom: var(--sp-xl); }
+
+  .btn-pilula {
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: 11px 24px;
+    font-family: var(--f-corpo); font-size: .64rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background-color .3s ease, color .3s ease, border-color .3s ease;
+  }
+  .btn-pilula-coral { color: var(--coral-texto); border: 1px solid var(--coral-texto); }
+  .btn-pilula-coral:hover, .btn-pilula-coral:focus-visible { background: var(--coral-texto); color: var(--tinta-clara); }
+  .btn-pilula-rosa { color: var(--rosa-texto); border: 1px solid var(--rosa-texto); }
+  .btn-pilula-rosa:hover, .btn-pilula-rosa:focus-visible { background: var(--rosa-texto); color: var(--tinta-clara); }
+
+  .local-mapa-moldura {
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--dourado-linha);
+    box-shadow: var(--sombra-card);
+    max-width: 720px;
+    margin: 0 auto;
+    aspect-ratio: 16/8;
+  }
+  .local-mapa-moldura iframe {
+    width: 100%; height: 100%; border: 0; display: block;
+    filter: sepia(.4) saturate(1.5) hue-rotate(320deg) brightness(.96) contrast(1.02);
   }
 
-  .modal-box .traje-block { margin-bottom: 1.8rem; }
-  .modal-box .traje-block:last-child { margin-bottom: 0; }
-
-  .modal-box .traje-block h4 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.25rem;
-    color: var(--texto);
-    margin-bottom: 0.5rem;
+  @media (max-width: 760px) {
+    .linha-tempo { max-width: 300px; }
+    .local-mapa-moldura { aspect-ratio: 4/5; }
   }
 
-  .modal-box .traje-block p {
-    font-size: 0.85rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    line-height: 1.85;
+  /* ===== informações: lista editorial com ícones ===== */
+  .lista-editorial { display: flex; flex-direction: column; }
+  .linha-editorial {
+    display: grid; grid-template-columns: 96px 1fr;
+    gap: var(--sp-lg); align-items: start;
+    padding: var(--sp-lg) 0;
+    border-top: 1px solid var(--linha-forte);
+  }
+  .lista-editorial > .linha-editorial:last-child { border-bottom: 1px solid var(--linha-forte); }
+  .linha-editorial { --acento: var(--coral-texto); }
+  .linha-editorial:nth-child(even) { --acento: var(--rosa-texto); }
+  .linha-editorial-marca { display: flex; align-items: center; gap: .75rem; }
+  .linha-editorial-num { font-family: var(--f-display); font-style: italic; font-size: 1.55rem; color: var(--acento); }
+  .linha-editorial-marca svg { width: 25px; height: 25px; color: var(--acento); flex-shrink: 0; }
+  .linha-editorial-corpo h3 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.4rem; color: var(--tinta); margin-bottom: .5rem; }
+  .linha-editorial-corpo p { font-size: .88rem; color: var(--tinta-suave); line-height: 1.75; max-width: 48ch; }
+  .linha-editorial-link { display: inline-block; margin-top: .6rem; font-size: .66rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--acento); transition: letter-spacing .3s; }
+  .linha-editorial.clicavel { cursor: pointer; transition: background-color .3s ease; }
+  .linha-editorial.clicavel:hover, .linha-editorial.clicavel:focus-visible { background-color: rgba(200, 150, 56, .07); }
+  .linha-editorial.clicavel:hover .linha-editorial-link, .linha-editorial.clicavel:focus-visible .linha-editorial-link { letter-spacing: .16em; }
+
+  .btn-em-breve {
+    display: inline-flex; align-items: center; gap: .5em;
+    margin-top: .9rem; padding: 10px 18px;
+    font-family: var(--f-corpo); font-size: .62rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--tinta-suave); background: transparent; border: 1px solid var(--linha-forte);
+    opacity: .75;
+  }
+  .btn-em-breve:disabled { cursor: not-allowed; }
+  a.btn-em-breve {
+    color: var(--coral-texto); border-color: var(--coral-texto); opacity: 1;
+    text-decoration: none; transition: background-color .3s ease, color .3s ease;
+  }
+  a.btn-em-breve:hover, a.btn-em-breve:focus-visible { background: var(--coral-texto); color: var(--tinta-clara); }
+
+  @media (max-width: 640px) {
+    .linha-editorial { grid-template-columns: 1fr; gap: .7rem; }
   }
 
-  .traje-divider {
-    width: 30px; height: 1px;
-    background: var(--bege-areia);
-    margin: 1.6rem 0;
+  /* ===== recados: carrossel automático de um cartão, com fade, centralizado ===== */
+  .recados-carrossel { position: relative; max-width: 640px; margin: 0 auto; }
+  .recados-viewport {
+    padding: .5rem .1rem 1rem;
   }
+  .recados-viewport:focus-visible { outline-offset: 6px; }
 
-  /* Padrinhos modal */
-  .padrinhos-list {
+  .recado-card {
+    background-color: var(--tinta-clara);
+    background-image: var(--grao);
+    border: 1px solid var(--dourado-linha);
+    box-shadow: var(--sombra-card);
+    padding: var(--sp-xl) var(--sp-lg);
     display: flex;
     flex-direction: column;
-    gap: 1.8rem;
-    margin-top: 0.5rem;
-  }
-
-  .padrinho-item {
-    display: flex;
-    gap: 1.3rem;
-    align-items: flex-start;
-  }
-
-  .padrinho-photo {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    border: 1px solid var(--bege-areia);
-    overflow: hidden;
-  }
-
-  .padrinho-info h4 {
-    font-family: var(--font-display);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 1.15rem;
-    color: var(--texto);
-    margin-bottom: 0.3rem;
-  }
-
-  .padrinho-info p {
-    font-size: 0.8rem;
-    font-weight: 300;
-    color: var(--texto-suave);
-    line-height: 1.7;
-  }
-  /* ===== FOOTER ===== */
-  footer {
-    background: var(--texto);
-    color: rgba(255,252,247,0.5);
     text-align: center;
-    padding: 2.6rem 2rem;
-    font-size: 0.74rem;
-    font-weight: 300;
-    letter-spacing: 0.05em;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .6s ease, transform .6s ease;
   }
+  .recado-card.ativo { opacity: 1; transform: none; }
+  .recado-aspas { font-family: var(--f-display); font-style: italic; font-size: 2.6rem; color: var(--dourado); line-height: 1; opacity: .8; margin-bottom: .2rem; }
+  .recado-mensagem { font-family: var(--f-display); font-style: italic; font-size: 1.2rem; color: var(--tinta); line-height: 1.8; max-width: 46ch; }
+  .recado-nome { margin-top: 1.3rem; padding-top: .9rem; border-top: 1px solid var(--linha); font-size: .66rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--rosa-texto); }
+  .recados-estado { padding: 2.8rem 1rem; text-align: center; font-size: .9rem; color: var(--tinta-suave); }
 
-  footer span {
-    color: var(--amarelo);
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: 0.95rem;
+  .recados-controles { display: flex; align-items: center; justify-content: center; gap: 1.4rem; margin-top: var(--sp-md); }
+  .recados-seta {
+    width: 42px; height: 42px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: none; border: 1px solid var(--linha-forte); border-radius: 50%;
+    font-family: var(--f-display); font-size: 1.25rem; color: var(--tinta-suave);
+    cursor: pointer; transition: border-color .3s ease, color .3s ease;
   }
+  .recados-seta:hover, .recados-seta:focus-visible { border-color: var(--rosa-texto); color: var(--rosa-texto); }
 
-  /* ===== ANIMATIONS ===== */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+  .recados-pontos { display: flex; align-items: center; gap: .5rem; }
+  .recados-ponto {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--linha-forte); border: none; padding: 0; cursor: pointer;
+    transition: background-color .3s ease, transform .3s ease;
   }
+  .recados-ponto.ativo { background: var(--rosa-texto); transform: scale(1.3); }
 
-  /* ===== MOBILE ===== */
-  @media (max-width: 680px) {
-    nav { padding: 0 1.3rem; }
-    .nav-links { display: none; position: absolute; top: 64px; left: 0; right: 0; background: var(--branco); flex-direction: column; padding: 1.2rem 2rem 1.6rem; gap: 1.1rem; border-bottom: 1px solid var(--bege-areia); }
-    .nav-links.open { display: flex; }
-    .nav-toggle { display: flex; }
+  .recados-cta { text-align: center; margin-top: var(--sp-2xl); }
+  .recados-confirmacao { margin-top: .9rem; font-size: .8rem; color: var(--rosa-texto); opacity: 0; transition: opacity .4s ease; min-height: 1.2em; }
+  .recados-confirmacao.mostrar { opacity: 1; }
 
-    section:not(#home) { padding: 4rem 1.3rem; }
+  /* ===== formulário do recado ===== */
+  .campo-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--sp-md); }
+  .campo-form label { font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); }
+  .campo-form input, .campo-form textarea {
+    padding: 12px 2px; border: none; border-bottom: 1px solid var(--linha-forte);
+    background: transparent; font-family: var(--f-corpo); font-size: .92rem; color: var(--tinta);
+    transition: border-color .3s;
+  }
+  .campo-form input:focus, .campo-form textarea:focus { border-color: var(--rosa); outline: none; }
+  .campo-form textarea { resize: vertical; min-height: 96px; }
+  .recado-erro { display: none; font-size: .78rem; color: var(--rosa-texto); margin-bottom: var(--sp-sm); }
+  .recado-erro.mostrar { display: block; }
+  .recado-envio { display: flex; justify-content: flex-end; margin-top: var(--sp-sm); }
 
-    .local-wrap { grid-template-columns: 1fr; gap: 2rem; }
-    .map-preview { height: 200px; }
-    .presentes-wrap { grid-template-columns: 1fr; }
-    .form-row { grid-template-columns: 1fr; }
-    .msg-form { padding: 1.8rem 1.4rem; }
-    .confirm-cta { padding: 2rem 1.4rem; }
-    .modal-box { padding: 2.2rem 1.6rem; }
-    .cd-num { font-size: 1.9rem; }
-    .cd-unit { min-width: 48px; }
-    .countdown { gap: 1.1rem; }
+  /* ===== padrinhos / traje (conteúdo do modal) ===== */
+  .padrinhos-lista { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-lg) 1.2rem; }
+  @media (max-width: 480px) { .padrinhos-lista { grid-template-columns: 1fr; } }
+  .padrinho { display: flex; gap: .9rem; align-items: center; }
+  .padrinho-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--dourado-linha); background: var(--gradiente-luxo); }
+  .padrinho h4 { font-family: var(--f-display); font-style: italic; font-size: 1.08rem; color: var(--coral-texto); margin-bottom: .25rem; }
+  .padrinho p { font-size: .86rem; color: var(--tinta-suave); line-height: 1.7; }
+  .traje-bloco + .traje-bloco { margin-top: var(--sp-lg); padding-top: var(--sp-lg); border-top: 1px dashed var(--linha-forte); }
+  .traje-bloco h4 { font-family: var(--f-display); font-style: italic; font-size: 1.15rem; color: var(--coral-texto); margin-bottom: .4rem; }
+  .traje-bloco p { font-size: .88rem; color: var(--tinta-suave); line-height: 1.8; }
+
+  /* ===== CTA presentes / confirmação: banner único ===== */
+  .cta-faixa { position: relative; }
+  .cta-faixa::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradiente-luxo); }
+  .cta-colunas { display: grid; grid-template-columns: 1fr 1fr; }
+  .cta-coluna { padding: 0 var(--sp-2xl); text-align: center; position: relative; }
+  .cta-coluna + .cta-coluna::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 1px; background: var(--dourado-linha); }
+  .cta-icone { width: 48px; height: 48px; margin: 0 auto var(--sp-md); }
+  .cta-coluna h3 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.6rem; color: var(--tinta); margin-bottom: var(--sp-sm); }
+  .cta-coluna p { font-size: .88rem; color: var(--tinta-suave); line-height: 1.8; margin-bottom: var(--sp-lg); max-width: 320px; margin-left: auto; margin-right: auto; }
+
+  @media (max-width: 760px) {
+    .cta-colunas { grid-template-columns: 1fr; gap: var(--sp-2xl); }
+    .cta-coluna { padding: 0 1rem; }
+    .cta-coluna + .cta-coluna::before { display: none; }
   }
 </style>
 </head>
 <body>
 
-<nav id="navbar">
-  <div class="nav-logo">L &amp; H</div>
+<a href="#inicio" class="skip-link">Pular para o conteúdo</a>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav class="nav" id="navbar">
+  <a href="#inicio" class="nav-brand" aria-label="Luana &amp; Heitor — início">
+    <img class="nav-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
   <ul class="nav-links" id="navLinks">
-    <li><a href="#home">Início</a></li>
+    <li><a href="#inicio">Início</a></li>
+    <li><a href="#grande-dia">O grande dia</a></li>
     <li><a href="#informacoes">Informações</a></li>
-    <li><a href="#local">Local</a></li>
-    <li><a href="#presentes">Presentes</a></li>
-    <li><a href="#mensagem">Mensagem</a></li>
-    <li><a href="#confirmacao">Confirmação</a></li>
+    <li><a href="#recados">Recados</a></li>
+    <li><a href="presentes.html">Presentes</a></li>
+    <li><a href="confirmacao.html">Confirmação</a></li>
   </ul>
-  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
 <!-- HERO -->
-<section id="home">
-  <svg class="hero-watercolor" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <filter id="hwblur1"><feGaussianBlur stdDeviation="40"/></filter>
-      <filter id="hwblur2"><feGaussianBlur stdDeviation="26"/></filter>
-    </defs>
-    <ellipse cx="80" cy="80" rx="220" ry="180" fill="#E91E9A" opacity="0.08" filter="url(#hwblur1)"/>
-    <ellipse cx="930" cy="900" rx="240" ry="190" fill="#FF6A1A" opacity="0.08" filter="url(#hwblur1)"/>
-    <ellipse cx="920" cy="100" rx="150" ry="110" fill="#FFD21F" opacity="0.1" filter="url(#hwblur2)"/>
-    <ellipse cx="60" cy="900" rx="160" ry="120" fill="#FFD21F" opacity="0.08" filter="url(#hwblur2)"/>
-    <ellipse cx="500" cy="960" rx="120" ry="60" fill="#E91E9A" opacity="0.05" filter="url(#hwblur2)"/>
-  </svg>
-  <div class="hero-tag">Save the date</div>
-  <h1 class="hero-names">
-    Luana
-    <span class="amp">&amp;</span>
-    Heitor
-  </h1>
-  <p class="hero-date">10 · 10 · 2026</p>
-  <div class="hero-divider"></div>
-  <div class="countdown" id="countdown">
-    <div class="cd-unit">
-      <span class="cd-num" id="cd-days">000</span>
-      <span class="cd-label">dias</span>
+<section id="inicio" class="hero-cena" tabindex="-1">
+  <div class="hero-fundo" aria-hidden="true">
+    <img src="imagens/paisagem.png" alt="" width="1536" height="1024" fetchpriority="high">
+    <div class="hero-veu"></div>
+  </div>
+
+  <div class="hero-conteudo">
+    <img class="hero-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+    <p class="hero-boasvindas">Bem-vindos ao nosso casamento</p>
+    <h1 class="hero-nomes">
+      <span style="--i:0">Luana</span> <span class="amp" style="--i:1">&amp;</span> <span style="--i:2">Heitor</span>
+    </h1>
+    <p class="hero-data-extenso">10 de outubro de 2026 · Mairiporã, SP</p>
+
+    <div class="hero-ctas">
+      <a class="btn btn-primario" href="confirmacao.html">Confirmar presença</a>
+      <a class="btn btn-fantasma" href="#grande-dia">Ver o local</a>
     </div>
-    <span class="cd-sep">:</span>
-    <div class="cd-unit">
-      <span class="cd-num" id="cd-hours">00</span>
-      <span class="cd-label">horas</span>
-    </div>
-    <span class="cd-sep">:</span>
-    <div class="cd-unit">
-      <span class="cd-num" id="cd-mins">00</span>
-      <span class="cd-label">minutos</span>
-    </div>
-    <span class="cd-sep">:</span>
-    <div class="cd-unit">
-      <span class="cd-num" id="cd-secs">00</span>
-      <span class="cd-label">segundos</span>
+
+    <div class="hero-contagem" id="countdown" data-target="2026-10-10T17:00:00-03:00" aria-label="Contagem regressiva para o casamento">
+      <div class="cd-unidade"><span class="cd-numero" id="cd-days">0</span><span class="cd-rotulo">dias</span></div>
+      <span class="cd-sep" aria-hidden="true">:</span>
+      <div class="cd-unidade"><span class="cd-numero" id="cd-hours">00</span><span class="cd-rotulo">horas</span></div>
+      <span class="cd-sep" aria-hidden="true">:</span>
+      <div class="cd-unidade"><span class="cd-numero" id="cd-mins">00</span><span class="cd-rotulo">min</span></div>
+      <span class="cd-sep" aria-hidden="true">:</span>
+      <div class="cd-unidade"><span class="cd-numero" id="cd-secs">00</span><span class="cd-rotulo">seg</span></div>
     </div>
   </div>
+
+  <span class="hero-scroll" aria-hidden="true">Role</span>
+</section>
+
+<!-- O GRANDE DIA -->
+<section id="grande-dia">
+  <div class="container">
+    <div class="cabecalho-secao centro" data-reveal>
+      <span class="eyebrow">Data &amp; local</span>
+      <h2 class="titulo-secao">O grande dia</h2>
+      <p class="sub-secao" style="margin-inline:auto">Guardem a data — mal podemos esperar para celebrar esse início ao lado de vocês.</p>
+    </div>
+
+    <div class="grandedia-composicao" data-reveal>
+      <ol class="linha-tempo">
+        <li class="linha-tempo-item">
+          <span class="linha-tempo-ponto" aria-hidden="true"></span>
+          <span class="linha-tempo-rotulo">Data</span>
+          <p class="linha-tempo-valor">10 de outubro de 2026</p>
+        </li>
+        <li class="linha-tempo-item">
+          <span class="linha-tempo-ponto" aria-hidden="true"></span>
+          <span class="linha-tempo-rotulo">Horário</span>
+          <p class="linha-tempo-valor">17h00</p>
+        </li>
+        <li class="linha-tempo-item">
+          <span class="linha-tempo-ponto" aria-hidden="true"></span>
+          <span class="linha-tempo-rotulo">Local</span>
+          <p class="linha-tempo-valor">Mansão do Lago</p>
+        </li>
+      </ol>
+    </div>
+
+    <div class="local-cartao" data-reveal>
+      <svg class="local-icone" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-6.6 7-12a7 7 0 1 0-14 0c0 5.4 7 12 7 12Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.6" stroke="currentColor" stroke-width="1.2"/></svg>
+      <span class="local-rotulo">Localização</span>
+      <p class="endereco-linha">Estrada Guarulhos-Nazaré, km 42,2<br>Tapera Grande — Mairiporã, SP<br>CEP 07600-000</p>
+      <div class="endereco-ctas">
+        <a class="btn-pilula btn-pilula-rosa" href="https://maps.app.goo.gl/tcWToNgtQm9CLBtF7?g_st=ic" target="_blank" rel="noopener">Abrir com Maps</a>
+        <a class="btn-pilula btn-pilula-coral" href="https://waze.com/ul/h6gygr6vh8" target="_blank" rel="noopener">Abrir com Waze</a>
+      </div>
+      <div class="local-mapa-moldura">
+        <iframe src="https://www.google.com/maps?q=Mans%C3%A3o%20do%20Lago%2C%20Estrada%20Guarulhos-Nazar%C3%A9%20km%2042%2C2%2C%20Tapera%20Grande%2C%20Mairipor%C3%A3%20SP&output=embed" title="Mapa: Mansão do Lago, Mairiporã — SP" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </div>
+  <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:150px; right:-30px; bottom:20px; transform:rotate(-12deg);">
 </section>
 
 <!-- INFORMAÇÕES -->
-<section id="informacoes">
-  <div class="section-inner">
-    <span class="section-tag">Informações importantes</span>
-    <h2 class="section-title">Tudo que você precisa saber</h2>
-    <p class="section-sub">Separamos as principais informações para que o seu dia seja perfeito também.</p>
-    <div class="info-grid">
-      <div class="info-card info-card-clickable" onclick="openTrajeModal()">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M14 8 L22 14 L30 8 L34 14 L30 18 V36 H14 V18 L10 14 Z" stroke="#E91E9A" stroke-width="1.2" stroke-linejoin="round"/>
-          </svg>
+<section id="informacoes" class="faixa-crua">
+  <div class="container">
+    <div class="cabecalho-secao centro" data-reveal>
+      <span class="eyebrow">Informações importantes</span>
+      <h2 class="titulo-secao">Tudo que você precisa saber</h2>
+      <p class="sub-secao" style="margin-inline:auto">Os detalhes essenciais para o seu dia ser tão especial quanto o nosso.</p>
+    </div>
+
+    <div class="lista-editorial" data-reveal>
+      <div class="linha-editorial clicavel" role="button" tabindex="0" aria-haspopup="dialog" onclick="abrirModal('modalTraje')" onkeydown="teclaLinha(event, () => abrirModal('modalTraje'))">
+        <div class="linha-editorial-marca">
+          <span class="linha-editorial-num">01</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4L4 7l2 3 2-1.5V20h8V8.5L18 10l2-3-4-3-2 2h-4L8 4Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
         </div>
-        <h3>Traje</h3>
-        <p>Festa / Passeio completo. Capriche na produção, esse dia merece.</p>
-        <span class="info-card-link">Saiba mais →</span>
+        <div class="linha-editorial-corpo">
+          <h3>Festa tropical</h3>
+          <p>Cores vivas são bem-vindas. Capriche na produção, esse dia merece leveza e brilho.</p>
+          <span class="linha-editorial-link">Saiba mais →</span>
+        </div>
       </div>
-      <div class="info-card">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="6" y="20" width="32" height="12" rx="3" stroke="#FF6A1A" stroke-width="1.2"/>
-            <circle cx="13" cy="34" r="2.6" stroke="#FF6A1A" stroke-width="1.2"/>
-            <circle cx="31" cy="34" r="2.6" stroke="#FF6A1A" stroke-width="1.2"/>
-            <path d="M9 20 L13 11 H31 L35 20" stroke="#FF6A1A" stroke-width="1.2" stroke-linejoin="round"/>
-          </svg>
+
+      <div class="linha-editorial">
+        <div class="linha-editorial-marca">
+          <span class="linha-editorial-num">02</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 16v-3.5L6 8h12l2 4.5V16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16h16v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><circle cx="7.5" cy="16" r="1.1" stroke="currentColor" stroke-width="1.1"/><circle cx="16.5" cy="16" r="1.1" stroke="currentColor" stroke-width="1.1"/></svg>
         </div>
-        <h3>Estacionamento</h3>
-        <p>O local conta com estacionamento gratuito. Fique à vontade para ir de carro.</p>
+        <div class="linha-editorial-corpo">
+          <h3>Vagas no local</h3>
+          <p>O local conta com estacionamento gratuito. Fique à vontade para ir de carro.</p>
+        </div>
       </div>
-      <div class="info-card">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 6 C29 6 34 11 34 18 C34 27 22 38 22 38 C22 38 10 27 10 18 C10 11 15 6 22 6 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
-            <circle cx="22" cy="18" r="4.5" stroke="#FFD21F" stroke-width="1.2"/>
-          </svg>
+
+      <div class="linha-editorial">
+        <div class="linha-editorial-marca">
+          <span class="linha-editorial-num">03</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 18c3-1 3-4 6-4s3 3 6 3 3-4 3-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="18" r="1.3" stroke="currentColor" stroke-width="1.1"/><circle cx="19" cy="13" r="1.3" stroke="currentColor" stroke-width="1.1"/></svg>
         </div>
-        <h3>Como chegar</h3>
-        <p>O local fica na Estrada Guarulhos-Nazaré km 42,2, em Mairiporã - SP. Recomendamos o Google Maps para melhor orientação.</p>
+        <div class="linha-editorial-corpo">
+          <h3>Combine transporte</h3>
+          <p>Criamos um grupo para combinar caronas, dividir van ou se organizar com outros convidados.</p>
+          <a class="btn-em-breve" href="https://chat.whatsapp.com/IFbiw9SxBGA2jfojiIvq1D" target="_blank" rel="noopener">Entrar no grupo do WhatsApp</a>
+        </div>
       </div>
-      <div class="info-card">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="22" cy="22" r="16" stroke="#5A4638" stroke-width="1.2"/>
-            <path d="M22 13 V22 L29 26" stroke="#5A4638" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
+
+      <div class="linha-editorial clicavel" role="button" tabindex="0" aria-haspopup="dialog" onclick="abrirModal('modalPadrinhos')" onkeydown="teclaLinha(event, () => abrirModal('modalPadrinhos'))">
+        <div class="linha-editorial-marca">
+          <span class="linha-editorial-num">04</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="14" r="5" stroke="currentColor" stroke-width="1.2"/><circle cx="15" cy="14" r="5" stroke="currentColor" stroke-width="1.2"/></svg>
         </div>
-        <h3>Horário</h3>
-        <p>A celebração começa às <strong>17h</strong>. Pedimos pontualidade para que todos aproveitem cada momento.</p>
-      </div>
-      <div class="info-card info-card-clickable" onclick="openPadrinhosModal()">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="16" cy="17" r="6" stroke="#FF6A1A" stroke-width="1.2"/>
-            <circle cx="29" cy="17" r="6" stroke="#E91E9A" stroke-width="1.2"/>
-            <path d="M6 38 C6 30 10.5 26 16 26 C18 26 19.8 26.9 21 28.3" stroke="#FF6A1A" stroke-width="1.2" stroke-linecap="round"/>
-            <path d="M38 38 C38 30 33.5 26 28 26 C26 26 24.2 26.9 23 28.3" stroke="#E91E9A" stroke-width="1.2" stroke-linecap="round"/>
-          </svg>
+        <div class="linha-editorial-corpo">
+          <h3>Padrinhos e madrinhas</h3>
+          <p>Conheça as pessoas especiais que vão caminhar ao nosso lado nesse dia.</p>
+          <span class="linha-editorial-link">Conhecer →</span>
         </div>
-        <h3>Padrinhos</h3>
-        <p>Conheça algumas pessoas especiais que farão parte dessa história.</p>
-        <span class="info-card-link">Conhecer →</span>
-      </div>
-      <div class="info-card">
-        <div class="info-icon-wrap">
-          <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22 7 C16 7 12 12 12 17.5 C12 22 14.5 24.5 16 27 C17 28.6 17.5 30 17.5 32 H26.5 C26.5 30 27 28.6 28 27 C29.5 24.5 32 22 32 17.5 C32 12 28 7 22 7 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
-            <line x1="17.5" y1="35" x2="26.5" y2="35" stroke="#FFD21F" stroke-width="1.2"/>
-            <line x1="19" y1="38" x2="25" y2="38" stroke="#FFD21F" stroke-width="1.2"/>
-          </svg>
-        </div>
-        <h3>Dicas</h3>
-        <p>A celebração será em uma região mais reservada. Combinar caronas, cotar uma van em grupo ou buscar hospedagens próximas pode tornar a chegada mais tranquila.</p>
       </div>
     </div>
   </div>
+  <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:120px; left:-24px; top:60px; transform:rotate(18deg);">
 </section>
 
-<!-- DATA E LOCAL -->
-<section id="local">
-  <div class="section-inner">
-    <span class="section-tag">Data &amp; Local</span>
-    <h2 class="section-title">O grande dia</h2>
-    <p class="section-sub">Mal podemos esperar para celebrar com vocês nesse lugar incrível.</p>
-    <div class="local-wrap">
-      <div class="local-details">
-        <div class="local-item">
-          <div class="local-icon"></div>
-          <div>
-            <h4>Data</h4>
-            <p>Sábado, 10 de Outubro de 2026</p>
-          </div>
+<!-- RECADOS -->
+<section id="recados">
+  <div class="container">
+    <div class="cabecalho-secao centro" data-reveal>
+      <span class="eyebrow">Para vocês</span>
+      <h2 class="titulo-secao">Recados para nós</h2>
+      <p class="sub-secao" style="margin-inline:auto">Palavras de quem vai estar com a gente nesse dia — ou de quem já está, mesmo de longe.</p>
+    </div>
+
+    <div class="recados-carrossel" data-reveal>
+      <div class="recados-viewport" id="recadosViewport" tabindex="0" role="region" aria-label="Recados dos convidados">
+        <div class="recados-trilho" id="recadosTrilho">
+          <p class="recados-estado">Carregando recados…</p>
         </div>
-        <div class="local-item">
-          <div class="local-icon"></div>
-          <div>
-            <h4>Horário</h4>
-            <p>A partir das 17h00</p>
-          </div>
-        </div>
-        <div class="local-item">
-          <div class="local-icon"></div>
-          <div>
-            <h4>Local</h4>
-            <p>Estrada Guarulhos-Nazaré km 42,2<br>Tapera Grande — Mairiporã, SP<br>CEP 07600-000</p>
-          </div>
-        </div>
-        <a class="map-btn" href="https://maps.google.com/?q=Estrada+Guarulhos-Nazaré+km+42,2,+Mairiporã+SP" target="_blank">
-          Abrir no Google Maps
-        </a>
       </div>
-      <div class="map-preview">
-        <svg width="48" height="48" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22 6 C29 6 34 11 34 18 C34 27 22 38 22 38 C22 38 10 27 10 18 C10 11 15 6 22 6 Z" stroke="#FFD21F" stroke-width="1.2" stroke-linejoin="round"/>
-          <circle cx="22" cy="18" r="4.5" stroke="#FFD21F" stroke-width="1.2"/>
+      <div class="recados-controles">
+        <button class="recados-seta" id="recadoAnterior" aria-label="Ver recado anterior" type="button">‹</button>
+        <div class="recados-pontos" id="recadosPontos" aria-hidden="true"></div>
+        <button class="recados-seta" id="recadoProximo" aria-label="Ver próximo recado" type="button">›</button>
+      </div>
+    </div>
+
+    <div class="recados-cta" data-reveal>
+      <button class="btn btn-secundario" type="button" onclick="abrirModal('modalRecado')">Deixar um recado</button>
+      <p class="recados-confirmacao" id="recadosConfirmacao" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+  <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:130px; right:0; top:-10px; transform:rotate(-8deg) scaleX(-1);">
+</section>
+
+<!-- CTAs -->
+<section id="presentes-confirmacao" class="cta-faixa faixa-crua">
+  <div class="container">
+    <div class="cta-colunas">
+      <div class="cta-coluna" data-reveal>
+        <svg class="cta-icone" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="12" y="22" width="30" height="24" rx="2" stroke="var(--coral-texto)" stroke-width="1.1"/>
+          <path d="M16 22 20 10H34L38 22" stroke="var(--coral-texto)" stroke-width="1.1" stroke-linejoin="round"/>
+          <circle cx="27" cy="16" r="3" stroke="var(--coral-texto)" stroke-width="1.1"/>
         </svg>
-        <p class="place-name">Mairiporã, SP</p>
-        <p>Estrada Guarulhos-Nazaré km 42,2<br>Tapera Grande</p>
-        <a class="map-btn" href="https://maps.google.com/?q=Estrada+Guarulhos-Nazaré+km+42,2,+Mairiporã+SP" target="_blank" style="margin-top:0.3rem; font-size:0.66rem; padding:10px 22px;">
-          Ver no mapa
-        </a>
+        <h3>Presenteie com carinho</h3>
+        <p>Sua presença já é o maior presente, mas se quiser nos mimar, preparamos uma lista especial.</p>
+        <a class="btn btn-secundario" href="presentes.html">Acessar lista de presentes</a>
+      </div>
+
+      <div class="cta-coluna" data-reveal style="--atraso:90ms">
+        <svg class="cta-icone" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M9 30c0-9 7-15 18-15s18 6 18 15" stroke="var(--rosa-texto)" stroke-width="1.1" stroke-linecap="round"/>
+          <path d="M18 27l7 7 13-14" stroke="var(--rosa-texto)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Confirme sua presença</h3>
+        <p>Busque pelo nome da sua família e nos avise quem vai estar com a gente nesse dia.</p>
+        <a class="btn btn-primario" href="confirmacao.html">Confirmar presença</a>
       </div>
     </div>
   </div>
+  <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:140px; left:-26px; bottom:-16px; transform:rotate(10deg);">
 </section>
 
-<!-- LISTA DE PRESENTES -->
-<section id="presentes">
-  <div class="section-inner">
-    <span class="section-tag">Lista de presentes</span>
-    <h2 class="section-title">Presenteie com carinho</h2>
-    <p class="section-sub">Sua presença já é o maior presente, mas se quiser nos mimar, aqui estão as opções.</p>
-    <div class="presentes-wrap">
-      <div class="presente-card">
-        <div class="presente-icon">
-          <svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="12" y="22" width="30" height="24" rx="2" stroke="#FF6A1A" stroke-width="1.1"/>
-            <path d="M16 22 L20 10 H34 L38 22" stroke="#FF6A1A" stroke-width="1.1" stroke-linejoin="round"/>
-            <circle cx="27" cy="16" r="3" stroke="#FF6A1A" stroke-width="1.1"/>
-          </svg>
-        </div>
-        <h3>Lista de presentes</h3>
-        <p>Acesse nossa lista completa e escolha o presente ideal para nos acompanhar nessa nova fase.</p>
-        <a class="btn btn-outline-laranja" href="lista-presentes-luana-heitor.html" target="_blank">Ver lista de presentes</a>
-      </div>
-      <div class="presente-card">
-        <div class="presente-icon">
-          <svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M27 42 C18 35 10 28 10 19.5 C10 13.7 14.7 9 20.5 9 C23.6 9 26.3 10.6 27 13 C27.7 10.6 30.4 9 33.5 9 C39.3 9 44 13.7 44 19.5 C44 28 36 35 27 42 Z" stroke="#E91E9A" stroke-width="1.1" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h3>Presente via Pix</h3>
-        <p>Se preferir, também aceitamos contribuições via Pix. Qualquer valor é recebido com muito amor.</p>
-        <p style="font-size:0.72rem; color:var(--texto-suave); margin-bottom:0.6rem; margin-top:-0.9rem; font-weight:300;">Toque para copiar a chave:</p>
-        <div class="pix-key" id="pixKey" onclick="copyPix()">meupix.luana@gmail.com</div>
-        <p class="pix-copy-msg" id="pixCopyMsg">Chave copiada com sucesso</p>
-        <button class="btn btn-outline-rosa" onclick="copyPix()" style="margin-top:0.8rem">Copiar chave Pix</button>
-      </div>
-    </div>
+<footer class="rodape">
+  <a href="#inicio" class="rodape-monograma-link" aria-label="Luana &amp; Heitor — voltar ao início">
+    <img class="rodape-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <p>Feito com amor para <span class="destaque">Luana &amp; Heitor</span> · 10.10.2026</p>
+  <div class="rodape-links">
+    <a href="#inicio">Início</a>
+    <a href="#recados">Recados</a>
+    <a href="presentes.html">Presentes</a>
+    <a href="confirmacao.html">Confirmação</a>
   </div>
-</section>
-
-<!-- MENSAGEM AOS NOIVOS -->
-<section id="mensagem">
-  <div class="section-inner">
-    <span class="section-tag">Mensagem</span>
-    <h2 class="section-title">Deixe seu carinho</h2>
-    <p class="section-sub">Escreva uma mensagem especial para Luana &amp; Heitor. Guardaremos cada palavra com muito amor.</p>
-    <div class="msg-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Seu nome</label>
-          <input type="text" id="msgNome" placeholder="Como você se chama?">
-        </div>
-        <div class="form-group">
-          <label>Seu e-mail (opcional)</label>
-          <input type="email" id="msgEmail" placeholder="seu@email.com">
-        </div>
-      </div>
-      <div class="form-group" style="margin-bottom:1.2rem">
-        <label>Sua mensagem</label>
-        <textarea id="msgTexto" placeholder="Escreva algo lindo para os noivos"></textarea>
-      </div>
-      <div class="form-submit">
-        <button class="btn btn-outline-laranja" onclick="sendMessage()">Enviar mensagem</button>
-      </div>
-      <div class="success-msg" id="msgSuccess">
-        Mensagem enviada com muito amor. Luana &amp; Heitor agradecem de coração.
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CONFIRMAÇÃO DE PRESENÇA -->
-<section id="confirmacao">
-  <div class="section-inner">
-    <span class="section-tag">Confirmação</span>
-    <h2 class="section-title">Confirme sua presença</h2>
-    <p class="section-sub">Busque pelo nome da sua família e confirme quem vai estar presente nesse dia especial.</p>
-
-    <div class="confirm-cta">
-      <svg width="40" height="40" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 22 L18 30 L34 12" stroke="#E91E9A" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <p>Reservamos um espaço especial para você confirmar quem da sua família estará presente.</p>
-      <a class="btn btn-outline-rosa" href="confirmacao.html">Confirmar presença</a>
-    </div>
-  </div>
-</section>
+</footer>
 
 <!-- MODAL TRAJE -->
-<div class="modal-overlay" id="trajeModalOverlay" onclick="closeModalOutside(event, 'trajeModalOverlay')">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal('trajeModalOverlay')">✕</button>
+<div class="modal-overlay" id="modalTraje" role="dialog" aria-modal="true" aria-labelledby="tituloModalTraje" onclick="fecharModalFora(event, 'modalTraje')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalTraje')" aria-label="Fechar">✕</button>
     <span class="modal-tag">Traje</span>
-    <h2>Festa &amp; Passeio completo</h2>
-
-    <div class="traje-block">
-      <h4>Traje de festa</h4>
-      <p>Para os homens, terno completo (com ou sem gravata) em tons sóbrios ou estampas discretas. Para as mulheres, vestido longo ou midi, em tecidos nobres como seda, cetim ou renda. Acessórios refinados são bem-vindos.</p>
+    <h2 id="tituloModalTraje">Festa tropical</h2>
+    <div class="traje-bloco">
+      <h4>Elas</h4>
+      <p>Vestido de festa, longo ou midi. As cores vivas da nossa paleta — laranja, rosa e dourado — são muito bem-vindas. Evitem branco e tons muito próximos ao noivo.</p>
     </div>
-
-    <div class="traje-divider"></div>
-
-    <div class="traje-block">
-      <h4>Passeio completo</h4>
-      <p>Uma opção mais leve, porém elegante. Para os homens, calça social com camisa, blazer opcional. Para as mulheres, vestido curto ou midi, macacão ou conjunto sofisticado. O importante é manter um visual cuidado e alinhado ao clima da celebração.</p>
-    </div>
-
-    <div class="traje-divider"></div>
-
-    <div class="traje-block">
-      <h4>Algumas observações</h4>
-      <p>Evitem branco, off-white e tons muito próximos ao do vestido da noiva. A cerimônia será ao ar livre, então recomendamos sapatos confortáveis para grama e um casaco leve para o fim da noite.</p>
+    <div class="traje-bloco">
+      <h4>Eles</h4>
+      <p>Camisa social ou linho, calça alfaiataria. Blazer é opcional dado o clima ao ar livre. Sapato fechado ou mocassim — o chão é gramado.</p>
     </div>
   </div>
 </div>
 
 <!-- MODAL PADRINHOS -->
-<div class="modal-overlay" id="padrinhosModalOverlay" onclick="closeModalOutside(event, 'padrinhosModalOverlay')">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal('padrinhosModalOverlay')">✕</button>
-    <span class="modal-tag">Padrinhos</span>
-    <h2>Conheça algumas pessoas especiais que farão parte dessa história</h2>
-
-    <div class="padrinhos-list" id="padrinhosList"></div>
+<div class="modal-overlay" id="modalPadrinhos" role="dialog" aria-modal="true" aria-labelledby="tituloModalPadrinhos" onclick="fecharModalFora(event, 'modalPadrinhos')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalPadrinhos')" aria-label="Fechar">✕</button>
+    <span class="modal-tag">Nosso time de honra</span>
+    <h2 id="tituloModalPadrinhos">Padrinhos e madrinhas</h2>
+    <div class="padrinhos-lista">
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Márcia e Maurício</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Alice e Marcelo</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Amanda e Wesley</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Taís</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Deive e Walace</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>João</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Lorella</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Anne e Edu</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Hélio e Liliane</h4></div>
+    </div>
   </div>
 </div>
 
-<footer>
-  <p>Feito com muito amor para <span>Luana &amp; Heitor</span> · 10.10.2026</p>
-</footer>
-
-<script>
-// MODAIS (Traje / Padrinhos)
-function openTrajeModal() {
-  document.getElementById('trajeModalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function avatarPlaceholder(seed, color) {
-  return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-    <rect width="64" height="64" fill="${color}" opacity="0.18"/>
-    <circle cx="32" cy="26" r="11" fill="none" stroke="#5A4638" stroke-width="1.2"/>
-    <path d="M14 56 C14 42 21 36 32 36 C43 36 50 42 50 56" fill="none" stroke="#5A4638" stroke-width="1.2"/>
-  </svg>`;
-}
-
-const padrinhos = [
-  {
-    nome: "Marina &amp; Thiago",
-    cor: "#E91E9A",
-    historia: "Amigos de Luana desde a faculdade, estiveram presentes em cada etapa importante da vida dela. Marina foi quem apresentou Luana e Heitor numa festa de aniversário."
-  },
-  {
-    nome: "Bruno &amp; Camila",
-    cor: "#FF6A1A",
-    historia: "Bruno é amigo de infância de Heitor — se conhecem desde os 8 anos de idade. Camila entrou no grupo depois, mas hoje é tão próxima quanto se fizesse parte desde sempre."
-  },
-  {
-    nome: "Renata",
-    cor: "#FFD21F",
-    historia: "Irmã mais velha de Luana e sua maior confidente. Acompanhou de perto cada detalhe do planejamento do casamento, com muito carinho e paciência."
-  },
-  {
-    nome: "Felipe",
-    cor: "#E91E9A",
-    historia: "Melhor amigo de Heitor desde o colégio. Os dois compartilham a paixão por churrasco de domingo e já viajaram juntos para mais de dez países."
-  }
-];
-
-function openPadrinhosModal() {
-  const list = document.getElementById('padrinhosList');
-  list.innerHTML = '';
-  padrinhos.forEach((p, i) => {
-    const item = document.createElement('div');
-    item.className = 'padrinho-item';
-    item.innerHTML = `
-      <div class="padrinho-photo">${avatarPlaceholder(i, p.cor)}</div>
-      <div class="padrinho-info">
-        <h4>${p.nome}</h4>
-        <p>${p.historia}</p>
+<!-- MODAL RECADO -->
+<div class="modal-overlay" id="modalRecado" role="dialog" aria-modal="true" aria-labelledby="tituloModalRecado" onclick="fecharModalFora(event, 'modalRecado')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalRecado')" aria-label="Fechar">✕</button>
+    <span class="modal-tag">Recados</span>
+    <h2 id="tituloModalRecado">Deixe um recado para nós</h2>
+    <form id="formRecado" novalidate>
+      <div class="campo-form">
+        <label for="recadoNome">Seu nome</label>
+        <input type="text" id="recadoNome" name="nome" maxlength="80" required data-foco-inicial>
       </div>
-    `;
-    list.appendChild(item);
-  });
-  document.getElementById('padrinhosModalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
+      <div class="campo-form">
+        <label for="recadoMensagem">Mensagem</label>
+        <textarea id="recadoMensagem" name="mensagem" maxlength="500" rows="4" required></textarea>
+      </div>
+      <p class="recado-erro" id="recadoErro" role="alert"></p>
+      <div class="recado-envio">
+        <button class="btn btn-primario" type="submit" id="recadoSubmitBtn">Enviar recado</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeModalOutside(e, id) {
-  if (e.target === document.getElementById(id)) closeModal(id);
-}
-
-// COUNTDOWN
-function updateCountdown() {
-  const wedding = new Date('2026-10-10T17:00:00');
-  const now = new Date();
-  const diff = wedding - now;
-  if (diff <= 0) {
-    document.getElementById('countdown').innerHTML = '<p style="font-family:var(--font-display);font-style:italic;font-weight:300;font-size:1.5rem;color:var(--rosa)">Hoje é o grande dia</p>';
-    return;
-  }
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  const secs = Math.floor((diff % 60000) / 1000);
-  document.getElementById('cd-days').textContent = String(days).padStart(3,'0');
-  document.getElementById('cd-hours').textContent = String(hours).padStart(2,'0');
-  document.getElementById('cd-mins').textContent = String(mins).padStart(2,'0');
-  document.getElementById('cd-secs').textContent = String(secs).padStart(2,'0');
-}
-updateCountdown();
-setInterval(updateCountdown, 1000);
-
-// NAV TOGGLE
-document.getElementById('navToggle').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-});
-
-document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
-});
-
-// PIX COPY
-function copyPix() {
-  navigator.clipboard.writeText('meupix.luana@gmail.com').then(() => {
-    const msg = document.getElementById('pixCopyMsg');
-    msg.classList.add('show');
-    setTimeout(() => msg.classList.remove('show'), 2500);
-  });
-}
-
-// MENSAGEM
-function sendMessage() {
-  const nome = document.getElementById('msgNome').value.trim();
-  const texto = document.getElementById('msgTexto').value.trim();
-  if (!nome || !texto) {
-    alert('Por favor, preencha seu nome e mensagem.');
-    return;
-  }
-  document.getElementById('msgSuccess').classList.add('show');
-  document.getElementById('msgNome').value = '';
-  document.getElementById('msgEmail').value = '';
-  document.getElementById('msgTexto').value = '';
-  setTimeout(() => document.getElementById('msgSuccess').classList.remove('show'), 4000);
-}
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/main.js?v=2"></script>
+<script src="js/recados.js?v=2"></script>
 </body>
 </html>

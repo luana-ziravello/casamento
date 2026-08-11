@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Presentes — Luana &amp; Heitor</title>
+<meta name="description" content="Lista de presentes do casamento de Luana &amp; Heitor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23FCF5E9%27/%3E%3Ccircle cx=%2726%27 cy=%2732%27 r=%2716%27 fill=%27%23FF6A2E%27 opacity=%27.9%27/%3E%3Ccircle cx=%2738%27 cy=%2732%27 r=%2716%27 fill=%27%23E8146F%27 opacity=%27.85%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=2">
+<style>
+  .cabecalho-pagina {
+    position: relative;
+    padding: 150px clamp(1.3rem, 4vw, 3rem) var(--sp-2xl);
+    text-align: center;
+    overflow: hidden;
+  }
+  .cabecalho-mancha { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .voltar {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: .5rem;
+    text-decoration: none; font-size: .68rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--tinta-suave); opacity: .8;
+    margin-bottom: var(--sp-xl);
+    transition: opacity .3s, letter-spacing .3s;
+  }
+  .voltar:hover, .voltar:focus-visible { opacity: 1; letter-spacing: .18em; }
+  .cabecalho-pagina .eyebrow { position: relative; z-index: 1; justify-content: center; }
+  .cabecalho-pagina h1 {
+    position: relative; z-index: 1;
+    font-family: var(--f-display); font-weight: 400; font-style: italic;
+    font-size: clamp(2.4rem, 6vw, 3.8rem); color: var(--tinta); margin-bottom: var(--sp-md);
+  }
+  .cabecalho-pagina p { position: relative; z-index: 1; font-size: .92rem; color: var(--tinta-suave); max-width: 460px; margin: 0 auto; line-height: 1.9; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 0 clamp(1.3rem, 4vw, 2.5rem) var(--sp-3xl); }
+
+  .rotulo-secao {
+    font-size: .68rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase;
+    color: var(--tinta-suave);
+    margin-bottom: var(--sp-lg);
+    display: flex; align-items: center; gap: 18px;
+  }
+  .rotulo-secao::after { content: ''; flex: 1; height: 1px; background: var(--linha-forte); }
+
+  /* ===== grade de presentes ===== */
+  .grade-presentes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 1.6rem;
+    margin-bottom: var(--sp-3xl);
+  }
+  .presente {
+    background-color: var(--tinta-clara);
+    background-image: var(--grao);
+    border: 1px solid var(--linha);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  }
+  .presente:hover { transform: translateY(-5px); box-shadow: var(--sombra-card); border-color: var(--dourado-linha); }
+  .presente-ilustracao {
+    height: 170px;
+    display: flex; align-items: center; justify-content: center;
+    border-bottom: 1px solid var(--linha);
+  }
+  .presente-corpo { padding: 1.5rem 1.5rem 1.6rem; flex: 1; display: flex; flex-direction: column; }
+  .presente-nome { font-family: var(--f-display); font-style: italic; font-size: 1.22rem; color: var(--tinta); margin-bottom: .3rem; line-height: 1.35; }
+  .presente-categoria { font-size: .64rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--rosa-texto); margin-bottom: .7rem; }
+  .presente-rodape { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-top: 1.1rem; border-top: 1px solid var(--linha); margin-top: auto; }
+  .presente-preco { font-family: var(--f-display); font-size: 1.28rem; color: var(--tinta); }
+  .presentear-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; color: var(--rosa-texto); border: 1px solid var(--rosa-texto);
+    padding: 9px 16px; font-size: .64rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; transition: background .3s, color .3s;
+  }
+  .presentear-btn:hover, .presentear-btn:focus-visible { background: var(--rosa-texto); color: var(--tinta-clara); }
+  .presentear-btn:disabled { cursor: not-allowed; opacity: .6; }
+
+  .presente.dado { opacity: .62; }
+  .presente-selo {
+    display: inline-flex; align-items: center; gap: .4em;
+    font-size: .6rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--tinta-clara); background: var(--rosa-texto);
+    padding: 5px 10px; margin-bottom: .5rem; align-self: flex-start;
+  }
+
+  /* ===== banner de status de pagamento (retorno do Mercado Pago) ===== */
+  .banner-pagamento {
+    display: flex; align-items: center; gap: .8rem;
+    padding: 1rem 1.2rem; margin-bottom: var(--sp-xl);
+    border: 1px solid var(--linha-forte); font-size: .86rem; color: var(--tinta);
+    background-color: var(--tinta-clara); background-image: var(--grao);
+  }
+  .banner-pagamento.aprovado { border-color: var(--rosa-texto); }
+  .banner-pagamento.recusado { border-color: var(--coral-texto); }
+
+  /* ===== modal presente ===== */
+  #modalPresente .modal-caixa { text-align: center; max-width: 440px; }
+  #modalPresente .presente-ilustracao-modal { width: 120px; height: 120px; margin: 0 auto var(--sp-sm); }
+  #modalPresente h2 { margin-bottom: .3rem; }
+  #modalPresente .modal-preco { font-family: var(--f-display); font-size: 2rem; color: var(--rosa-texto); margin-bottom: var(--sp-md); }
+  #modalPresente .modal-nota { font-size: .8rem; color: var(--tinta-suave); margin-bottom: var(--sp-md); }
+  #modalPresente .modal-agradecimento { font-size: .76rem; color: var(--tinta-suave); margin-top: var(--sp-md); }
+  #modalPresente .modal-erro-pagamento { display: none; font-size: .78rem; color: var(--coral-texto); margin-top: var(--sp-sm); }
+  #modalPresente .modal-erro-pagamento.mostrar { display: block; }
+
+  @media (max-width: 600px) {
+    .grade-presentes { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .presente-ilustracao { height: 130px; }
+    .presente-corpo { padding: 1.1rem 1.1rem 1.3rem; }
+    .presente-nome { font-size: 1.02rem; }
+    .presente-preco { font-size: 1.05rem; }
+    .presentear-btn { padding: 7px 12px; font-size: .58rem; }
+    .cabecalho-pagina { padding: 128px 1.4rem var(--sp-xl); }
+  }
+  @media (max-width: 400px) {
+    .grade-presentes { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#lista" class="skip-link">Pular para o conteúdo</a>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav class="nav" id="navbar">
+  <a href="index.html" class="nav-brand" aria-label="Luana &amp; Heitor — início">
+    <img class="nav-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Início</a></li>
+    <li><a href="index.html#grande-dia">O grande dia</a></li>
+    <li><a href="index.html#informacoes">Informações</a></li>
+    <li><a href="index.html#recados">Recados</a></li>
+    <li><a href="presentes.html" aria-current="page">Presentes</a></li>
+    <li><a href="confirmacao.html">Confirmação</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<header class="cabecalho-pagina">
+  <svg class="cabecalho-mancha" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><filter id="pb1"><feGaussianBlur stdDeviation="30"/></filter></defs>
+    <ellipse cx="90" cy="60" rx="200" ry="150" fill="var(--rosa)" opacity="0.07" filter="url(#pb1)"/>
+    <ellipse cx="1120" cy="440" rx="220" ry="160" fill="var(--coral)" opacity="0.08" filter="url(#pb1)"/>
+    <ellipse cx="1000" cy="30" rx="120" ry="90" fill="var(--amarelo)" opacity="0.14" filter="url(#pb1)"/>
+  </svg>
+  <a class="voltar" href="index.html">← Voltar ao site</a>
+  <span class="eyebrow">Sugestão de presentes</span>
+  <h1>Presenteie com carinho</h1>
+  <p>Sua presença já é o maior presente. Mas se quiser nos mimar, escolha algo aqui com muito amor.</p>
+</header>
+
+<main id="lista">
+  <div id="bannerPagamento"></div>
+  <div class="rotulo-secao">Presentes especiais</div>
+  <div class="grade-presentes" id="gradePresentes"></div>
+
+</main>
+
+<footer class="rodape">
+  <a href="index.html" class="rodape-monograma-link" aria-label="Luana &amp; Heitor — início">
+    <img class="rodape-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <p>Feito com amor para <span class="destaque">Luana &amp; Heitor</span> · 10.10.2026</p>
+  <div class="rodape-links">
+    <a href="index.html">Início</a>
+    <a href="confirmacao.html">Confirmação</a>
+  </div>
+</footer>
+
+<!-- MODAL PRESENTE -->
+<div class="modal-overlay" id="modalPresente" role="dialog" aria-modal="true" aria-labelledby="modalPresenteNome" onclick="fecharModalFora(event, 'modalPresente')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalPresente')" aria-label="Fechar">✕</button>
+    <div class="presente-ilustracao-modal" id="modalIlustracao"></div>
+    <h2 id="modalPresenteNome"></h2>
+    <div class="modal-preco" id="modalPreco"></div>
+    <p class="modal-nota">Pague com Pix, cartão ou boleto pelo Mercado Pago.</p>
+    <button class="btn btn-primario" type="button" id="btnPagarPresente" onclick="pagarPresenteAtual()">Pagar com Mercado Pago</button>
+    <p class="modal-erro-pagamento" id="modalErroPagamento"></p>
+    <p class="modal-agradecimento">Você será redirecionado para o ambiente seguro do Mercado Pago.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/main.js?v=2"></script>
+<script src="js/presentes.js?v=3"></script>
+</body>
+</html>

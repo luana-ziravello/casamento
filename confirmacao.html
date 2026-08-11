@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirmação de Presença — Luana &amp; Heitor</title>
+<meta name="description" content="Confirme sua presença no casamento de Luana &amp; Heitor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23FCF5E9%27/%3E%3Ccircle cx=%2726%27 cy=%2732%27 r=%2716%27 fill=%27%23FF6A2E%27 opacity=%27.9%27/%3E%3Ccircle cx=%2738%27 cy=%2732%27 r=%2716%27 fill=%27%23E8146F%27 opacity=%27.85%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=2">
+<style>
+  .cabecalho-pagina {
+    position: relative;
+    padding: 150px clamp(1.3rem, 4vw, 3rem) var(--sp-2xl);
+    text-align: center;
+    overflow: hidden;
+  }
+  .cabecalho-mancha { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .voltar {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: .5rem;
+    text-decoration: none; font-size: .68rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--tinta-suave); opacity: .8;
+    margin-bottom: var(--sp-xl);
+    transition: opacity .3s, letter-spacing .3s;
+  }
+  .voltar:hover, .voltar:focus-visible { opacity: 1; letter-spacing: .18em; }
+  .cabecalho-pagina .eyebrow { position: relative; z-index: 1; justify-content: center; }
+  .cabecalho-pagina h1 {
+    position: relative; z-index: 1;
+    font-family: var(--f-display); font-weight: 400; font-style: italic;
+    font-size: clamp(2.4rem, 6vw, 3.8rem); color: var(--tinta); margin-bottom: var(--sp-md);
+  }
+  .cabecalho-pagina p { position: relative; z-index: 1; font-size: .92rem; color: var(--tinta-suave); max-width: 480px; margin: 0 auto; line-height: 1.9; }
+
+  main.rsvp { max-width: 640px; margin: 0 auto; padding: 0 clamp(1.3rem, 4vw, 2.5rem) var(--sp-3xl); }
+
+
+  .busca-painel {
+    background-color: var(--tinta-clara);
+    background-image: var(--grao);
+    border: 1px solid var(--dourado-linha);
+    box-shadow: var(--sombra-card);
+    padding: var(--sp-xl) var(--sp-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .busca-painel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradiente-luxo); }
+
+  .busca-form { display: flex; gap: .8rem; flex-wrap: wrap; }
+  .busca-campo { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+  .busca-campo label { font-size: .66rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); }
+  .busca-campo input {
+    height: 50px; padding: 0 14px;
+    border: 1px solid var(--linha-forte); background: var(--areia-0);
+    font-family: var(--f-corpo); font-size: .92rem; color: var(--tinta);
+    transition: border-color .3s;
+  }
+  .busca-campo input:focus { border-color: var(--rosa); outline: none; }
+  .busca-form .btn { align-self: flex-end; height: 50px; }
+
+  .resultado { margin-top: var(--sp-lg); display: none; }
+  .resultado.mostrar { display: block; animation: aparecer .4s ease; }
+
+  .grupo-familia { margin-bottom: var(--sp-xl); padding-bottom: var(--sp-lg); border-bottom: 1px dashed var(--linha-forte); }
+  .grupo-familia:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+  .familia-cabecalho { margin-bottom: var(--sp-md); }
+  .familia-cabecalho h3 { font-family: var(--f-display); font-style: italic; font-size: 1.5rem; color: var(--tinta); margin-bottom: .3rem; }
+  .familia-cabecalho p { font-size: .82rem; color: var(--tinta-suave); }
+
+  .convidado {
+    display: flex; align-items: center; gap: .9rem;
+    padding: .9rem 0;
+    border-top: 1px solid var(--linha);
+  }
+  .convidado input[type="checkbox"] {
+    width: 22px; height: 22px; accent-color: var(--rosa-texto); cursor: pointer; flex-shrink: 0;
+  }
+  .convidado label { font-size: .92rem; color: var(--tinta); cursor: pointer; flex: 1; }
+
+  .resultado-rodape { margin-top: var(--sp-lg); display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }
+  .grupo-erro { font-size: .78rem; color: var(--rosa-texto); }
+  .grupo-confirmado { display: flex; align-items: center; gap: .6rem; font-size: .88rem; color: var(--rosa-texto); padding: .6rem 0; }
+  .grupo-confirmado svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  .nao-encontrado { display: none; margin-top: var(--sp-lg); font-size: .86rem; color: var(--tinta-suave); text-align: center; }
+  .nao-encontrado.mostrar { display: block; }
+
+  .sucesso {
+    display: none;
+    text-align: center;
+    padding: var(--sp-lg) 0 0;
+  }
+  .sucesso.mostrar { display: block; animation: aparecer .4s ease; }
+  .sucesso .icone-check { width: 54px; height: 54px; margin: 0 auto var(--sp-sm); }
+  .sucesso h3 { font-family: var(--f-display); font-style: italic; font-size: 1.5rem; color: var(--tinta); margin-bottom: .4rem; }
+  .sucesso p { font-size: .86rem; color: var(--tinta-suave); }
+
+  @media (max-width: 560px) {
+    .busca-form .btn { width: 100%; }
+    .cabecalho-pagina { padding: 128px 1.4rem var(--sp-xl); }
+  }
+</style>
+</head>
+<body>
+
+<a href="#confirmar" class="skip-link">Pular para o conteúdo</a>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<nav class="nav" id="navbar">
+  <a href="index.html" class="nav-brand" aria-label="Luana &amp; Heitor — início">
+    <img class="nav-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Início</a></li>
+    <li><a href="index.html#grande-dia">O grande dia</a></li>
+    <li><a href="index.html#informacoes">Informações</a></li>
+    <li><a href="index.html#recados">Recados</a></li>
+    <li><a href="presentes.html">Presentes</a></li>
+    <li><a href="confirmacao.html" aria-current="page">Confirmação</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<header class="cabecalho-pagina">
+  <svg class="cabecalho-mancha" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs><filter id="cb1"><feGaussianBlur stdDeviation="30"/></filter></defs>
+    <ellipse cx="1120" cy="60" rx="200" ry="150" fill="var(--rosa)" opacity="0.07" filter="url(#cb1)"/>
+    <ellipse cx="80" cy="440" rx="220" ry="160" fill="var(--coral)" opacity="0.08" filter="url(#cb1)"/>
+    <ellipse cx="200" cy="30" rx="120" ry="90" fill="var(--amarelo)" opacity="0.14" filter="url(#cb1)"/>
+  </svg>
+  <a class="voltar" href="index.html">← Voltar ao site</a>
+  <span class="eyebrow">Confirmação</span>
+  <h1>Confirme sua presença</h1>
+  <p>Busque pelo nome da sua família e conte pra gente quem vai estar junto nesse dia.</p>
+</header>
+
+<main class="rsvp" id="confirmar">
+  <div class="busca-painel" data-reveal>
+    <form class="busca-form" id="formBusca">
+      <div class="busca-campo">
+        <label for="campoFamilia">Nome da família ou convidado</label>
+        <input type="text" id="campoFamilia" name="familia" placeholder="Ex.: Alves, Otênio, Marçal…" autocomplete="off" required>
+      </div>
+      <button class="btn btn-primario" type="submit">Buscar</button>
+    </form>
+
+    <p class="nao-encontrado" id="naoEncontrado">Não encontramos esse nome na nossa lista. Confira a grafia ou fale com os noivos.</p>
+
+    <div class="resultado" id="resultado"></div>
+
+    <div class="sucesso" id="sucesso">
+      <svg class="icone-check" viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="27" cy="27" r="22" stroke="var(--rosa-texto)" stroke-width="1.4"/>
+        <path d="M18 27l6 6 13-14" stroke="var(--rosa-texto)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h3>Presença confirmada!</h3>
+      <p>Mal podemos esperar para celebrar com vocês. Muito obrigado por confirmar.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="rodape">
+  <a href="index.html" class="rodape-monograma-link" aria-label="Luana &amp; Heitor — início">
+    <img class="rodape-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <p>Feito com amor para <span class="destaque">Luana &amp; Heitor</span> · 10.10.2026</p>
+  <div class="rodape-links">
+    <a href="index.html">Início</a>
+    <a href="presentes.html">Presentes</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/main.js?v=2"></script>
+<script src="js/confirmacao.js?v=2"></script>
+</body>
+</html>
