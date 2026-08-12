@@ -75,8 +75,6 @@
   --sp-xl: 3.5rem;
   --sp-2xl: 5.5rem;
   --sp-3xl: 8rem;
-
-  --grao: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch' result='t'/%3E%3CfeColorMatrix in='t' type='matrix' values='0 0 0 0 0.29 0 0 0 0 0.2 0 0 0 0 0.13 0.045 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ===== reset ===== */
@@ -96,7 +94,6 @@ body {
   font-size: 16px;
   color: var(--tinta);
   background-color: var(--areia-0);
-  background-image: var(--grao);
   letter-spacing: .01em;
   line-height: 1.6;
   overflow-x: hidden;
@@ -330,7 +327,7 @@ body::after { inset: 15px; border-color: rgba(122, 78, 33, 0.09); }
 .cabecalho-secao.centro { margin-left: auto; margin-right: auto; text-align: center; }
 
 section { position: relative; padding: var(--sp-3xl) 0; scroll-margin-top: 80px; }
-.faixa-crua { background-color: var(--areia-1); background-image: var(--grao); }
+.faixa-crua { background-color: var(--areia-1); }
 
 /* ===== scroll reveal (progressive enhancement) ===== */
 html.js [data-reveal] {
@@ -378,7 +375,6 @@ html.js [data-reveal].em-vista { opacity: 1; transform: none; }
 .modal-overlay.aberta { display: flex; }
 .modal-caixa {
   background-color: var(--tinta-clara);
-  background-image: var(--grao);
   border: 1px solid var(--dourado-linha);
   padding: var(--sp-xl);
   max-width: 560px; width: 100%;
