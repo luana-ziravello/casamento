@@ -32,7 +32,7 @@
     position: relative; z-index: 1;
     text-align: center;
     color: var(--tinta-clara);
-    padding: 150px clamp(1.2rem, 5vw, 3rem) 130px;
+    padding: 108px clamp(1.2rem, 5vw, 3rem) 36px;
     max-width: 780px;
   }
   .hero-monograma {
@@ -75,14 +75,14 @@
     animation: subirDesvanecer 1s .5s ease both;
   }
 
-  .hero-ctas { margin-top: var(--sp-xl); display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; animation: subirDesvanecer 1.05s .6s ease both; }
+  .hero-ctas { margin-top: var(--sp-lg); display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; animation: subirDesvanecer 1.05s .6s ease both; }
   .hero-ctas .btn { background: rgba(28,18,10,.38); backdrop-filter: blur(10px); }
   .hero-ctas .btn-primario { color: var(--tinta-clara); border-color: rgba(255,255,255,.6); }
   .hero-ctas .btn-primario::before { --btn-fill: var(--gradiente-luxo); }
   .hero-ctas .btn-fantasma { color: var(--tinta-clara); border-color: rgba(255,255,255,.42); }
 
   .hero-contagem {
-    margin-top: var(--sp-2xl);
+    margin-top: var(--sp-xl);
     display: inline-flex; gap: 1.5rem;
     padding: 1.1rem 1.9rem;
     background: rgba(38,26,16,.32);
@@ -96,7 +96,7 @@
   .cd-sep { align-self: center; font-family: var(--f-display); font-style: italic; color: var(--amarelo); font-size: 1.05rem; }
 
   .hero-setas-scroll {
-    margin-top: var(--sp-lg);
+    margin-top: var(--sp-md);
     display: flex; flex-direction: column; align-items: center; gap: 1px;
     color: rgba(255,255,255,.68);
     animation: flutuarSetas 2.2s ease-in-out infinite;
@@ -110,8 +110,18 @@
   @media (prefers-reduced-motion: reduce) { .hero-fundo img, .hero-setas-scroll { animation: none; } }
 
   @media (max-width: 480px) {
+    .hero-conteudo { padding-top: 92px; }
     .hero-contagem { gap: .85rem; padding: 1rem 1.2rem; }
     .cd-numero { font-size: 1.3rem; }
+  }
+  @media (max-height: 720px) {
+    .hero-conteudo { padding-top: 84px; padding-bottom: 24px; }
+    .hero-monograma { height: 34px; margin-bottom: var(--sp-md); }
+    .hero-nomes { font-size: clamp(2.5rem, 8vw, 5.4rem); }
+    .hero-data-extenso { margin-top: var(--sp-sm); }
+    .hero-ctas { margin-top: var(--sp-md); }
+    .hero-contagem { margin-top: var(--sp-lg); }
+    .hero-setas-scroll { margin-top: var(--sp-sm); }
   }
 
   /* ===== nav sobre a foto do hero: links claros até rolar a página ===== */

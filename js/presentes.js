@@ -164,7 +164,7 @@ async function pagarCarrinho() {
         apikey: SUPABASE_PUBLISHABLE_KEY,
         Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ giftIds: [...carrinho] }),
+      body: JSON.stringify({ giftIds: [...carrinho], siteBaseUrl: window.location.href.replace(/[^/]*$/, '') }),
     });
     const dados = await resposta.json();
 
