@@ -65,6 +65,8 @@ function grupoHtml(grupo, idx) {
     </div>
   `).join('');
 
+  const rotuloBotao = grupo.convidados.length > 1 ? 'Salvar confirmações' : 'Confirmar presença';
+
   return `
     <div class="grupo-familia" id="grupo-${idx}">
       <div class="familia-cabecalho">
@@ -74,8 +76,35 @@ function grupoHtml(grupo, idx) {
       <div>${linhas}</div>
       <div class="resultado-rodape">
         <span class="grupo-erro" id="grupoErro-${idx}"></span>
-        <button class="btn btn-primario" type="button" onclick="confirmarGrupo(${idx})">Confirmar presença</button>
+        <button class="btn btn-primario" type="button" onclick="confirmarGrupo(${idx})">${rotuloBotao}</button>
       </div>
+    </div>
+  `;
+}
+
+function mensagemResultadoHtml(convidados) {
+  const confirmados = convidados.filter((c) => c.confirmado);
+  const naoConfirmados = convidados.filter((c) => !c.confirmado);
+
+  if (!naoConfirmados.length) {
+    return `<div class="grupo-resultado grupo-resultado-positivo">${iconeCheckSvg()}<p>Presença confirmada! Mal podemos esperar para celebrar esse dia com vocês. 💛</p></div>`;
+  }
+
+  if (!confirmados.length) {
+    return `<div class="grupo-resultado grupo-resultado-negativo"><p>É uma pena que vocês não poderão estar conosco nesse dia. Sentiremos a falta de vocês, mas agradecemos muito pelo carinho!</p></div>`;
+  }
+
+  const listaConfirmados = confirmados.map((c) => `<li>${escaparHtml(c.nome)} <span class="marca-sim">✓</span></li>`).join('');
+  const listaNao = naoConfirmados.map((c) => `<li>${escaparHtml(c.nome)}</li>`).join('');
+  const rotuloNao = naoConfirmados.length > 1 ? 'Não poderão comparecer' : 'Não poderá comparecer';
+
+  return `
+    <div class="grupo-resultado grupo-resultado-misto">
+      <p class="grupo-resultado-rotulo">Confirmados</p>
+      <ul class="grupo-resultado-lista">${listaConfirmados}</ul>
+      <p class="grupo-resultado-rotulo">${rotuloNao}</p>
+      <ul class="grupo-resultado-lista grupo-resultado-lista-nao">${listaNao}</ul>
+      <p class="grupo-resultado-mensagem">Obrigada por confirmar! Ficamos muito felizes em saber quem estará conosco para celebrar esse dia tão especial.</p>
     </div>
   `;
 }
@@ -146,6 +175,7 @@ async function confirmarGrupo(idx) {
   }
 
   const botao = grupoEl.querySelector('.resultado-rodape .btn');
+  const rotuloOriginal = botao ? botao.textContent : 'Confirmar presença';
   const checkboxes = [...grupoEl.querySelectorAll('input[type="checkbox"]')];
   if (botao) { botao.disabled = true; botao.textContent = 'Enviando…'; }
   if (erroEl) erroEl.textContent = '';
@@ -160,7 +190,7 @@ async function confirmarGrupo(idx) {
 
   if (comErro) {
     if (erroEl) erroEl.textContent = 'Não foi possível salvar agora. Tente novamente em instantes.';
-    if (botao) { botao.disabled = false; botao.textContent = 'Confirmar presença'; }
+    if (botao) { botao.disabled = false; botao.textContent = rotuloOriginal; }
     return;
   }
 
@@ -177,11 +207,11 @@ async function confirmarGrupo(idx) {
     return { nome: convidado?.guest_name || '', confirmado: cb.checked };
   });
   notificarConfirmacao(familiaNome, resumoConvidados);
-  grupoEl.innerHTML = `<p class="grupo-confirmado">${iconeCheckSvg()} Presença de <strong>${escaparHtml(familiaNome)}</strong> confirmada — obrigado!</p>`;
+  grupoEl.innerHTML = mensagemResultadoHtml(resumoConvidados);
 
   // No modo com dropdown, só uma família fica visível por vez — confirmar essa já basta.
   const modoSeletor = !!document.getElementById('seletorFamilia');
-  const confirmados = resultado.querySelectorAll('.grupo-confirmado').length;
+  const confirmados = resultado.querySelectorAll('.grupo-resultado').length;
   if (modoSeletor || confirmados >= grupos.length) {
     resultado.classList.remove('mostrar');
     sucesso.classList.add('mostrar');
