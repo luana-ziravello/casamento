@@ -208,14 +208,6 @@ async function confirmarGrupo(idx) {
   });
   notificarConfirmacao(familiaNome, resumoConvidados);
   grupoEl.innerHTML = mensagemResultadoHtml(resumoConvidados);
-
-  // No modo com dropdown, só uma família fica visível por vez — confirmar essa já basta.
-  const modoSeletor = !!document.getElementById('seletorFamilia');
-  const confirmados = resultado.querySelectorAll('.grupo-resultado').length;
-  if (modoSeletor || confirmados >= grupos.length) {
-    resultado.classList.remove('mostrar');
-    sucesso.classList.add('mostrar');
-  }
 }
 
 form.addEventListener('submit', (e) => {
