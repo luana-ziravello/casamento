@@ -80,14 +80,6 @@
   .presentear-btn:hover, .presentear-btn:focus-visible { background: var(--rosa-texto); color: var(--tinta-clara); }
   .presentear-btn:disabled { cursor: not-allowed; opacity: .6; }
 
-  .presente.dado { opacity: .62; }
-  .presente-selo {
-    display: inline-flex; align-items: center; gap: .4em;
-    font-size: .6rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
-    color: var(--tinta-clara); background: var(--rosa-texto);
-    padding: 5px 10px; margin-bottom: .5rem; align-self: flex-start;
-  }
-
   .presente.selecionado { border-color: var(--rosa-texto); box-shadow: 0 0 0 2px rgba(197, 40, 80, .16); }
   .presentear-btn.esta-selecionado { background: var(--rosa-texto); color: var(--tinta-clara); }
 
@@ -138,6 +130,18 @@
   .modal-erro-pagamento { display: none; font-size: .78rem; color: var(--coral-texto); margin: -.6rem 0 var(--sp-md); text-align: center; }
   .modal-erro-pagamento.mostrar { display: block; }
   .modal-agradecimento { font-size: .76rem; color: var(--tinta-suave); text-align: center; margin-top: var(--sp-sm); }
+
+  /* ===== campos de quem está presenteando ===== */
+  .campo-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--sp-md); text-align: left; }
+  .campo-form label { font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); }
+  .campo-form label .opcional { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+  .campo-form input, .campo-form textarea {
+    padding: 12px 2px; border: none; border-bottom: 1px solid var(--linha-forte);
+    background: transparent; font-family: var(--f-corpo); font-size: .92rem; color: var(--tinta);
+    transition: border-color .3s;
+  }
+  .campo-form input:focus, .campo-form textarea:focus { border-color: var(--rosa); outline: none; }
+  .campo-form textarea { resize: vertical; min-height: 72px; }
 
   @media (max-width: 600px) {
     .grade-presentes { grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -223,6 +227,14 @@
       <span class="carrinho-total-rotulo">Total</span>
       <span class="carrinho-total-valor" id="carrinhoTotalValor">R$ 0,00</span>
     </div>
+    <div class="campo-form">
+      <label for="carrinhoNomePresenteador">Seu nome</label>
+      <input type="text" id="carrinhoNomePresenteador" maxlength="120" placeholder="Quem está presenteando?">
+    </div>
+    <div class="campo-form">
+      <label for="carrinhoMensagemPresenteador">Mensagem <span class="opcional">(opcional)</span></label>
+      <textarea id="carrinhoMensagemPresenteador" maxlength="400" rows="3" placeholder="Deixe uma mensagem para os noivos"></textarea>
+    </div>
     <p class="modal-nota" style="text-align:center">Pague com Pix, cartão ou boleto pelo Mercado Pago.</p>
     <button class="btn btn-primario" type="button" id="btnPagarCarrinho" onclick="pagarCarrinho()">Pagar com Mercado Pago</button>
     <p class="modal-erro-pagamento" id="modalErroPagamento"></p>
@@ -232,6 +244,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=2"></script>
-<script src="js/presentes.js?v=7"></script>
+<script src="js/presentes.js?v=8"></script>
 </body>
 </html>

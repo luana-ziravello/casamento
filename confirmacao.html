@@ -65,6 +65,16 @@
   .resultado { margin-top: var(--sp-lg); display: none; }
   .resultado.mostrar { display: block; animation: aparecer .4s ease; }
 
+  .seletor-familia { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--sp-lg); }
+  .seletor-familia label { font-size: .82rem; color: var(--tinta-suave); }
+  .seletor-familia select {
+    height: 50px; padding: 0 14px;
+    border: 1px solid var(--linha-forte); background: var(--areia-0);
+    font-family: var(--f-corpo); font-size: .92rem; color: var(--tinta);
+    transition: border-color .3s; cursor: pointer;
+  }
+  .seletor-familia select:focus { border-color: var(--rosa); outline: none; }
+
   .grupo-familia { margin-bottom: var(--sp-xl); padding-bottom: var(--sp-lg); border-bottom: 1px dashed var(--linha-forte); }
   .grupo-familia:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
 
@@ -179,6 +189,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=2"></script>
-<script src="js/confirmacao.js?v=3"></script>
+<script src="js/confirmacao.js?v=4"></script>
 </body>
 </html>

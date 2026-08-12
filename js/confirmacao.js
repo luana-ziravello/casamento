@@ -55,7 +55,7 @@ function iconeCheckSvg() {
 function grupoHtml(grupo, idx) {
   const linhas = grupo.convidados.map((c) => `
     <div class="convidado">
-      <input type="checkbox" id="convidado-${idx}-${c.id}" data-guest-id="${c.id}" ${c.confirmed === false ? '' : 'checked'}>
+      <input type="checkbox" id="convidado-${idx}-${c.id}" data-guest-id="${c.id}" ${c.confirmed === true ? 'checked' : ''}>
       <label for="convidado-${idx}-${c.id}">${escaparHtml(c.guest_name)}</label>
     </div>
   `).join('');
@@ -100,8 +100,33 @@ function buscar(termo) {
   });
 
   grupos = [...porFamilia.entries()].map(([familia, convidados]) => ({ familia, convidados }));
-  resultado.innerHTML = grupos.map((g, i) => grupoHtml(g, i)).join('');
+
+  if (grupos.length > 1) {
+    renderSeletorFamilias();
+  } else {
+    resultado.innerHTML = grupoHtml(grupos[0], 0);
+  }
   resultado.classList.add('mostrar');
+}
+
+function renderSeletorFamilias() {
+  const opcoes = grupos.map((g, i) => {
+    const qtd = g.convidados.length;
+    return `<option value="${i}">${escaparHtml(g.familia)} (${qtd} ${qtd === 1 ? 'pessoa' : 'pessoas'})</option>`;
+  }).join('');
+  resultado.innerHTML = `
+    <div class="seletor-familia">
+      <label for="seletorFamilia">Encontramos mais de uma família com esse nome — qual é a sua?</label>
+      <select id="seletorFamilia" onchange="mostrarGrupoEscolhido(this.value)">${opcoes}</select>
+    </div>
+    <div id="grupoEscolhido"></div>
+  `;
+  mostrarGrupoEscolhido(0);
+}
+
+function mostrarGrupoEscolhido(idx) {
+  const container = document.getElementById('grupoEscolhido');
+  if (container) container.innerHTML = grupoHtml(grupos[Number(idx)], Number(idx));
 }
 
 async function confirmarGrupo(idx) {
@@ -149,8 +174,10 @@ async function confirmarGrupo(idx) {
   notificarConfirmacao(familiaNome, resumoConvidados);
   grupoEl.innerHTML = `<p class="grupo-confirmado">${iconeCheckSvg()} Presença de <strong>${escaparHtml(familiaNome)}</strong> confirmada — obrigado!</p>`;
 
+  // No modo com dropdown, só uma família fica visível por vez — confirmar essa já basta.
+  const modoSeletor = !!document.getElementById('seletorFamilia');
   const confirmados = resultado.querySelectorAll('.grupo-confirmado').length;
-  if (confirmados >= grupos.length) {
+  if (modoSeletor || confirmados >= grupos.length) {
     resultado.classList.remove('mostrar');
     sucesso.classList.add('mostrar');
   }

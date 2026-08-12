@@ -32,7 +32,6 @@ const formatoPreco = new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
 const CHAVE_CARRINHO = 'carrinho-presentes-luana-heitor';
 
 let PRESENTES = [];
-let PRESENTES_DADOS = new Set(); // ids de presentes já pagos (status approved)
 let carrinho = new Set(); // ids selecionados
 
 function ilustracaoAquarela(cor, iconeSvg, seed) {
@@ -69,21 +68,19 @@ function montarGrade() {
   grade.innerHTML = '';
   PRESENTES.forEach((p, i) => {
     const cor = corParaIndice(i);
-    const dado = PRESENTES_DADOS.has(p.id);
     const selecionado = carrinho.has(p.id);
     const card = document.createElement('div');
-    card.className = 'presente' + (dado ? ' dado' : '') + (selecionado ? ' selecionado' : '');
+    card.className = 'presente' + (selecionado ? ' selecionado' : '');
     card.innerHTML = `
       <div class="presente-ilustracao" style="background: radial-gradient(circle at 50% 45%, var(--tinta-clara) 35%, var(--areia-1) 100%)">
         ${ilustracaoAquarela(cor, iconeParaIndice(i), i)}
       </div>
       <div class="presente-corpo">
-        ${dado ? '<span class="presente-selo">Já presenteado</span>' : ''}
         <h3 class="presente-nome">${p.name}</h3>
         <div class="presente-rodape">
           <span class="presente-preco">${formatoPreco.format(p.price)}</span>
-          <button class="presentear-btn${selecionado ? ' esta-selecionado' : ''}" onclick="alternarCarrinho(${p.id})" ${dado ? 'disabled' : ''}>
-            ${dado ? 'Presenteado' : (selecionado ? 'Remover' : 'Presentear')}
+          <button class="presentear-btn${selecionado ? ' esta-selecionado' : ''}" onclick="alternarCarrinho(${p.id})">
+            ${selecionado ? 'Remover' : 'Presentear'}
           </button>
         </div>
       </div>
@@ -150,9 +147,20 @@ async function pagarCarrinho() {
   if (!carrinho.size) return;
   const btn = document.getElementById('btnPagarCarrinho');
   const erroEl = document.getElementById('modalErroPagamento');
+  const campoNome = document.getElementById('carrinhoNomePresenteador');
+  const campoMensagem = document.getElementById('carrinhoMensagemPresenteador');
 
   erroEl.textContent = '';
   erroEl.classList.remove('mostrar');
+
+  const giverName = campoNome.value.trim();
+  if (!giverName) {
+    erroEl.textContent = 'Preencha seu nome antes de continuar.';
+    erroEl.classList.add('mostrar');
+    campoNome.focus();
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'Preparando pagamento…';
 
@@ -164,14 +172,16 @@ async function pagarCarrinho() {
         apikey: SUPABASE_PUBLISHABLE_KEY,
         Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ giftIds: [...carrinho], siteBaseUrl: window.location.href.replace(/[^/]*$/, '') }),
+      body: JSON.stringify({
+        giftIds: [...carrinho],
+        siteBaseUrl: window.location.href.replace(/[^/]*$/, ''),
+        giverName,
+        giverMessage: campoMensagem.value.trim(),
+      }),
     });
     const dados = await resposta.json();
 
     if (!resposta.ok || !dados.checkoutUrl) {
-      if (dados?.indisponiveis?.length) {
-        throw new Error(`Já deram: ${dados.indisponiveis.join(', ')}. Atualize a página e tente novamente.`);
-      }
       throw new Error(dados?.error || 'Não foi possível iniciar o pagamento.');
     }
 
@@ -204,17 +214,6 @@ function mostrarBannerPagamento() {
   window.history.replaceState({}, '', window.location.pathname);
 }
 
-async function carregarPresentesDados() {
-  const client = getPresentesClient();
-  if (!client) return;
-  const { data, error } = await client
-    .from('gift_order_items')
-    .select('gift_id, gift_orders!inner(status)')
-    .eq('gift_orders.status', 'approved');
-  if (error) return;
-  PRESENTES_DADOS = new Set((data || []).map((o) => o.gift_id));
-}
-
 async function carregarPresentes() {
   const grade = document.getElementById('gradePresentes');
   if (grade) grade.innerHTML = '<p class="recados-estado">Carregando presentes…</p>';
@@ -225,18 +224,17 @@ async function carregarPresentes() {
     return;
   }
 
-  const [presentesRes] = await Promise.all([
-    client.from('gifts').select('id, name, price, active, sort_order').eq('active', true).order('sort_order', { ascending: true }),
-    carregarPresentesDados(),
-  ]);
+  const { data, error } = await client
+    .from('gifts')
+    .select('id, name, price, active, sort_order')
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
 
-  if (presentesRes.error) {
+  if (error) {
     if (grade) grade.innerHTML = '<p class="recados-estado">Não foi possível carregar a lista de presentes agora.</p>';
     return;
   }
-  PRESENTES = presentesRes.data || [];
-  carrinho.forEach((id) => { if (PRESENTES_DADOS.has(id)) carrinho.delete(id); });
-  salvarCarrinho();
+  PRESENTES = data || [];
   montarGrade();
   atualizarCarrinhoFlutuante();
 }
