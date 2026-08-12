@@ -27,17 +27,17 @@
 
 :root {
   /* ---- neutros: marfim quente ---- */
-  --areia-0: #FFF9E3;
-  --areia-1: #FFF9E3;
-  --areia-2: #FFF9E3;
+  --areia-0: #FEF8E0;
+  --areia-1: #FEF8E0;
+  --areia-2: #FEF8E0;
   --linha: rgba(122, 78, 33, 0.16);
   --linha-forte: rgba(122, 78, 33, 0.26);
 
   /* ---- texto ---- */
   --tinta: #3A2A1E;
   --tinta-suave: #6B5642;
-  --tinta-clara: #FFF9E3;
-  --tinta-clara-soft: rgba(255, 249, 227, 0.72);
+  --tinta-clara: #FEF8E0;
+  --tinta-clara-soft: rgba(254, 248, 224, 0.72);
 
   /* ---- marca: tropical luxo -----
      decorativo = pode ser vívido (ícones, linhas, fundos, elementos grandes)
@@ -291,7 +291,7 @@ body::after { inset: 15px; border-color: rgba(122, 78, 33, 0.09); }
 
 .btn-primario { background: transparent; color: var(--rosa-texto); border-color: var(--rosa-texto); box-shadow: var(--sombra-botao); }
 .btn-secundario { background: transparent; color: var(--coral-texto); border-color: var(--coral-texto); --btn-fill: linear-gradient(100deg, var(--coral), var(--dourado-claro)); }
-.btn-fantasma { background: transparent; color: var(--tinta-clara-soft); border-color: rgba(255,249,227,.4); --btn-fill: var(--gradiente-luxo); }
+.btn-fantasma { background: transparent; color: var(--tinta-clara-soft); border-color: rgba(254,248,224,.4); --btn-fill: var(--gradiente-luxo); }
 
 /* ===== cabeçalho de seção reutilizável ===== */
 .eyebrow {
