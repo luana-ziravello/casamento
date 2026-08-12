@@ -55,8 +55,13 @@ function iconeCheckSvg() {
 function grupoHtml(grupo, idx) {
   const linhas = grupo.convidados.map((c) => `
     <div class="convidado">
-      <input type="checkbox" id="convidado-${idx}-${c.id}" data-guest-id="${c.id}" ${c.confirmed === true ? 'checked' : ''}>
-      <label for="convidado-${idx}-${c.id}">${escaparHtml(c.guest_name)}</label>
+      <span class="convidado-nome">${escaparHtml(c.guest_name)}</span>
+      <label class="toggle-presenca">
+        <input type="checkbox" class="toggle-input" id="convidado-${idx}-${c.id}" data-guest-id="${c.id}">
+        <span class="toggle-rotulo toggle-rotulo-nao">Não</span>
+        <span class="toggle-trilho" aria-hidden="true"><span class="toggle-bolinha"></span></span>
+        <span class="toggle-rotulo toggle-rotulo-sim">Sim</span>
+      </label>
     </div>
   `).join('');
 
