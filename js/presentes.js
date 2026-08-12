@@ -1,4 +1,4 @@
-/* Lista de presentes — dados reais vindos do Supabase (public.gifts) e pagamento via Mercado Pago. */
+/* Lista de presentes — dados reais vindos do Supabase (public.gifts), carrinho e pagamento via Mercado Pago. */
 
 const SUPABASE_URL = 'https://huggafwjjceoekgjzbxi.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_BzOM_a4GHiAiiAThr5N0GA_ZV0bkE4D';
@@ -12,8 +12,8 @@ function getPresentesClient() {
 }
 
 const PALETA = {
-  coral: '#FF6A2E',
-  rosa: '#FF2D82',
+  coral: '#F46B30',
+  rosa: '#E82F5D',
   dourado: '#C89638',
   tinta: '#3A2A1E',
 };
@@ -29,10 +29,11 @@ const ICONES = [
 ];
 
 const formatoPreco = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const CHAVE_CARRINHO = 'carrinho-presentes-luana-heitor';
 
 let PRESENTES = [];
 let PRESENTES_DADOS = new Set(); // ids de presentes já pagos (status approved)
-let presenteSelecionadoIndice = null;
+let carrinho = new Set(); // ids selecionados
 
 function ilustracaoAquarela(cor, iconeSvg, seed) {
   return `<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
@@ -45,6 +46,18 @@ function ilustracaoAquarela(cor, iconeSvg, seed) {
 
 function corParaIndice(i) { return CORES_ROTATIVAS[i % CORES_ROTATIVAS.length]; }
 function iconeParaIndice(i) { return ICONES[i % ICONES.length]; }
+function presentePorId(id) { return PRESENTES.find((p) => p.id === id); }
+
+/* ===== persistência simples do carrinho (sobrevive a reload) ===== */
+function salvarCarrinho() {
+  try { localStorage.setItem(CHAVE_CARRINHO, JSON.stringify([...carrinho])); } catch { /* localStorage indisponível, segue sem persistir */ }
+}
+function restaurarCarrinho() {
+  try {
+    const salvo = JSON.parse(localStorage.getItem(CHAVE_CARRINHO) || '[]');
+    carrinho = new Set(salvo.filter((id) => Number.isInteger(id)));
+  } catch { carrinho = new Set(); }
+}
 
 function montarGrade() {
   const grade = document.getElementById('gradePresentes');
@@ -57,8 +70,9 @@ function montarGrade() {
   PRESENTES.forEach((p, i) => {
     const cor = corParaIndice(i);
     const dado = PRESENTES_DADOS.has(p.id);
+    const selecionado = carrinho.has(p.id);
     const card = document.createElement('div');
-    card.className = 'presente' + (dado ? ' dado' : '');
+    card.className = 'presente' + (dado ? ' dado' : '') + (selecionado ? ' selecionado' : '');
     card.innerHTML = `
       <div class="presente-ilustracao" style="background: radial-gradient(circle at 50% 45%, var(--tinta-clara) 35%, var(--areia-1) 100%)">
         ${ilustracaoAquarela(cor, iconeParaIndice(i), i)}
@@ -68,7 +82,9 @@ function montarGrade() {
         <h3 class="presente-nome">${p.name}</h3>
         <div class="presente-rodape">
           <span class="presente-preco">${formatoPreco.format(p.price)}</span>
-          <button class="presentear-btn" onclick="abrirModalPresente(${i})" ${dado ? 'disabled' : ''}>${dado ? 'Presenteado' : 'Presentear'}</button>
+          <button class="presentear-btn${selecionado ? ' esta-selecionado' : ''}" onclick="alternarCarrinho(${p.id})" ${dado ? 'disabled' : ''}>
+            ${dado ? 'Presenteado' : (selecionado ? 'Remover' : 'Presentear')}
+          </button>
         </div>
       </div>
     `;
@@ -76,32 +92,63 @@ function montarGrade() {
   });
 }
 
-function abrirModalPresente(i) {
-  presenteSelecionadoIndice = i;
-  const p = PRESENTES[i];
-  const cor = corParaIndice(i);
-  const ilustracao = document.getElementById('modalIlustracao');
-  ilustracao.innerHTML = ilustracaoAquarela(cor, iconeParaIndice(i), 'm' + i);
-  ilustracao.style.background = 'radial-gradient(circle at 50% 45%, var(--tinta-clara) 35%, var(--areia-1) 100%)';
-  ilustracao.style.border = '1px solid var(--linha)';
-  ilustracao.style.padding = '10px';
-  document.getElementById('modalPresenteNome').textContent = p.name;
-  document.getElementById('modalPreco').textContent = formatoPreco.format(p.price);
+function alternarCarrinho(id) {
+  if (carrinho.has(id)) carrinho.delete(id);
+  else carrinho.add(id);
+  salvarCarrinho();
+  montarGrade();
+  atualizarCarrinhoFlutuante();
+  if (document.getElementById('modalCarrinho').classList.contains('aberta')) montarListaCarrinho();
+}
 
+function totalCarrinho() {
+  return [...carrinho].reduce((soma, id) => soma + Number(presentePorId(id)?.price || 0), 0);
+}
+
+function atualizarCarrinhoFlutuante() {
+  const barra = document.getElementById('carrinhoFlutuante');
+  const qtd = carrinho.size;
+  document.getElementById('carrinhoFlutuanteQtd').textContent = String(qtd);
+  document.getElementById('carrinhoFlutuanteTotal').textContent = formatoPreco.format(totalCarrinho());
+  barra.classList.toggle('mostrar', qtd > 0);
+}
+
+function montarListaCarrinho() {
+  const lista = document.getElementById('carrinhoLista');
+  if (!carrinho.size) {
+    lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio.</p>';
+  } else {
+    lista.innerHTML = [...carrinho].map((id) => {
+      const p = presentePorId(id);
+      if (!p) return '';
+      return `
+        <div class="carrinho-item">
+          <span class="carrinho-item-nome">${p.name}</span>
+          <span class="carrinho-item-preco">${formatoPreco.format(p.price)}</span>
+          <button class="carrinho-item-remover" onclick="alternarCarrinho(${p.id})" aria-label="Remover ${p.name}">✕</button>
+        </div>
+      `;
+    }).join('');
+  }
+  document.getElementById('carrinhoTotalValor').textContent = formatoPreco.format(totalCarrinho());
+  const btnPagar = document.getElementById('btnPagarCarrinho');
+  btnPagar.disabled = carrinho.size === 0;
+}
+
+function abrirCarrinho() {
   const erroEl = document.getElementById('modalErroPagamento');
   erroEl.textContent = '';
   erroEl.classList.remove('mostrar');
-  const btn = document.getElementById('btnPagarPresente');
-  btn.disabled = false;
+  const btn = document.getElementById('btnPagarCarrinho');
+  btn.disabled = carrinho.size === 0;
   btn.textContent = 'Pagar com Mercado Pago';
-
-  abrirModal('modalPresente');
+  montarListaCarrinho();
+  abrirModal('modalCarrinho');
 }
 
-async function pagarPresenteAtual() {
-  if (presenteSelecionadoIndice === null) return;
-  const presente = PRESENTES[presenteSelecionadoIndice];
-  const btn = document.getElementById('btnPagarPresente');
+async function pagarCarrinho() {
+  if (!carrinho.size) return;
+  const btn = document.getElementById('btnPagarCarrinho');
   const erroEl = document.getElementById('modalErroPagamento');
 
   erroEl.textContent = '';
@@ -117,17 +164,21 @@ async function pagarPresenteAtual() {
         apikey: SUPABASE_PUBLISHABLE_KEY,
         Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ giftId: presente.id }),
+      body: JSON.stringify({ giftIds: [...carrinho] }),
     });
     const dados = await resposta.json();
 
     if (!resposta.ok || !dados.checkoutUrl) {
+      if (dados?.indisponiveis?.length) {
+        throw new Error(`Já deram: ${dados.indisponiveis.join(', ')}. Atualize a página e tente novamente.`);
+      }
       throw new Error(dados?.error || 'Não foi possível iniciar o pagamento.');
     }
 
+    localStorage.removeItem(CHAVE_CARRINHO);
     window.location.href = dados.checkoutUrl;
   } catch (erro) {
-    erroEl.textContent = 'Não foi possível iniciar o pagamento agora. Tente novamente em instantes.';
+    erroEl.textContent = erro.message || 'Não foi possível iniciar o pagamento agora. Tente novamente em instantes.';
     erroEl.classList.add('mostrar');
     btn.disabled = false;
     btn.textContent = 'Pagar com Mercado Pago';
@@ -142,8 +193,8 @@ function mostrarBannerPagamento() {
   if (!status) return;
 
   const mensagens = {
-    aprovado: { classe: 'aprovado', texto: 'Pagamento aprovado! Muito obrigado pelo carinho — o presente já foi registrado.' },
-    pendente: { classe: '', texto: 'Recebemos seu pagamento e estamos aguardando a confirmação. Assim que aprovado, o presente é atualizado aqui.' },
+    aprovado: { classe: 'aprovado', texto: 'Pagamento aprovado! Muito obrigado pelo carinho — os presentes já foram registrados.' },
+    pendente: { classe: '', texto: 'Recebemos seu pagamento e estamos aguardando a confirmação. Assim que aprovado, os presentes são atualizados aqui.' },
     recusado: { classe: 'recusado', texto: 'Não foi possível concluir esse pagamento. Fique à vontade para tentar novamente.' },
   };
   const info = mensagens[status];
@@ -157,9 +208,9 @@ async function carregarPresentesDados() {
   const client = getPresentesClient();
   if (!client) return;
   const { data, error } = await client
-    .from('gift_orders')
-    .select('gift_id, status')
-    .eq('status', 'approved');
+    .from('gift_order_items')
+    .select('gift_id, gift_orders!inner(status)')
+    .eq('gift_orders.status', 'approved');
   if (error) return;
   PRESENTES_DADOS = new Set((data || []).map((o) => o.gift_id));
 }
@@ -184,8 +235,12 @@ async function carregarPresentes() {
     return;
   }
   PRESENTES = presentesRes.data || [];
+  carrinho.forEach((id) => { if (PRESENTES_DADOS.has(id)) carrinho.delete(id); });
+  salvarCarrinho();
   montarGrade();
+  atualizarCarrinhoFlutuante();
 }
 
+restaurarCarrinho();
 mostrarBannerPagamento();
 carregarPresentes();

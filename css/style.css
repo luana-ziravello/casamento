@@ -27,34 +27,34 @@
 
 :root {
   /* ---- neutros: marfim quente ---- */
-  --areia-0: #FCF5E9;
-  --areia-1: #F7ECD9;
-  --areia-2: #EFDCBC;
+  --areia-0: #FFF9E3;
+  --areia-1: #FFF9E3;
+  --areia-2: #FFF9E3;
   --linha: rgba(122, 78, 33, 0.16);
   --linha-forte: rgba(122, 78, 33, 0.26);
 
   /* ---- texto ---- */
   --tinta: #3A2A1E;
   --tinta-suave: #6B5642;
-  --tinta-clara: #FBF3E7;
-  --tinta-clara-soft: rgba(251, 243, 231, 0.72);
+  --tinta-clara: #FFF9E3;
+  --tinta-clara-soft: rgba(255, 249, 227, 0.72);
 
   /* ---- marca: tropical luxo -----
      decorativo = pode ser vívido (ícones, linhas, fundos, elementos grandes)
      texto/funcional = deve manter AA 4.5:1 sobre --areia-0 (nunca "queimado" demais) */
-  --coral: #FF6A2E;
-  --coral-texto: #B8410F;
+  --coral: #F46B30;
+  --coral-texto: #F46B30;
   /* tom dedicado ao nome dos noivos - vivido e alegre, AA mesmo em texto normal */
-  --coral-nome: #C2450F;
-  --rosa: #FF2D82;
-  --rosa-texto: #C2126D;
+  --coral-nome: #F46B30;
+  --rosa: #E82F5D;
+  --rosa-texto: #C52850;
   --dourado: #C89638;
   --dourado-claro: #E8B84B;
   --dourado-linha: rgba(184, 141, 42, 0.4);
   --amarelo: #FFC94D;
 
   --gradiente-luxo: linear-gradient(100deg, var(--coral) 0%, var(--rosa) 62%, var(--dourado-claro) 100%);
-  --gradiente-suave: linear-gradient(180deg, rgba(255, 106, 46, 0.10), rgba(232, 20, 111, 0.06));
+  --gradiente-suave: linear-gradient(180deg, rgba(244, 107, 48, 0.10), rgba(232, 47, 93, 0.06));
 
   --sombra-card: 0 24px 60px -30px rgba(58, 42, 30, 0.35);
   --sombra-modal: 0 34px 90px -24px rgba(40, 26, 14, 0.42);
