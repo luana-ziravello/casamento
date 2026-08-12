@@ -17,6 +17,14 @@ function escaparHtml(str) {
   return div.innerHTML;
 }
 
+function notificarRecado(nome, mensagem) {
+  fetch(`${SUPABASE_URL}/functions/v1/notify-recado`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}` },
+    body: JSON.stringify({ nome, mensagem }),
+  }).catch(() => { /* aviso por e-mail é best-effort, não bloqueia o recado */ });
+}
+
 function cartaoRecadoHtml(r) {
   return `
     <article class="recado-card">
@@ -182,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
       form.reset();
       fecharModal('modalRecado');
       carregarRecados();
+      notificarRecado(nome, mensagem);
       if (confirmacaoEl) {
         confirmacaoEl.textContent = 'Obrigado! Seu recado foi publicado.';
         confirmacaoEl.classList.add('mostrar');

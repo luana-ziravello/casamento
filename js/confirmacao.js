@@ -24,6 +24,14 @@ function normalizar(texto) {
   return (texto ?? '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
+function notificarConfirmacao(familia, convidados) {
+  fetch(`${SUPABASE_URL}/functions/v1/notify-confirmacao`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}` },
+    body: JSON.stringify({ familia, convidados }),
+  }).catch(() => { /* aviso por e-mail é best-effort, não bloqueia a confirmação */ });
+}
+
 function escaparHtml(str) {
   const div = document.createElement('div');
   div.textContent = str ?? '';
@@ -133,6 +141,12 @@ async function confirmarGrupo(idx) {
   });
 
   const familiaNome = grupos[idx]?.familia || '';
+  const resumoConvidados = checkboxes.map((cb) => {
+    const guestId = Number(cb.dataset.guestId);
+    const convidado = grupos[idx]?.convidados.find((c) => c.id === guestId);
+    return { nome: convidado?.guest_name || '', confirmado: cb.checked };
+  });
+  notificarConfirmacao(familiaNome, resumoConvidados);
   grupoEl.innerHTML = `<p class="grupo-confirmado">${iconeCheckSvg()} Presença de <strong>${escaparHtml(familiaNome)}</strong> confirmada — obrigado!</p>`;
 
   const confirmados = resultado.querySelectorAll('.grupo-confirmado').length;
