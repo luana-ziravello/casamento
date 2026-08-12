@@ -28,6 +28,12 @@
       radial-gradient(58% 48% at 50% 42%, rgba(28,18,10,.4) 0%, rgba(28,18,10,0) 74%),
       linear-gradient(180deg, rgba(28,18,10,.6) 0%, rgba(28,18,10,.34) 28%, rgba(28,18,10,.5) 60%, rgba(28,18,10,.9) 100%);
   }
+  .hero-fade-baixo {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: clamp(110px, 20vh, 220px);
+    background: linear-gradient(180deg, rgba(58,42,30,0) 0%, var(--areia-0) 92%);
+    pointer-events: none;
+  }
 
   .hero-conteudo {
     position: relative; z-index: 1;
@@ -404,6 +410,7 @@
   <div class="hero-fundo" aria-hidden="true">
     <img src="imagens/paisagem.png" alt="" width="1536" height="1024" fetchpriority="high">
     <div class="hero-veu"></div>
+    <div class="hero-fade-baixo"></div>
   </div>
 
   <div class="hero-conteudo">
