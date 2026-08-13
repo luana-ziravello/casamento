@@ -173,7 +173,7 @@ function renderSeletorFamilias() {
 
   resultado.innerHTML = `
     <div class="selecao-grupos">
-      <p class="selecao-grupos-label">Encontramos mais de uma opção — qual é a sua?</p>
+      <p class="selecao-grupos-label">Encontramos mais de uma família, qual é a sua?</p>
       <div class="selecao-grupos-lista">${pilulas}</div>
     </div>
     <div id="grupoEscolhido"></div>
