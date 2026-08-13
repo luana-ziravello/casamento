@@ -401,3 +401,25 @@ html.js [data-reveal].em-vista { opacity: 1; transform: none; }
   .modal-caixa { padding: var(--sp-lg) 1.6rem; }
   section { padding: var(--sp-2xl) 0; }
 }
+
+/* ===== botão flutuante do WhatsApp ===== */
+.whatsapp-flutuante {
+  position: fixed;
+  right: 20px; bottom: 20px;
+  z-index: 250;
+  width: 50px; height: 50px;
+  display: flex; align-items: center; justify-content: center;
+  background-color: #25D366;
+  border-radius: 50%;
+  box-shadow: 0 6px 16px -4px rgba(28, 18, 10, .4);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.whatsapp-flutuante svg { width: 24px; height: 24px; }
+.whatsapp-flutuante:hover, .whatsapp-flutuante:focus-visible {
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px -4px rgba(28, 18, 10, .48);
+}
+@media (max-width: 480px) {
+  .whatsapp-flutuante { right: 14px; bottom: 14px; width: 46px; height: 46px; }
+  .whatsapp-flutuante svg { width: 22px; height: 22px; }
+}
