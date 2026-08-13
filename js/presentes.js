@@ -33,6 +33,9 @@ const CHAVE_CARRINHO = 'carrinho-presentes-luana-heitor';
 
 let PRESENTES = [];
 let carrinho = new Set(); // ids selecionados
+let ordenacao = 'padrao';
+let filtroPreco = { min: 0, max: 0 };
+let limitesPreco = { min: 0, max: 0 };
 
 function ilustracaoAquarela(cor, iconeSvg, seed) {
   return `<svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
@@ -58,6 +61,74 @@ function restaurarCarrinho() {
   } catch { carrinho = new Set(); }
 }
 
+/* ===== ordenação e filtro de faixa de preço ===== */
+function inicializarFiltroPreco() {
+  const precos = PRESENTES.map((p) => Number(p.price));
+  if (!precos.length) return;
+  limitesPreco.min = Math.floor(Math.min(...precos) / 10) * 10;
+  limitesPreco.max = Math.ceil(Math.max(...precos) / 10) * 10;
+  filtroPreco.min = limitesPreco.min;
+  filtroPreco.max = limitesPreco.max;
+
+  const inputMin = document.getElementById('filtroPrecoMin');
+  const inputMax = document.getElementById('filtroPrecoMax');
+  if (!inputMin || !inputMax) return;
+  [inputMin, inputMax].forEach((el) => {
+    el.min = String(limitesPreco.min);
+    el.max = String(limitesPreco.max);
+    el.step = '10';
+  });
+  inputMin.value = String(limitesPreco.min);
+  inputMax.value = String(limitesPreco.max);
+  atualizarVisualFiltroPreco();
+}
+
+function aoMoverFiltroPreco() {
+  const inputMin = document.getElementById('filtroPrecoMin');
+  const inputMax = document.getElementById('filtroPrecoMax');
+  if (!inputMin || !inputMax) return;
+  let min = Number(inputMin.value);
+  let max = Number(inputMax.value);
+  // impede que os dois cabos do range se cruzem
+  if (min > max) {
+    if (document.activeElement === inputMax) { max = min; inputMax.value = String(max); }
+    else { min = max; inputMin.value = String(min); }
+  }
+  filtroPreco.min = min;
+  filtroPreco.max = max;
+  atualizarVisualFiltroPreco();
+  montarGrade();
+}
+
+function atualizarVisualFiltroPreco() {
+  const { min, max } = limitesPreco;
+  const amplitude = Math.max(max - min, 1);
+  const pctMin = ((filtroPreco.min - min) / amplitude) * 100;
+  const pctMax = ((filtroPreco.max - min) / amplitude) * 100;
+  const preenchido = document.getElementById('filtroPrecoPreenchido');
+  if (preenchido) {
+    preenchido.style.left = pctMin + '%';
+    preenchido.style.right = (100 - pctMax) + '%';
+  }
+  const valores = document.getElementById('filtroPrecoValores');
+  if (valores) valores.textContent = `${formatoPreco.format(filtroPreco.min)} – ${formatoPreco.format(filtroPreco.max)}`;
+}
+
+function aoMudarOrdenacao(valor) {
+  ordenacao = valor;
+  montarGrade();
+}
+
+function presentesVisiveis() {
+  let lista = PRESENTES.filter((p) => {
+    const preco = Number(p.price);
+    return preco >= filtroPreco.min && preco <= filtroPreco.max;
+  });
+  if (ordenacao === 'preco-asc') lista = [...lista].sort((a, b) => Number(a.price) - Number(b.price));
+  else if (ordenacao === 'preco-desc') lista = [...lista].sort((a, b) => Number(b.price) - Number(a.price));
+  return lista;
+}
+
 function montarGrade() {
   const grade = document.getElementById('gradePresentes');
   if (!grade) return;
@@ -65,8 +136,14 @@ function montarGrade() {
     grade.innerHTML = '<p class="recados-estado">Não foi possível carregar a lista de presentes agora.</p>';
     return;
   }
+  const visiveis = presentesVisiveis();
+  if (!visiveis.length) {
+    grade.innerHTML = '<p class="recados-estado">Nenhum presente encontrado nessa faixa de preço.</p>';
+    return;
+  }
   grade.innerHTML = '';
-  PRESENTES.forEach((p, i) => {
+  visiveis.forEach((p) => {
+    const i = PRESENTES.indexOf(p);
     const cor = corParaIndice(i);
     const selecionado = carrinho.has(p.id);
     const card = document.createElement('div');
@@ -235,6 +312,7 @@ async function carregarPresentes() {
     return;
   }
   PRESENTES = data || [];
+  inicializarFiltroPreco();
   montarGrade();
   atualizarCarrinhoFlutuante();
 }

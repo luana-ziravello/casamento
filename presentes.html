@@ -46,6 +46,51 @@
   }
   .rotulo-secao::after { content: ''; flex: 1; height: 1px; background: var(--linha-forte); }
 
+  /* ===== filtros (ordenar + faixa de preço) ===== */
+  .filtros-presentes {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 1.6rem 2.6rem;
+    padding: 1.3rem 1.5rem; margin-bottom: var(--sp-xl);
+    background-color: var(--tinta-clara); border: 1px solid var(--linha);
+  }
+  .filtro-ordenar { display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+  .filtro-ordenar label, .filtro-preco-cabecalho label {
+    font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave);
+  }
+  .filtro-ordenar select {
+    padding: 10px 12px; border: 1px solid var(--linha-forte); background-color: var(--tinta-clara);
+    font-family: var(--f-corpo); font-size: .85rem; color: var(--tinta); cursor: pointer;
+  }
+  .filtro-ordenar select:focus-visible { outline: none; border-color: var(--rosa); }
+  .filtro-preco { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 12px; }
+  .filtro-preco-cabecalho { display: flex; align-items: center; justify-content: space-between; }
+  .filtro-preco-valores { font-family: var(--f-display); font-style: italic; font-size: .88rem; color: var(--tinta); }
+  .filtro-preco-slider { position: relative; height: 24px; }
+  .filtro-preco-trilho {
+    position: absolute; top: 50%; left: 0; right: 0; height: 3px; transform: translateY(-50%);
+    background: var(--linha-forte);
+  }
+  .filtro-preco-preenchido {
+    position: absolute; top: 50%; height: 3px; transform: translateY(-50%);
+    background: var(--rosa-texto);
+  }
+  .filtro-range {
+    position: absolute; top: 0; left: 0; width: 100%; height: 24px; margin: 0;
+    background: transparent; -webkit-appearance: none; appearance: none; pointer-events: none;
+  }
+  .filtro-range::-webkit-slider-runnable-track { -webkit-appearance: none; background: transparent; height: 24px; }
+  .filtro-range::-moz-range-track { background: transparent; height: 24px; }
+  .filtro-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; pointer-events: auto;
+    width: 16px; height: 16px; border-radius: 50%; margin-top: 4px;
+    background: var(--rosa-texto); border: 2px solid var(--tinta-clara);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+  }
+  .filtro-range::-moz-range-thumb {
+    pointer-events: auto; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--rosa-texto); border: 2px solid var(--tinta-clara);
+    box-shadow: 0 1px 4px rgba(0,0,0,.25); cursor: pointer;
+  }
+
   /* ===== grade de presentes ===== */
   .grade-presentes {
     display: grid;
@@ -62,7 +107,7 @@
   }
   .presente:hover { transform: translateY(-5px); box-shadow: var(--sombra-card); border-color: var(--dourado-linha); }
   .presente-ilustracao {
-    height: 170px;
+    aspect-ratio: 1 / 1;
     display: flex; align-items: center; justify-content: center;
     border-bottom: 1px solid var(--linha);
   }
@@ -144,7 +189,6 @@
 
   @media (max-width: 600px) {
     .grade-presentes { grid-template-columns: 1fr 1fr; gap: 1rem; }
-    .presente-ilustracao { height: 130px; }
     .presente-corpo { padding: 1.1rem 1.1rem 1.3rem; }
     .presente-nome { font-size: 1.02rem; }
     .presente-preco { font-size: 1.05rem; }
@@ -152,6 +196,8 @@
     .cabecalho-pagina { padding: 128px 1.4rem var(--sp-xl); }
     .carrinho-flutuante { left: 12px; right: 12px; bottom: 12px; transform: translateY(140%); width: auto; justify-content: space-between; }
     .carrinho-flutuante.mostrar { transform: translateY(0); }
+    .filtros-presentes { flex-direction: column; align-items: stretch; gap: 1.2rem; padding: 1.1rem 1.2rem; }
+    .filtro-ordenar { min-width: 0; }
   }
   @media (max-width: 400px) {
     .grade-presentes { grid-template-columns: 1fr; }
@@ -203,6 +249,30 @@
 <main id="lista">
   <div id="bannerPagamento"></div>
   <div class="rotulo-secao">Presentes especiais</div>
+
+  <div class="filtros-presentes">
+    <div class="filtro-ordenar">
+      <label for="ordenarPresentes">Ordenar por</label>
+      <select id="ordenarPresentes" onchange="aoMudarOrdenacao(this.value)">
+        <option value="padrao">Sugestão</option>
+        <option value="preco-asc">Menor preço</option>
+        <option value="preco-desc">Maior preço</option>
+      </select>
+    </div>
+    <div class="filtro-preco">
+      <div class="filtro-preco-cabecalho">
+        <label>Faixa de preço</label>
+        <span class="filtro-preco-valores" id="filtroPrecoValores">R$ 0 – R$ 0</span>
+      </div>
+      <div class="filtro-preco-slider">
+        <div class="filtro-preco-trilho"></div>
+        <div class="filtro-preco-preenchido" id="filtroPrecoPreenchido"></div>
+        <input type="range" class="filtro-range" id="filtroPrecoMin" oninput="aoMoverFiltroPreco()" aria-label="Preço mínimo">
+        <input type="range" class="filtro-range" id="filtroPrecoMax" oninput="aoMoverFiltroPreco()" aria-label="Preço máximo">
+      </div>
+    </div>
+  </div>
+
   <div class="grade-presentes" id="gradePresentes"></div>
 </main>
 
@@ -250,6 +320,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=2"></script>
-<script src="js/presentes.js?v=8"></script>
+<script src="js/presentes.js?v=9"></script>
 </body>
 </html>
