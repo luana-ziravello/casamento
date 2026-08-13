@@ -158,23 +158,33 @@ function buscar(termo) {
 }
 
 function renderSeletorFamilias() {
-  const opcoes = grupos.map((g, i) => {
-    const qtd = g.convidados.length;
-    return `<option value="${i}">${escaparHtml(g.familia)} (${qtd} ${qtd === 1 ? 'pessoa' : 'pessoas'})</option>`;
+  // se mais de um grupo do resultado tiver o mesmo nome de família, mostra os nomes
+  // de quem está em cada um pra dar pra diferenciar (ex.: duas famílias "Alves" distintas).
+  const contagemFamilia = {};
+  grupos.forEach((g) => { contagemFamilia[g.familia] = (contagemFamilia[g.familia] || 0) + 1; });
+
+  const pilulas = grupos.map((g, i) => {
+    const precisaDesambiguar = contagemFamilia[g.familia] > 1;
+    const detalhe = precisaDesambiguar
+      ? `<span class="pilula-detalhe">${escaparHtml(g.convidados.map((c) => c.guest_name).join(', '))}</span>`
+      : '';
+    return `<button type="button" class="pilula-grupo" id="pilula-${i}" onclick="mostrarGrupoEscolhido(${i})"><span>${escaparHtml(g.familia)}${detalhe}</span><span class="pilula-mais" aria-hidden="true">+</span></button>`;
   }).join('');
+
   resultado.innerHTML = `
-    <div class="seletor-familia">
-      <label for="seletorFamilia">Encontramos mais de uma família com esse nome — qual é a sua?</label>
-      <select id="seletorFamilia" onchange="mostrarGrupoEscolhido(this.value)">${opcoes}</select>
+    <div class="selecao-grupos">
+      <p class="selecao-grupos-label">Encontramos mais de uma opção — qual é a sua?</p>
+      <div class="selecao-grupos-lista">${pilulas}</div>
     </div>
     <div id="grupoEscolhido"></div>
   `;
-  mostrarGrupoEscolhido(0);
 }
 
 function mostrarGrupoEscolhido(idx) {
+  idx = Number(idx);
+  document.querySelectorAll('.pilula-grupo').forEach((btn, i) => btn.classList.toggle('ativa', i === idx));
   const container = document.getElementById('grupoEscolhido');
-  if (container) container.innerHTML = grupoHtml(grupos[Number(idx)], Number(idx));
+  if (container) container.innerHTML = grupoHtml(grupos[idx], idx);
 }
 
 async function confirmarGrupo(idx) {

@@ -64,15 +64,20 @@
   .resultado { margin-top: var(--sp-lg); display: none; }
   .resultado.mostrar { display: block; animation: aparecer .4s ease; }
 
-  .seletor-familia { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--sp-lg); }
-  .seletor-familia label { font-size: .82rem; color: var(--tinta-suave); }
-  .seletor-familia select {
-    height: 50px; padding: 0 14px;
-    border: 1px solid var(--linha-forte); background: var(--areia-0);
-    font-family: var(--f-corpo); font-size: .92rem; color: var(--tinta);
-    transition: border-color .3s; cursor: pointer;
+  .selecao-grupos { margin-bottom: var(--sp-lg); }
+  .selecao-grupos-label { font-size: .82rem; color: var(--tinta-suave); margin-bottom: var(--sp-sm); }
+  .selecao-grupos-lista { display: flex; flex-wrap: wrap; gap: .7rem; }
+  .pilula-grupo {
+    display: inline-flex; align-items: center; gap: .5em;
+    padding: 12px 20px;
+    background: var(--areia-0); border: 1px solid var(--linha-forte);
+    font-family: var(--f-corpo); font-size: .86rem; color: var(--tinta);
+    cursor: pointer; transition: border-color .25s ease, background .25s ease, color .25s ease;
   }
-  .seletor-familia select:focus { border-color: var(--rosa); outline: none; }
+  .pilula-grupo:hover, .pilula-grupo:focus-visible { border-color: var(--rosa-texto); }
+  .pilula-grupo.ativa { background: var(--rosa-texto); border-color: var(--rosa-texto); color: var(--tinta-clara); }
+  .pilula-mais { font-weight: 700; opacity: .7; }
+  .pilula-detalhe { display: block; font-size: .68rem; opacity: .75; margin-top: 2px; }
 
   .grupo-familia { margin-bottom: var(--sp-xl); padding-bottom: var(--sp-lg); border-bottom: 1px dashed var(--linha-forte); }
   .grupo-familia:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
@@ -179,15 +184,15 @@
   <a class="voltar" href="index.html">← Voltar ao site</a>
   <span class="eyebrow">Confirmação</span>
   <h1>Confirme sua presença</h1>
-  <p>Busque pelo nome da sua família e conte pra gente quem vai estar junto nesse dia.</p>
+  <p>Digite o seu nome e conte pra gente quem vai estar junto nesse dia.</p>
 </header>
 
 <main class="rsvp" id="confirmar">
   <div class="busca-painel" data-reveal>
     <form class="busca-form" id="formBusca">
       <div class="busca-campo">
-        <label for="campoFamilia">Nome da família ou convidado</label>
-        <input type="text" id="campoFamilia" name="familia" placeholder="Ex.: Alves, Otênio, Marçal…" autocomplete="off" required>
+        <label for="campoFamilia">Seu nome</label>
+        <input type="text" id="campoFamilia" name="familia" placeholder="Ex.: Márcia, Heitor, Constança…" autocomplete="off" required>
       </div>
       <button class="btn btn-primario" type="submit">Buscar</button>
     </form>
@@ -220,6 +225,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=2"></script>
-<script src="js/confirmacao.js?v=9"></script>
+<script src="js/confirmacao.js?v=10"></script>
 </body>
 </html>
