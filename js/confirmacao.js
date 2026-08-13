@@ -43,9 +43,17 @@ async function carregarConvidados() {
   if (!client) return;
   const { data, error } = await client
     .from('guests')
-    .select('id, guest_name, family_name, confirmed');
+    .select('id, guest_name, family_name, confirmed, search_group, search_aliases');
   if (error) return;
   todosConvidados = data || [];
+}
+
+function pilhaBusca(c) {
+  return normalizar([c.guest_name, c.family_name, c.search_aliases].filter(Boolean).join(' '));
+}
+
+function chaveGrupo(c) {
+  return c.search_group || c.family_name || c.guest_name;
 }
 
 function iconeCheckSvg() {
@@ -111,12 +119,16 @@ function mensagemResultadoHtml(convidados) {
 
 function buscar(termo) {
   sucesso.classList.remove('mostrar');
-  const alvo = normalizar(termo);
-  if (!alvo) return;
+  const palavras = normalizar(termo).split(/\s+/).filter(Boolean);
+  if (!palavras.length) return;
 
-  const encontrados = todosConvidados.filter((c) =>
-    normalizar(c.family_name).includes(alvo) || normalizar(c.guest_name).includes(alvo)
-  );
+  // bate se TODAS as palavras digitadas aparecem em algum lugar (nome, família ou termos de
+  // busca/apelidos) — assim "Márcia Alves" já vai direto pro grupo certo, sem ambiguidade,
+  // e apelidos/variações cadastrados (ex.: "Zé" pro José) também encontram o grupo certo.
+  const encontrados = todosConvidados.filter((c) => {
+    const pilha = pilhaBusca(c);
+    return palavras.every((p) => pilha.includes(p));
+  });
 
   if (!encontrados.length) {
     resultado.classList.remove('mostrar');
@@ -126,14 +138,16 @@ function buscar(termo) {
 
   naoEncontrado.classList.remove('mostrar');
 
-  const porFamilia = new Map();
-  encontrados.forEach((c) => {
-    const chave = c.family_name || c.guest_name;
-    if (!porFamilia.has(chave)) porFamilia.set(chave, []);
-    porFamilia.get(chave).push(c);
+  // expande cada acerto pro grupo (household) inteiro — não só quem bateu com o termo.
+  const chavesEncontradas = new Set(encontrados.map(chaveGrupo));
+  const porGrupo = new Map();
+  chavesEncontradas.forEach((chave) => {
+    const membros = todosConvidados.filter((c) => chaveGrupo(c) === chave);
+    const familia = membros[0]?.family_name || membros[0]?.guest_name || '';
+    porGrupo.set(chave, { familia, convidados: membros });
   });
 
-  grupos = [...porFamilia.entries()].map(([familia, convidados]) => ({ familia, convidados }));
+  grupos = [...porGrupo.values()];
 
   if (grupos.length > 1) {
     renderSeletorFamilias();
