@@ -364,17 +364,14 @@ html.js [data-reveal].em-vista { opacity: 1; transform: none; }
 
 /* ===== destaque de prazo (ex.: data-limite para confirmar presença) ===== */
 .cta-destaque {
-  display: inline-block;
-  font-size: .7rem;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  display: block;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: .84rem;
+  letter-spacing: .01em;
   color: var(--rosa-texto);
-  background: rgba(232, 47, 93, .08);
-  border: 1px solid rgba(232, 47, 93, .25);
-  padding: 8px 14px;
-  border-radius: 3px;
-  margin: -.3rem 0 .6rem;
+  margin: -.4rem 0 .7rem;
 }
 
 /* ===== modal genérica ===== */
