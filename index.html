@@ -359,7 +359,8 @@
   .padrinhos-lista { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-lg) 1.2rem; }
   @media (max-width: 480px) { .padrinhos-lista { grid-template-columns: 1fr; } }
   .padrinho { display: flex; gap: .9rem; align-items: center; }
-  .padrinho-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--dourado-linha); background: var(--gradiente-luxo); }
+  .padrinho-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--dourado-linha); background: var(--gradiente-luxo); overflow: hidden; }
+  .padrinho-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .padrinho h4 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.15rem; color: var(--coral-texto); margin-bottom: .25rem; }
   .padrinho p { font-size: .86rem; color: var(--tinta-suave); line-height: 1.7; }
   .traje-bloco + .traje-bloco { margin-top: var(--sp-lg); padding-top: var(--sp-lg); border-top: 1px dashed var(--linha-forte); }
@@ -671,11 +672,11 @@
     <span class="modal-tag">Nosso time de honra</span>
     <h2 id="tituloModalPadrinhos">Padrinhos e madrinhas</h2>
     <div class="padrinhos-lista">
-      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Márcia e Maurício</h4></div>
-      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Alice e Marcelo</h4></div>
-      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Amanda e Wesley</h4></div>
-      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Thaís</h4></div>
-      <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Deive e Walace</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar"><img src="imagens/padrinhos/marcia-mauricio.jpg" alt="" style="object-position:center 38%"></div><h4>Márcia e Maurício</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar"><img src="imagens/padrinhos/alice-marcelo.jpg" alt="" style="object-position:center 28%"></div><h4>Alice e Marcelo</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar"><img src="imagens/padrinhos/amanda-wesley.jpg" alt="" style="object-position:center 20%"></div><h4>Amanda e Wesley</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar"><img src="imagens/padrinhos/thais.jpg" alt="" style="object-position:center 18%"></div><h4>Thaís</h4></div>
+      <div class="padrinho"><div class="padrinho-avatar"><img src="imagens/padrinhos/deive-walace.jpg" alt="" style="object-position:center 42%"></div><h4>Deive e Walace</h4></div>
       <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>João</h4></div>
       <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Lorella</h4></div>
       <div class="padrinho"><div class="padrinho-avatar" aria-hidden="true"></div><h4>Anne e Edu</h4></div>
