@@ -109,6 +109,22 @@ const IMAGENS_LOCAIS = {
   55: 'imagens/presentes/robo-aspirador.jpg',
   57: 'imagens/presentes/decoracao-impulsiva.jpg',
   58: 'imagens/presentes/excesso-bagagem.jpg',
+  76: 'imagens/presentes/tapete-chique.jpg',
+  77: 'imagens/presentes/cortinas.jpg',
+  78: 'imagens/presentes/panela-eletrica.jpg',
+  79: 'imagens/presentes/utensilios-cozinha.jpg',
+  81: 'imagens/presentes/ferro-passar.jpg',
+  82: 'imagens/presentes/caixa-ferramentas.jpg',
+  83: 'imagens/presentes/porta-retrato.jpg',
+  85: 'imagens/presentes/cervejeira.jpg',
+  86: 'imagens/presentes/microondas.jpg',
+  88: 'imagens/presentes/cepo-facas.jpg',
+  89: 'imagens/presentes/jogo-panelas.jpg',
+  91: 'imagens/presentes/batedeira.jpg',
+  92: 'imagens/presentes/faqueiro.jpg',
+  93: 'imagens/presentes/fogao.jpg',
+  96: 'imagens/presentes/capacete.jpg',
+  97: 'imagens/presentes/peugeot.jpg',
 };
 
 function imagemPresenteUrl(id) {
