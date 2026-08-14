@@ -77,7 +77,42 @@ const IMAGENS_PRESENTES = {
   67: '1566759996874-04d713cc224a', 68: '1583847268964-b28dc8f51f92', 69: '1721617864119-611e4544ff07',
 };
 
+/* ===== fotos próprias enviadas por vocês — têm prioridade sobre as do Unsplash ===== */
+const IMAGENS_LOCAIS = {
+  1: 'imagens/presentes/varal.jpg',
+  2: 'imagens/presentes/jarra-le-creuset.jpg',
+  3: 'imagens/presentes/conjunto-copos.jpg',
+  5: 'imagens/presentes/organizadores-casa.jpg',
+  8: 'imagens/presentes/cafe-manha-lua-mel.jpg',
+  9: 'imagens/presentes/sobremesa-lua-mel.jpg',
+  11: 'imagens/presentes/brawl-pass.jpg',
+  12: 'imagens/presentes/delivery-pos-festa.jpg',
+  13: 'imagens/presentes/cinema.jpg',
+  15: 'imagens/presentes/aromatizadores.jpg',
+  17: 'imagens/presentes/spotify.jpg',
+  18: 'imagens/presentes/garrafa-vinho.jpg',
+  19: 'imagens/presentes/spa.jpg',
+  20: 'imagens/presentes/heitor-nerd.jpg',
+  23: 'imagens/presentes/forminha-gelo.jpg',
+  25: 'imagens/presentes/pregador-embalagem.jpg',
+  26: 'imagens/presentes/porta-esponja.jpg',
+  29: 'imagens/presentes/tapete-pia.jpg',
+  30: 'imagens/presentes/porta-chave.jpg',
+  31: 'imagens/presentes/porta-tempero.jpg',
+  39: 'imagens/presentes/fonte-agua.jpg',
+  43: 'imagens/presentes/compra-mercado.jpg',
+  45: 'imagens/presentes/massagem-pes.jpg',
+  46: 'imagens/presentes/mordomia-gato.jpg',
+  48: 'imagens/presentes/cafeteira.jpg',
+  52: 'imagens/presentes/fundo-emergencial.jpg',
+  54: 'imagens/presentes/spa.jpg',
+  55: 'imagens/presentes/robo-aspirador.jpg',
+  57: 'imagens/presentes/decoracao-impulsiva.jpg',
+  58: 'imagens/presentes/excesso-bagagem.jpg',
+};
+
 function imagemPresenteUrl(id) {
+  if (IMAGENS_LOCAIS[id]) return IMAGENS_LOCAIS[id];
   const fotoId = IMAGENS_PRESENTES[id];
   if (!fotoId) return null;
   return `https://images.unsplash.com/photo-${fotoId}?w=500&h=500&fit=crop&auto=format&q=75`;
