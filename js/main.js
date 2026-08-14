@@ -112,3 +112,14 @@ document.addEventListener('keydown', (e) => {
 function teclaLinha(event, fn) {
   if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); }
 }
+
+function abrirFotoPadrinho(src, nome, posicao) {
+  const img = document.getElementById('imagemFotoPadrinho');
+  const titulo = document.getElementById('tituloFotoPadrinho');
+  if (!img || !titulo) return;
+  img.src = src;
+  img.alt = nome;
+  img.style.objectPosition = posicao || 'center';
+  titulo.textContent = nome;
+  abrirModal('modalFotoPadrinho');
+}
