@@ -50,6 +50,39 @@ function corParaIndice(i) { return CORES_ROTATIVAS[i % CORES_ROTATIVAS.length]; 
 function iconeParaIndice(i) { return ICONES[i % ICONES.length]; }
 function presentePorId(id) { return PRESENTES.find((p) => p.id === id); }
 
+/* ===== fotos reais (Unsplash) por presente — id do presente no banco -> id da foto no Unsplash ===== */
+const IMAGENS_PRESENTES = {
+  1: '1630784392728-8aa0a1c07d7e', 2: '1605117012605-b68dedd4accc', 3: '1610821165540-80c084d50fd3',
+  4: '1680206893968-01fe5583f6b5', 5: '1638780506095-3d61a4f0edd6', 6: '1668585419087-55097ab1d520',
+  7: '1536392706976-e486e2ba97af', 8: '1561239905-d620f213c5f7', 9: '1582379492269-199bcdc53cba',
+  10: '1533616688419-b7a585564566', 11: '1493711662062-fa541adb3fc8', 12: '1600728619239-d2a73f7aa541',
+  13: '1707063017149-a3cd268776c4', 14: '1593504049359-74330189a345', 15: '1636714507452-48716cfa1818',
+  16: '1610632380989-680fe40816c6', 17: '1505740420928-5e560c06d30e', 18: '1547595628-c61a29f496f0',
+  19: '1619695662967-3e739a597f47', 20: '1626218174358-7769486c4b79', 21: '1683624328172-88fb24625ec1',
+  22: '1605497788044-5a32c7078486', 23: '1562673478-900ecbd319cf', 24: '1571115637435-26e423673f7b',
+  25: '1582735689369-4fe89db7114c', 26: '1590610994353-7b0e7546e681', 27: '1621318551436-68573392fd5c',
+  28: '1580116270858-8a0d62b15426', 29: '1590610994353-7b0e7546e681', 30: '1595944356863-e624f8234e1e',
+  31: '1580116270858-8a0d62b15426', 32: '1678572823447-45fc146df43c', 33: '1562673478-900ecbd319cf',
+  34: '1621318551436-68573392fd5c', 35: '1583847268964-b28dc8f51f92', 36: '1709429790175-b02bb1b19207',
+  37: '1583847268964-b28dc8f51f92', 38: '1641924676578-ed2792eb24de', 39: '1772800562154-2a321e304f19',
+  40: '1561239905-d620f213c5f7', 41: '1600728619239-d2a73f7aa541', 42: '1600725935160-f67ee4f6084a',
+  43: '1601598851547-4302969d0614', 44: '1621523132966-19f711d565d1', 45: '1515377905703-c4788e51af15',
+  46: '1772800562154-2a321e304f19', 47: '1602516793068-35b73edf3368', 48: '1608354580875-30bd4168b351',
+  49: '1566759996874-04d713cc224a', 50: '1414235077428-338989a2e8c0', 51: '1618773928121-c32242e63f39',
+  52: '1602516793068-35b73edf3368', 53: '1502301197179-65228ab57f78', 54: '1619695662967-3e739a597f47',
+  55: '1558317374-067fb5f30001', 56: '1721617864119-611e4544ff07', 57: '1602516793068-35b73edf3368',
+  58: '1502301197179-65228ab57f78', 59: '1540961403310-79825242906e', 60: '1414235077428-338989a2e8c0',
+  61: '1566759996874-04d713cc224a', 62: '1414235077428-338989a2e8c0', 63: '1626266061368-46a8f578ddd6',
+  64: '1618773928121-c32242e63f39', 65: '1602516793068-35b73edf3368', 66: '1536392706976-e486e2ba97af',
+  67: '1566759996874-04d713cc224a', 68: '1583847268964-b28dc8f51f92', 69: '1721617864119-611e4544ff07',
+};
+
+function imagemPresenteUrl(id) {
+  const fotoId = IMAGENS_PRESENTES[id];
+  if (!fotoId) return null;
+  return `https://images.unsplash.com/photo-${fotoId}?w=500&h=500&fit=crop&auto=format&q=75`;
+}
+
 /* ===== persistência simples do carrinho (sobrevive a reload) ===== */
 function salvarCarrinho() {
   try { localStorage.setItem(CHAVE_CARRINHO, JSON.stringify([...carrinho])); } catch { /* localStorage indisponível, segue sem persistir */ }
@@ -146,11 +179,15 @@ function montarGrade() {
     const i = PRESENTES.indexOf(p);
     const cor = corParaIndice(i);
     const selecionado = carrinho.has(p.id);
+    const fotoUrl = imagemPresenteUrl(p.id);
+    const conteudoIlustracao = fotoUrl
+      ? `<img src="${fotoUrl}" alt="${p.name}" loading="lazy" decoding="async">`
+      : ilustracaoAquarela(cor, iconeParaIndice(i), i);
     const card = document.createElement('div');
     card.className = 'presente' + (selecionado ? ' selecionado' : '');
     card.innerHTML = `
-      <div class="presente-ilustracao" style="background: radial-gradient(circle at 50% 45%, var(--tinta-clara) 35%, var(--areia-1) 100%)">
-        ${ilustracaoAquarela(cor, iconeParaIndice(i), i)}
+      <div class="presente-ilustracao"${fotoUrl ? '' : ' style="background: radial-gradient(circle at 50% 45%, var(--tinta-clara) 35%, var(--areia-1) 100%)"'}>
+        ${conteudoIlustracao}
       </div>
       <div class="presente-corpo">
         <h3 class="presente-nome">${p.name}</h3>
