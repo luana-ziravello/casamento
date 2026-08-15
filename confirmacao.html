@@ -93,27 +93,18 @@
   }
   .convidado-nome { font-size: .92rem; color: var(--tinta); }
 
-  /* ===== toggle sim/não ===== */
-  .toggle-presenca { position: relative; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; user-select: none; flex-shrink: 0; }
-  .toggle-input { position: absolute; top: 0; left: 0; opacity: 0; width: 1px; height: 1px; }
-  .toggle-rotulo { font-size: .64rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-suave); transition: color .25s ease; }
-  .toggle-input:not(:checked) ~ .toggle-rotulo-nao { color: var(--coral-texto); }
-  .toggle-input:checked ~ .toggle-rotulo-sim { color: var(--rosa-texto); }
-  .toggle-trilho {
-    position: relative; width: 44px; height: 24px;
-    border-radius: 999px; background: var(--linha-forte);
-    transition: background-color .25s ease;
+  /* ===== resposta de 3 estados: não / neutro (sem resposta) / sim ===== */
+  .resposta-3vias { display: inline-flex; border: 1px solid var(--linha-forte); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .resposta-opcao {
+    padding: 7px 16px; font-size: .64rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    background: transparent; border: none; cursor: pointer; color: var(--tinta-suave);
+    transition: background-color .25s ease, color .25s ease;
   }
-  .toggle-input:checked ~ .toggle-trilho { background: var(--rosa-texto); }
-  .toggle-bolinha {
-    position: absolute; top: 2px; left: 2px;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--tinta-clara);
-    box-shadow: 0 1px 3px rgba(0,0,0,.35);
-    transition: transform .25s cubic-bezier(.4,0,.2,1);
-  }
-  .toggle-input:checked ~ .toggle-trilho .toggle-bolinha { transform: translateX(20px); }
-  .toggle-input:focus-visible ~ .toggle-trilho { outline: 2px solid var(--rosa-texto); outline-offset: 2px; }
+  .resposta-opcao + .resposta-opcao { border-left: 1px solid var(--linha-forte); }
+  .resposta-opcao.ativa.resposta-nao { background: var(--coral-texto); color: var(--tinta-clara); }
+  .resposta-opcao.ativa.resposta-sim { background: var(--rosa-texto); color: var(--tinta-clara); }
+  .resposta-opcao:hover:not(.ativa) { color: var(--tinta); }
+  .resposta-opcao:focus-visible { outline: 2px solid var(--rosa-texto); outline-offset: -2px; }
 
   .resultado-rodape { margin-top: var(--sp-lg); display: flex; align-items: center; justify-content: flex-end; gap: 1rem; }
   .grupo-erro { font-size: .78rem; color: var(--rosa-texto); }
@@ -233,6 +224,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=3"></script>
-<script src="js/confirmacao.js?v=12"></script>
+<script src="js/confirmacao.js?v=13"></script>
 </body>
 </html>

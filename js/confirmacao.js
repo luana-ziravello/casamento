@@ -62,18 +62,29 @@ function iconeCheckSvg() {
   return '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" r="10" stroke="var(--rosa-texto)" stroke-width="1.4"/><path d="M8 12l3 3 6-6" stroke="var(--rosa-texto)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 
+function definirResposta(botao, valor) {
+  const container = botao.closest('.resposta-3vias');
+  if (!container) return;
+  container.dataset.estado = valor;
+  container.querySelectorAll('.resposta-opcao').forEach((b) => b.classList.remove('ativa'));
+  botao.classList.add('ativa');
+}
+
 function grupoHtml(grupo, idx) {
-  const linhas = grupo.convidados.map((c) => `
+  const linhas = grupo.convidados.map((c) => {
+    // sem resposta anterior (confirmed é null/undefined) começa neutro — nem sim, nem não —
+    // e só vira uma resposta de verdade quando alguém clica em um dos botões.
+    const estado = c.confirmed === true ? 'sim' : c.confirmed === false ? 'nao' : '';
+    return `
     <div class="convidado">
       <span class="convidado-nome">${escaparHtml(c.guest_name)}</span>
-      <label class="toggle-presenca">
-        <input type="checkbox" class="toggle-input" id="convidado-${idx}-${c.id}" data-guest-id="${c.id}" ${c.confirmed === true ? 'checked' : ''}>
-        <span class="toggle-rotulo toggle-rotulo-nao">Não</span>
-        <span class="toggle-trilho" aria-hidden="true"><span class="toggle-bolinha"></span></span>
-        <span class="toggle-rotulo toggle-rotulo-sim">Sim</span>
-      </label>
+      <div class="resposta-3vias" data-guest-id="${c.id}" data-estado="${estado}" role="group" aria-label="Resposta para ${escaparHtml(c.guest_name)}">
+        <button type="button" class="resposta-opcao resposta-nao${estado === 'nao' ? ' ativa' : ''}" onclick="definirResposta(this, 'nao')">Não</button>
+        <button type="button" class="resposta-opcao resposta-sim${estado === 'sim' ? ' ativa' : ''}" onclick="definirResposta(this, 'sim')">Sim</button>
+      </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   const rotuloBotao = grupo.convidados.length > 1 ? 'Salvar confirmações' : 'Confirmar presença';
 
@@ -202,13 +213,22 @@ async function confirmarGrupo(idx) {
 
   const botao = grupoEl.querySelector('.resultado-rodape .btn');
   const rotuloOriginal = botao ? botao.textContent : 'Confirmar presença';
-  const checkboxes = [...grupoEl.querySelectorAll('input[type="checkbox"]')];
+  const todasRespostas = [...grupoEl.querySelectorAll('.resposta-3vias')];
+  // quem ficou sem clicar em Sim/Não (estado neutro) não entra no envio — não contamos
+  // nenhuma informação pra essa pessoa, ela continua "sem resposta" no banco.
+  const respondidas = todasRespostas.filter((r) => r.dataset.estado === 'sim' || r.dataset.estado === 'nao');
+
+  if (!respondidas.length) {
+    if (erroEl) erroEl.textContent = 'Marque "Sim" ou "Não" para pelo menos uma pessoa.';
+    return;
+  }
+
   if (botao) { botao.disabled = true; botao.textContent = 'Enviando…'; }
   if (erroEl) erroEl.textContent = '';
 
   const agora = new Date().toISOString();
-  const atualizacoes = checkboxes.map((cb) =>
-    client.from('guests').update({ confirmed: cb.checked, confirmed_at: agora }).eq('id', Number(cb.dataset.guestId))
+  const atualizacoes = respondidas.map((r) =>
+    client.from('guests').update({ confirmed: r.dataset.estado === 'sim', confirmed_at: agora }).eq('id', Number(r.dataset.guestId))
   );
 
   const resultados = await Promise.all(atualizacoes);
@@ -220,17 +240,17 @@ async function confirmarGrupo(idx) {
     return;
   }
 
-  checkboxes.forEach((cb) => {
-    const guestId = Number(cb.dataset.guestId);
+  respondidas.forEach((r) => {
+    const guestId = Number(r.dataset.guestId);
     const alvo = todosConvidados.find((c) => c.id === guestId);
-    if (alvo) alvo.confirmed = cb.checked;
+    if (alvo) alvo.confirmed = r.dataset.estado === 'sim';
   });
 
   const familiaNome = grupos[idx]?.familia || '';
-  const resumoConvidados = checkboxes.map((cb) => {
-    const guestId = Number(cb.dataset.guestId);
+  const resumoConvidados = respondidas.map((r) => {
+    const guestId = Number(r.dataset.guestId);
     const convidado = grupos[idx]?.convidados.find((c) => c.id === guestId);
-    return { nome: convidado?.guest_name || '', confirmado: cb.checked };
+    return { nome: convidado?.guest_name || '', confirmado: r.dataset.estado === 'sim' };
   });
   notificarConfirmacao(familiaNome, resumoConvidados);
   grupoEl.innerHTML = mensagemResultadoHtml(resumoConvidados);
