@@ -125,6 +125,9 @@ const IMAGENS_LOCAIS = {
   93: 'imagens/presentes/fogao.jpg',
   96: 'imagens/presentes/capacete.jpg',
   97: 'imagens/presentes/peugeot.jpg',
+  98: 'imagens/presentes/liquidificador.jpg',
+  99: 'imagens/presentes/corinthians.jpg',
+  100: 'imagens/presentes/pedido-casamento.jpg',
 };
 
 function imagemPresenteUrl(id) {
