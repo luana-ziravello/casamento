@@ -21,7 +21,9 @@ let todosConvidados = [];
 let grupos = []; // grupos atualmente renderizados: [{ familia, convidados: [...] }]
 
 function normalizar(texto) {
-  return (texto ?? '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  // usa o intervalo Unicode escapado (em vez de caracteres combinantes literais no código-fonte)
+  // para não depender de como o arquivo é salvo/lido em cada editor ou sistema.
+  return (texto ?? '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 function notificarConfirmacao(familia, convidados) {
