@@ -211,6 +211,15 @@
   .linha-tempo-rotulo { display: block; font-size: .64rem; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--rosa-texto); }
   .linha-tempo-valor { font-family: var(--f-display); font-style: italic; font-size: 1.4rem; color: var(--tinta); margin-top: .35rem; }
 
+  /* ===== programação do grande dia (conteúdo do modal) ===== */
+  .programacao-lista { position: relative; list-style: none; padding: var(--sp-sm) 0 0; margin: 0; display: flex; flex-direction: column; gap: var(--sp-lg); }
+  .programacao-lista::before { content: ''; position: absolute; left: 5px; top: 10px; bottom: 10px; width: 1px; background: var(--linha-forte); }
+  .programacao-item { position: relative; padding-left: 2.3rem; }
+  .programacao-ponto { position: absolute; left: 0; top: 6px; width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--dourado); background: var(--areia-0); }
+  .programacao-hora { display: block; font-size: .64rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--rosa-texto); }
+  .programacao-item h4 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.1rem; color: var(--tinta); margin: .25rem 0 .2rem; }
+  .programacao-item p { font-size: .86rem; color: var(--tinta-suave); line-height: 1.6; }
+
   /* ===== local: ícone + pílulas + mapa ===== */
   .local-cartao { position: relative; z-index: 1; text-align: center; max-width: 620px; margin: 0 auto; }
   .local-icone {
@@ -586,6 +595,18 @@
           <span class="linha-editorial-link">Conhecer →</span>
         </div>
       </div>
+
+      <div class="linha-editorial clicavel" role="button" tabindex="0" aria-haspopup="dialog" onclick="abrirModal('modalProgramacao')" onkeydown="teclaLinha(event, () => abrirModal('modalProgramacao'))">
+        <div class="linha-editorial-marca">
+          <span class="linha-editorial-num">05</span>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.2"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="linha-editorial-corpo">
+          <h3>Programação</h3>
+          <p>Veja como vai ser o roteiro do grande dia, da recepção ao encerramento.</p>
+          <span class="linha-editorial-link">Ver programação →</span>
+        </div>
+      </div>
     </div>
   </div>
   <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:120px; left:-24px; top:60px; transform:rotate(18deg);">
@@ -701,6 +722,65 @@
     <button class="modal-fechar" onclick="fecharModal('modalFotoPadrinho')" aria-label="Fechar">✕</button>
     <img id="imagemFotoPadrinho" src="" alt="">
     <h4 id="tituloFotoPadrinho"></h4>
+  </div>
+</div>
+
+<!-- MODAL PROGRAMAÇÃO -->
+<div class="modal-overlay" id="modalProgramacao" role="dialog" aria-modal="true" aria-labelledby="tituloModalProgramacao" onclick="fecharModalFora(event, 'modalProgramacao')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalProgramacao')" aria-label="Fechar">✕</button>
+    <span class="modal-tag">Programação do grande dia</span>
+    <h2 id="tituloModalProgramacao">Como vai ser o roteiro</h2>
+    <ol class="programacao-lista">
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">17h00</span>
+        <h4>Recepção dos convidados</h4>
+        <p>Cheguem, aproveitem o espaço e já entrem no clima da celebração.</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">17h30</span>
+        <h4>Cerimônia</h4>
+        <p>O momento mais esperado: o nosso "sim". 💍</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">18h30</span>
+        <h4>Fim da cerimônia</h4>
+        <p>Hora dos abraços, fotos e de começar oficialmente a comemoração.</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">18h45</span>
+        <h4>Coquetel</h4>
+        <p>Drinks, comidinhas e aquele primeiro brinde no salão.</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">19h40</span>
+        <h4>Jantar</h4>
+        <p>Buffet liberado para comer à vontade, repetir sem culpa e aproveitar cada detalhe. 🍽️</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">20h45</span>
+        <h4>Dance Floor</h4>
+        <p>Pista aberta, música boa e oficialmente liberado dançar até cansar. ✨</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">23h15</span>
+        <h4>Café</h4>
+        <p>Uma pausa estratégica para recarregar as energias.</p>
+      </li>
+      <li class="programacao-item">
+        <span class="programacao-ponto" aria-hidden="true"></span>
+        <span class="programacao-hora">00h00</span>
+        <h4>Encerramento</h4>
+        <p>A festa termina, mas esperamos que as boas lembranças durem muito mais. 🧡</p>
+      </li>
+    </ol>
   </div>
 </div>
 
