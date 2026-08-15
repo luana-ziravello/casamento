@@ -132,6 +132,7 @@ const IMAGENS_LOCAIS = {
   102: 'imagens/presentes/jogo-de-lencol.jpg',
   103: 'imagens/presentes/mensalidade-pos.jpg',
   104: 'imagens/presentes/fusca-azul.jpg',
+  105: 'imagens/presentes/suborno.jpg',
 };
 
 function imagemPresenteUrl(id) {
