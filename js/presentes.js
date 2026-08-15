@@ -33,7 +33,7 @@ const CHAVE_CARRINHO = 'carrinho-presentes-luana-heitor';
 
 let PRESENTES = [];
 let carrinho = new Set(); // ids selecionados
-let ordenacao = 'padrao';
+let ordenacao = 'preco-desc';
 let filtroPreco = { min: 0, max: 0 };
 let limitesPreco = { min: 0, max: 0 };
 

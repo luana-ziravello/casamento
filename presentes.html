@@ -94,7 +94,7 @@
   /* ===== grade de presentes ===== */
   .grade-presentes {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 1.6rem;
     margin-bottom: var(--sp-3xl);
   }
@@ -190,7 +190,7 @@
   .campo-form textarea { resize: vertical; min-height: 72px; }
 
   @media (max-width: 600px) {
-    .grade-presentes { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grade-presentes { gap: 1rem; }
     .presente-corpo { padding: 1.1rem 1.1rem 1.3rem; }
     .presente-nome { font-size: 1.02rem; }
     .presente-preco { font-size: 1.05rem; }
@@ -258,7 +258,7 @@
       <select id="ordenarPresentes" onchange="aoMudarOrdenacao(this.value)">
         <option value="padrao">Sugestão</option>
         <option value="preco-asc">Menor preço</option>
-        <option value="preco-desc">Maior preço</option>
+        <option value="preco-desc" selected>Maior preço</option>
       </select>
     </div>
     <div class="filtro-preco">
@@ -322,6 +322,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/main.js?v=3"></script>
-<script src="js/presentes.js?v=13"></script>
+<script src="js/presentes.js?v=14"></script>
 </body>
 </html>
