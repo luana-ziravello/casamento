@@ -131,6 +131,7 @@ const IMAGENS_LOCAIS = {
   101: 'imagens/presentes/airfryer.jpg',
   102: 'imagens/presentes/jogo-de-lencol.jpg',
   103: 'imagens/presentes/mensalidade-pos.jpg',
+  104: 'imagens/presentes/fusca-azul.jpg',
 };
 
 function imagemPresenteUrl(id) {
