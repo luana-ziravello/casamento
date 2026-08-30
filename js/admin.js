@@ -55,6 +55,20 @@ const painel = document.getElementById('painel');
 const portaoForm = document.getElementById('portaoForm');
 const portaoSenha = document.getElementById('portaoSenha');
 const portaoErro = document.getElementById('portaoErro');
+const portaoOlho = document.getElementById('portaoOlho');
+
+const OLHO_ABERTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+const OLHO_FECHADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.2A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.4 4.3M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.3 9.3 0 0 0 4-.9"/></svg>';
+
+portaoOlho.innerHTML = OLHO_FECHADO;
+portaoOlho.addEventListener('click', () => {
+  const mostrar = portaoSenha.type === 'password';
+  portaoSenha.type = mostrar ? 'text' : 'password';
+  portaoOlho.innerHTML = mostrar ? OLHO_ABERTO : OLHO_FECHADO;
+  portaoOlho.setAttribute('aria-pressed', String(mostrar));
+  portaoOlho.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+  portaoSenha.focus();
+});
 
 function abrirPainel() {
   portao.classList.add('escondido');
@@ -97,8 +111,8 @@ document.querySelectorAll('.aba').forEach((aba) => {
 let confConvidados = [];
 let confFiltro = 'todos';
 
-function cartao(n, rotulo, destaque) {
-  return `<div class="cartao${destaque ? ' destaque' : ''}"><div class="n">${n}</div><div class="r">${rotulo}</div></div>`;
+function cartao(n, rotulo, classe) {
+  return `<div class="cartao${classe ? ' ' + classe : ''}"><div class="n">${n}</div><div class="r">${rotulo}</div></div>`;
 }
 
 function renderConfirmacoes() {
@@ -110,7 +124,7 @@ function renderConfirmacoes() {
   const sem = confConvidados.filter((c) => c.confirmed !== true && c.confirmed !== false);
 
   cartoes.innerHTML =
-    cartao(sim.length, 'Confirmados', true) +
+    cartao(sim.length, 'Confirmados', 'verde') +
     cartao(nao.length, 'Não vão') +
     cartao(sem.length, 'Sem resposta') +
     cartao(confConvidados.length, 'Convidados');
@@ -183,7 +197,7 @@ function renderPresentes() {
   const totalPendente = pendentes.reduce((s, p) => s + Number(p.total_amount || 0), 0);
 
   cartoes.innerHTML =
-    cartao(formatoPreco.format(totalAprovado), 'Recebido (aprovado)', true) +
+    cartao(formatoPreco.format(totalAprovado), 'Recebido (aprovado)', 'destaque') +
     cartao(aprovados.length, 'Pedidos aprovados') +
     cartao(formatoPreco.format(totalPendente), 'Aguardando') +
     cartao(pendentes.length, 'Pedidos pendentes');
@@ -202,11 +216,17 @@ function renderPresentes() {
       ? `<div class="pedido-msg">${escaparHtml(p.giver_message)}</div>`
       : '';
     const status = ROTULO_STATUS[p.status] || p.status;
+    const remover = p.status === 'pending'
+      ? `<button type="button" class="pedido-remover" data-id="${p.id}" aria-label="Remover este pedido em andamento" title="Remover">✕</button>`
+      : '';
     return `
       <div class="pedido">
         <div class="pedido-topo">
           <span class="pedido-nome">${escaparHtml(p.giver_name || 'Sem nome')}</span>
-          <span class="selo ${p.status}">${status}</span>
+          <span class="pedido-acoes">
+            <span class="selo ${p.status}">${status}</span>
+            ${remover}
+          </span>
         </div>
         <div class="pedido-data">${fmtData(p.created_at)}</div>
         <ul class="pedido-itens">${itens}</ul>
@@ -222,6 +242,30 @@ document.getElementById('presFiltros').addEventListener('click', (e) => {
   if (!btn) return;
   presFiltro = btn.dataset.f;
   document.querySelectorAll('#presFiltros .filtro').forEach((b) => b.classList.toggle('ativo', b === btn));
+  renderPresentes();
+});
+
+document.getElementById('presLista').addEventListener('click', async (e) => {
+  const btn = e.target.closest('.pedido-remover');
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  const pedido = presPedidos.find((p) => p.id === id);
+  const nome = pedido?.giver_name ? ` de ${pedido.giver_name}` : '';
+  if (!confirm(`Remover o pedido em andamento${nome}? Só é possível remover pedidos que ninguém concluiu.`)) return;
+
+  btn.disabled = true;
+  const client = getClient();
+  if (!client) { alert('Não foi possível conectar agora.'); btn.disabled = false; return; }
+
+  // apaga os itens primeiro (a policy só permite enquanto o pedido está pending)
+  const { error: erroItens } = await client.from('gift_order_items').delete().eq('order_id', id);
+  const { error: erroPedido } = await client.from('gift_orders').delete().eq('id', id).eq('status', 'pending');
+  if (erroItens || erroPedido) {
+    alert('Não foi possível remover agora. O pedido pode já ter sido aprovado.');
+    btn.disabled = false;
+    return;
+  }
+  presPedidos = presPedidos.filter((p) => p.id !== id);
   renderPresentes();
 });
 

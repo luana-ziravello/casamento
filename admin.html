@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/style.css?v=8">
 <style>
   body { background: var(--areia-0); }
+  :root { --verde: #3f7d4e; --verde-bg: rgba(63, 125, 78, .14); }
 
   /* ===== tela de senha ===== */
   .portao {
@@ -33,12 +34,20 @@
   .portao-caixa::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradiente-luxo); }
   .portao-caixa h1 { font-family: var(--f-display); font-style: italic; font-size: 1.6rem; color: var(--tinta); margin-bottom: .4rem; }
   .portao-caixa p { font-size: .8rem; color: var(--tinta-suave); margin-bottom: var(--sp-md); }
+  .portao-campo { position: relative; margin-bottom: .9rem; }
   .portao-caixa input {
-    width: 100%; height: 48px; padding: 0 14px; margin-bottom: .9rem;
+    width: 100%; height: 48px; padding: 0 44px 0 14px;
     border: 1px solid var(--linha-forte); background: var(--areia-0);
     font-family: var(--f-corpo); font-size: .95rem; color: var(--tinta); text-align: center;
   }
   .portao-caixa input:focus { border-color: var(--rosa); outline: none; }
+  .portao-olho {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer; color: var(--tinta-suave);
+  }
+  .portao-olho:hover, .portao-olho:focus-visible { color: var(--rosa-texto); }
+  .portao-olho svg { width: 19px; height: 19px; }
   .portao-caixa .btn { width: 100%; height: 48px; }
   .portao-erro { font-size: .78rem; color: var(--rosa-texto); margin-top: .8rem; min-height: 1.1em; }
 
@@ -68,6 +77,7 @@
   .cartao .n { font-family: var(--f-display); font-size: 1.9rem; color: var(--tinta); line-height: 1.1; }
   .cartao .r { font-size: .66rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); margin-top: .3rem; }
   .cartao.destaque .n { color: var(--rosa-texto); }
+  .cartao.verde .n { color: var(--verde); }
 
   .filtros { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: var(--sp-md); }
   .filtro { background: var(--areia-0); border: 1px solid var(--linha-forte); cursor: pointer; padding: .5rem .9rem; font-family: var(--f-corpo); font-size: .74rem; color: var(--tinta); }
@@ -79,7 +89,7 @@
   .linha:first-child { border-top: none; }
 
   .selo { font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: .25rem .55rem; border-radius: 999px; white-space: nowrap; }
-  .selo.sim { background: rgba(197,40,80,.12); color: var(--rosa-texto); }
+  .selo.sim { background: var(--verde-bg); color: var(--verde); }
   .selo.nao { background: rgba(122,78,33,.12); color: var(--tinta-suave); }
   .selo.sem { background: rgba(122,78,33,.07); color: var(--tinta-suave); }
   .selo.approved { background: rgba(197,40,80,.12); color: var(--rosa-texto); }
@@ -88,6 +98,14 @@
 
   .pedido { background: var(--tinta-clara); border: 1px solid var(--dourado-linha); padding: 1rem 1.2rem; margin-bottom: .8rem; }
   .pedido-topo { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+  .pedido-acoes { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+  .pedido-remover {
+    width: 24px; height: 24px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: none; border: 1px solid var(--linha-forte); border-radius: 999px;
+    cursor: pointer; color: var(--tinta-suave); font-size: .78rem; line-height: 1;
+  }
+  .pedido-remover:hover, .pedido-remover:focus-visible { border-color: var(--rosa-texto); color: var(--rosa-texto); }
   .pedido-nome { font-weight: 600; color: var(--tinta); }
   .pedido-data { font-size: .72rem; color: var(--tinta-suave); }
   .pedido-itens { list-style: none; padding: 0; margin: .6rem 0 0; }
@@ -110,7 +128,10 @@
   <form class="portao-caixa" id="portaoForm">
     <h1>Painel dos noivos</h1>
     <p>Área restrita. Digite a senha para continuar.</p>
-    <input type="password" id="portaoSenha" placeholder="Senha" autocomplete="current-password" required>
+    <div class="portao-campo">
+      <input type="password" id="portaoSenha" placeholder="Senha" autocomplete="current-password" required>
+      <button type="button" class="portao-olho" id="portaoOlho" aria-label="Mostrar senha" aria-pressed="false"></button>
+    </div>
     <button class="btn btn-primario" type="submit">Entrar</button>
     <p class="portao-erro" id="portaoErro"></p>
   </form>
@@ -156,6 +177,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/admin.js?v=1"></script>
+<script src="js/admin.js?v=2"></script>
 </body>
 </html>
