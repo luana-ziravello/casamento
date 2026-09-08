@@ -113,13 +113,54 @@ function teclaLinha(event, fn) {
   if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); fn(); }
 }
 
-function abrirFotoPadrinho(src, nome, posicao) {
+/* ===== presenças especiais (padrinhos, madrinhas e família) ===== */
+const PADRINHOS = [
+  { nome: 'Alice e Marcelo', foto: 'imagens/padrinhos/alice-marcelo.jpg', posicao: 'center 28%', relacao: 'Tios da noiva', descricao: 'Presenças queridas que sempre acompanharam sua história com muito carinho.' },
+  { nome: 'Amanda e Wesley', foto: 'imagens/padrinhos/amanda-wesley.jpg', posicao: 'center 20%', relacao: 'Irmã e cunhado da noiva', descricao: 'Vieram da Irlanda para viver de perto esse momento tão especial conosco.' },
+  { nome: 'Anne e Edu', foto: 'imagens/padrinhos/anne-edu.jpg', posicao: 'center 30%', relacao: 'Familiares do noivo', descricao: 'Pessoas muito queridas, que ocupam um lugar especial em nossa família.' },
+  { nome: 'Bete', foto: 'imagens/padrinhos/bete.jpg', posicao: 'center 18%', relacao: 'Mãe da noiva', descricao: 'Seu porto seguro, maior exemplo de força e amor por toda a vida.' },
+  { nome: 'Deive e Walace', foto: 'imagens/padrinhos/deive-walace.jpg', posicao: 'center 42%', relacao: 'Melhores amigos da noiva', descricao: 'Amigos de uma vida inteira e companheiros de incontáveis histórias.' },
+  { nome: 'Hélio e Liliane', foto: 'imagens/padrinhos/helio-liliane.jpg', posicao: 'center 35%', relacao: 'Tios e padrinhos do noivo', descricao: 'Parte importante da sua história e exemplos de amor, cuidado e família.' },
+  { nome: 'João', foto: 'imagens/padrinhos/joao.jpg', posicao: 'center 22%', relacao: 'Melhor amigo do noivo', descricao: 'Parceiro de vida, de boas histórias e de momentos inesquecíveis.' },
+  { nome: 'Lorella', foto: 'imagens/padrinhos/lorella.jpg', posicao: 'center 15%', relacao: 'Melhor amiga do noivo', descricao: 'Uma amizade cheia de carinho, cumplicidade e boas lembranças.' },
+  { nome: 'Márcia e Maurício', foto: 'imagens/padrinhos/marcia-mauricio.jpg', posicao: 'center 38%', relacao: 'Tios e padrinhos da noiva', descricao: 'Sempre presentes, cercando sua vida de amor, cuidado e carinho.' },
+  { nome: 'Maria', foto: 'imagens/padrinhos/maria.jpg', posicao: 'center 40%', relacao: 'Avó da noiva', descricao: 'A raiz da família e uma fonte inesgotável de amor, força e ternura.' },
+  { nome: 'Sandra', foto: 'imagens/padrinhos/sandra.jpg', posicao: 'center 48%', relacao: 'Mãe do noivo', descricao: 'Presença de amor, cuidado e acolhimento em cada etapa da sua caminhada.' },
+  { nome: 'Sofia e Zoe', foto: 'imagens/padrinhos/sofia-zoe.jpg', posicao: 'center 45%', relacao: 'Melhores amigas do noivo', descricao: 'Amizades especiais que deixam sua vida muito mais leve e feliz.' },
+  { nome: 'Thaís', foto: 'imagens/padrinhos/thais.jpg', posicao: 'center 18%', relacao: 'Prima da noiva', descricao: 'Uma presença muito querida em tantos capítulos da sua história.' },
+];
+
+function montarPadrinhos() {
+  const lista = document.getElementById('padrinhosLista');
+  if (!lista) return;
+  lista.innerHTML = PADRINHOS.map((p, i) => `
+    <div class="padrinho">
+      <div class="padrinho-avatar" role="button" tabindex="0" aria-label="Ver foto de ${p.nome} em tamanho grande" onclick="abrirFotoPadrinho(${i})" onkeydown="teclaLinha(event, () => abrirFotoPadrinho(${i}))">
+        <img src="${p.foto}" alt="" style="object-position:${p.posicao}">
+      </div>
+      <div class="padrinho-info">
+        <h4>${p.nome}</h4>
+        <span class="padrinho-relacao">${p.relacao}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function abrirFotoPadrinho(indice) {
+  const p = PADRINHOS[indice];
+  if (!p) return;
   const img = document.getElementById('imagemFotoPadrinho');
   const titulo = document.getElementById('tituloFotoPadrinho');
+  const relacao = document.getElementById('relacaoFotoPadrinho');
+  const descricao = document.getElementById('descricaoFotoPadrinho');
   if (!img || !titulo) return;
-  img.src = src;
-  img.alt = nome;
-  img.style.objectPosition = posicao || 'center';
-  titulo.textContent = nome;
+  img.src = p.foto;
+  img.alt = p.nome;
+  img.style.objectPosition = p.posicao || 'center';
+  titulo.textContent = p.nome;
+  if (relacao) relacao.textContent = p.relacao || '';
+  if (descricao) descricao.textContent = p.descricao || '';
   abrirModal('modalFotoPadrinho');
 }
+
+document.addEventListener('DOMContentLoaded', montarPadrinhos);
