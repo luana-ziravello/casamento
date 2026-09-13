@@ -96,6 +96,7 @@
   const btnFotoAnterior = document.getElementById('btnFotoAnterior');
   const btnFotoProxima = document.getElementById('btnFotoProxima');
   const lightboxImagem = document.getElementById('lightboxImagem');
+  const lightboxCaixa = document.querySelector('.album-lightbox-caixa');
   const lightboxAutor = document.getElementById('lightboxAutor');
   const lightboxData = document.getElementById('lightboxData');
   const lightboxLegenda = document.getElementById('lightboxLegenda');
@@ -373,7 +374,7 @@
     lightboxImagem.src = fotoAbertaUrl;
     lightboxImagem.alt = foto.caption ? foto.caption : `Foto de ${foto.author_name}`;
     lightboxAutor.textContent = foto.author_name;
-    lightboxData.textContent = formatarData(foto.created_at);
+    lightboxData.textContent = `· ${formatarData(foto.created_at)}`;
     if (foto.caption) { lightboxLegenda.textContent = foto.caption; lightboxLegenda.hidden = false; }
     else { lightboxLegenda.hidden = true; }
     listaComentarios.innerHTML = '<p class="album-comentarios-estado">Carregando comentários…</p>';
@@ -426,8 +427,14 @@
   function fecharLightbox() {
     fotoAbertaId = null;
     lightboxImagem.src = '';
+    lightboxCaixa.classList.remove('tela-cheia');
     fecharOverlay(modalFoto);
   }
+
+  lightboxImagem.addEventListener('click', () => {
+    if (!fotoAbertaId) return;
+    lightboxCaixa.classList.toggle('tela-cheia');
+  });
 
   async function navegarFoto(delta) {
     const i = indiceAtual();
@@ -550,6 +557,7 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       if (modalComposer.classList.contains('aberta')) { fecharComposerTotal(); return; }
+      if (lightboxCaixa.classList.contains('tela-cheia')) { lightboxCaixa.classList.remove('tela-cheia'); return; }
       if (modalFoto.classList.contains('aberta')) { fecharLightbox(); return; }
       if (modalNome.classList.contains('aberta') && permiteFecharModalNome) { fecharOverlay(modalNome); return; }
     }

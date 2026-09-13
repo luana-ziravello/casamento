@@ -54,14 +54,14 @@
   .album-hero-conteudo .hero-monograma { height: 46px; width: auto; margin: 0 auto var(--sp-lg); filter: brightness(0) invert(1); opacity: .9; animation: albumSubirDesvanecer .9s ease both; }
   .album-hero-titulo {
     font-family: var(--f-nomes); font-weight: 300; font-style: italic;
-    font-size: clamp(2.1rem, 6.4vw, 3.8rem); line-height: 1.2;
+    font-size: clamp(2.4rem, 7.2vw, 4.4rem); line-height: 1.2;
     color: var(--tinta-clara);
     text-shadow: 0 6px 30px rgba(0,0,0,.5), 0 1px 4px rgba(0,0,0,.35);
     opacity: 0; animation: albumSubirDesvanecer .9s .12s cubic-bezier(.16,.84,.28,1) both;
   }
   .album-hero-subtitulo {
     margin-top: var(--sp-md); font-family: var(--f-display); font-style: italic;
-    font-size: 1.06rem; color: var(--tinta-clara); letter-spacing: .02em; max-width: 46ch; margin-inline: auto;
+    font-size: 1.18rem; color: var(--tinta-clara); letter-spacing: .02em; max-width: 46ch; margin-inline: auto;
     text-shadow: 0 2px 16px rgba(0,0,0,.5);
     opacity: 0; animation: albumSubirDesvanecer 1s .3s ease both;
   }
@@ -72,7 +72,7 @@
     opacity: 0; animation: albumSubirDesvanecer 1.05s .45s ease both;
   }
   .album-hero-setas {
-    margin-top: var(--sp-sm);
+    margin: var(--sp-sm) auto 0;
     display: flex; flex-direction: column; align-items: center; gap: 1px;
     color: rgba(255,255,255,.68);
     background: none; border: none; cursor: pointer;
@@ -93,7 +93,7 @@
   @media (max-height: 720px) {
     .album-hero-conteudo { padding-top: 84px; padding-bottom: 24px; }
     .album-hero-conteudo .hero-monograma { height: 34px; margin-bottom: var(--sp-md); }
-    .album-hero-titulo { font-size: clamp(1.9rem, 7vw, 3rem); }
+    .album-hero-titulo { font-size: clamp(2.1rem, 7.6vw, 3.3rem); }
     .album-hero-dica { margin-top: var(--sp-lg); }
   }
 
@@ -154,13 +154,19 @@
   @media (min-width: 860px) {
     .album-lightbox-caixa { flex-direction: row; width: min(94vw, 1000px); height: min(88vh, 720px); max-width: 1000px; max-height: 720px; box-shadow: var(--sombra-modal); border-radius: 4px; }
   }
-  .album-lightbox-media { position: relative; flex: 1 1 52%; min-height: 42vh; background: #14100c; display: flex; align-items: center; justify-content: center; }
+  .album-lightbox-media { position: relative; flex: 1 1 70%; min-height: 58vh; background: #14100c; display: flex; align-items: center; justify-content: center; }
   @media (min-width: 860px) { .album-lightbox-media { min-height: 0; } }
-  .album-lightbox-media img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  .album-lightbox-info { flex: 1 1 48%; display: flex; flex-direction: column; min-height: 0; padding: 1.2rem 1.3rem calc(1rem + env(safe-area-inset-bottom)); overflow-y: auto; }
-  .album-lightbox-cabecalho { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; margin-bottom: .6rem; }
-  .album-lightbox-cabecalho strong { display: block; font-family: var(--f-display); font-style: italic; font-size: 1.15rem; color: var(--coral-texto); }
-  .album-lightbox-data { display: block; font-size: .68rem; letter-spacing: .06em; color: var(--tinta-suave); margin-top: 2px; }
+  .album-lightbox-media img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; }
+  .album-lightbox-info { flex: 1 1 30%; display: flex; flex-direction: column; min-height: 0; padding: 1rem 1.3rem calc(1rem + env(safe-area-inset-bottom)); overflow-y: auto; }
+  .album-lightbox-cabecalho { display: flex; align-items: baseline; justify-content: space-between; gap: .8rem; margin-bottom: .6rem; flex-wrap: wrap; }
+  .album-lightbox-cabecalho > div { display: flex; align-items: baseline; gap: .5em; flex-wrap: wrap; }
+  .album-lightbox-cabecalho strong { font-family: var(--f-display); font-style: italic; font-size: 1.15rem; color: var(--coral-texto); }
+  .album-lightbox-data { font-size: .68rem; letter-spacing: .06em; color: var(--tinta-suave); }
+
+  /* ===== modo tela cheia (toque na foto) ===== */
+  .album-lightbox-caixa.tela-cheia .album-lightbox-info { display: none; }
+  .album-lightbox-caixa.tela-cheia .album-lightbox-media { flex: 1 1 100%; }
+  .album-lightbox-caixa.tela-cheia .album-lightbox-media img { cursor: zoom-out; }
   .album-lightbox-legenda { font-size: .9rem; color: var(--tinta); line-height: 1.7; margin-bottom: var(--sp-md); }
 
   .album-baixar-foto {
