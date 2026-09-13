@@ -113,7 +113,6 @@
   const inputGaleria = document.getElementById('inputGaleria');
   const erroComposer = document.getElementById('erroComposer');
   const previewsComposer = document.getElementById('previewsComposer');
-  const campoLegenda = document.getElementById('campoLegenda');
   const btnPublicar = document.getElementById('btnPublicar');
 
   const albumToast = document.getElementById('albumToast');
@@ -191,6 +190,16 @@
       if (!ticking) { requestAnimationFrame(aplicar); ticking = true; }
     }, { passive: true });
     aplicar();
+  })();
+
+  (function () {
+    const btn = document.getElementById('btnRolarParaFeed');
+    const feedSecao = document.getElementById('feedSecao');
+    if (!btn || !feedSecao) return;
+    btn.addEventListener('click', () => {
+      const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      feedSecao.scrollIntoView({ behavior: reduzMovimento ? 'auto' : 'smooth', block: 'start' });
+    });
   })();
 
   /* ===== barra de progresso de leitura ===== */
@@ -656,7 +665,6 @@
     if (publicando) return;
     arquivosSelecionados.forEach((a) => { if (a.previewUrl) URL.revokeObjectURL(a.previewUrl); });
     arquivosSelecionados = [];
-    campoLegenda.value = '';
     erroComposer.hidden = true;
     renderPreviews();
     fecharOverlay(modalComposer);
@@ -685,15 +693,6 @@
     const textoOriginal = btnPublicar.textContent;
     btnPublicar.textContent = 'Publicando…';
 
-    const legenda = sanitizarTexto(campoLegenda.value, 280);
-    if (legenda && contemLink(legenda)) {
-      mostrarErroComposer('A legenda não pode conter links.');
-      publicando = false;
-      btnPublicar.textContent = textoOriginal;
-      atualizarBotaoPublicar();
-      return;
-    }
-
     const supa = getClient();
     let algumSucesso = false;
 
@@ -714,7 +713,7 @@
         const { error: erroInsert } = await supa.from('album_photos').insert({
           device_id: deviceId,
           author_name: nomeAtual,
-          caption: legenda || null,
+          caption: null,
           storage_path: caminhoCheio,
           thumb_path: caminhoMini,
           width: item.largura,
@@ -738,7 +737,6 @@
     atualizarBotaoPublicar();
 
     if (algumSucesso) {
-      campoLegenda.value = '';
       if (!arquivosSelecionados.length) fecharOverlay(modalComposer);
       mostrarToast('Seu olhar agora faz parte da nossa história.');
       recarregarFeedDoInicio();

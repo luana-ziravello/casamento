@@ -82,6 +82,17 @@ document.documentElement.classList.add('js');
   setInterval(tick, 1000);
 })();
 
+/* ===== setinhas do hero rolam até "Nós dois" ===== */
+(function () {
+  const btn = document.getElementById('btnRolarParaHistoria');
+  const alvo = document.getElementById('nos-dois');
+  if (!btn || !alvo) return;
+  btn.addEventListener('click', () => {
+    const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    alvo.scrollIntoView({ behavior: reduzMovimento ? 'auto' : 'smooth', block: 'start' });
+  });
+})();
+
 /* ===== botão do álbum de fotos (troca "Confirmar presença" quando ativado) ===== */
 (function () {
   const btn = document.getElementById('ctaConfirmarPresenca');
