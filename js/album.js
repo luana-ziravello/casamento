@@ -18,6 +18,8 @@
   const THUMB_MAX_DIM = 480;
   const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   const HEIC_TYPES = ['image/heic', 'image/heif'];
+  const NOME_MAGICO_ADMIN = 'admin-1010';
+  const NOME_EXIBICAO_ADMIN = 'Luana & Heitor';
   const CHAVE_DEVICE = 'album-device-id';
   const CHAVE_NOME = 'album-nome';
 
@@ -99,6 +101,7 @@
   const lightboxLegenda = document.getElementById('lightboxLegenda');
   const btnReagir = document.getElementById('btnReagir');
   const lightboxContagemReacoes = document.getElementById('lightboxContagemReacoes');
+  const btnBaixarFoto = document.getElementById('btnBaixarFoto');
   const listaComentarios = document.getElementById('listaComentarios');
   const formComentario = document.getElementById('formComentario');
   const campoComentario = document.getElementById('campoComentario');
@@ -134,9 +137,15 @@
   }
 
   /* ===== nome do convidado ===== */
+  let modoAdmin = false;
+  function nomeExibicao() {
+    return modoAdmin ? NOME_EXIBICAO_ADMIN : nomeAtual;
+  }
   function atualizarRotuloNome() {
+    modoAdmin = nomeAtual.trim().toLowerCase() === NOME_MAGICO_ADMIN;
+    document.body.classList.toggle('album-modo-admin', modoAdmin);
     feedEstadoTopo.hidden = !nomeAtual;
-    feedNomeAtual.textContent = nomeAtual;
+    feedNomeAtual.textContent = nomeExibicao();
   }
 
   let permiteFecharModalNome = false;
@@ -233,6 +242,9 @@
     return `
       <figure class="album-card" data-id="${foto.id}" tabindex="0" role="button" aria-label="${rotulo}" style="aspect-ratio:${proporcao}">
         <img src="${urlPublica(foto.thumb_path)}" alt="" loading="lazy" decoding="async">
+        <button type="button" class="album-card-excluir" data-excluir-foto="${foto.id}" aria-label="Excluir esta foto">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-9 0 1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </figure>
     `;
   }
@@ -295,7 +307,27 @@
     carregarFeed(true);
   }
 
+  async function excluirFotoDoFeed(id, botao) {
+    if (!confirm('Excluir esta foto do álbum? Essa ação não pode ser desfeita.')) return;
+    botao.disabled = true;
+    const supa = getClient();
+    const { data: foto } = await supa.from('album_photos').select('storage_path, thumb_path').eq('id', id).single();
+    if (foto) await supa.storage.from(BUCKET).remove([foto.storage_path, foto.thumb_path].filter(Boolean));
+    const { error } = await supa.from('album_photos').delete().eq('id', id);
+    if (error) { alert('Não foi possível excluir agora. Tente novamente.'); botao.disabled = false; return; }
+    feedItems = feedItems.filter((f) => f.id !== id);
+    const card = feedGrid.querySelector(`.album-card[data-id="${id}"]`);
+    if (card) card.remove();
+    if (!feedItems.length && !feedGrid.querySelector('.album-card')) renderEstadoVazio();
+  }
+
   feedGrid.addEventListener('click', (e) => {
+    const botaoExcluir = e.target.closest('[data-excluir-foto]');
+    if (botaoExcluir) {
+      e.stopPropagation();
+      excluirFotoDoFeed(Number(botaoExcluir.dataset.excluirFoto), botaoExcluir);
+      return;
+    }
     const card = e.target.closest('.album-card');
     if (card) abrirLightbox(Number(card.dataset.id));
   });
@@ -324,6 +356,7 @@
 
   /* ===== lightbox ===== */
   let fotoAbertaId = null;
+  let fotoAbertaUrl = '';
 
   function indiceAtual() {
     return feedItems.findIndex((f) => f.id === fotoAbertaId);
@@ -336,7 +369,8 @@
   }
 
   function renderizarLightboxBase(foto) {
-    lightboxImagem.src = urlPublica(foto.storage_path);
+    fotoAbertaUrl = urlPublica(foto.storage_path);
+    lightboxImagem.src = fotoAbertaUrl;
     lightboxImagem.alt = foto.caption ? foto.caption : `Foto de ${foto.author_name}`;
     lightboxAutor.textContent = foto.author_name;
     lightboxData.textContent = formatarData(foto.created_at);
@@ -438,6 +472,39 @@
     }
   });
 
+  const btnBaixarFotoTexto = document.getElementById('btnBaixarFotoTexto');
+  btnBaixarFoto.addEventListener('click', async () => {
+    if (!fotoAbertaUrl) return;
+    const textoOriginal = btnBaixarFotoTexto.textContent;
+    btnBaixarFoto.disabled = true;
+    btnBaixarFotoTexto.textContent = 'Baixando…';
+    try {
+      const resposta = await fetch(fotoAbertaUrl);
+      if (!resposta.ok) throw new Error('download falhou');
+      const blob = await resposta.blob();
+      const nomeArquivo = `foto-luana-e-heitor-${fotoAbertaId}.jpg`;
+
+      const arquivo = new File([blob], nomeArquivo, { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+        await navigator.share({ files: [arquivo] });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeArquivo;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      }
+    } catch (e) {
+      if (e && e.name !== 'AbortError') window.open(fotoAbertaUrl, '_blank', 'noopener');
+    } finally {
+      btnBaixarFoto.disabled = false;
+      btnBaixarFotoTexto.textContent = textoOriginal;
+    }
+  });
+
   let enviandoComentario = false;
   formComentario.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -464,7 +531,7 @@
 
     const supa = getClient();
     const idFoto = fotoAbertaId;
-    const { error } = await supa.from('album_comments').insert({ photo_id: idFoto, device_id: deviceId, author_name: nomeAtual, body: texto });
+    const { error } = await supa.from('album_comments').insert({ photo_id: idFoto, device_id: deviceId, author_name: nomeExibicao(), body: texto });
 
     botao.disabled = false;
     botao.textContent = textoOriginal;
@@ -712,7 +779,7 @@
 
         const { error: erroInsert } = await supa.from('album_photos').insert({
           device_id: deviceId,
-          author_name: nomeAtual,
+          author_name: nomeExibicao(),
           caption: null,
           storage_path: caminhoCheio,
           thumb_path: caminhoMini,
