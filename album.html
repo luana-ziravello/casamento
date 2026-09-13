@@ -139,6 +139,9 @@
     transition: border-color .3s;
   }
   .campo-form input:focus { outline: none; border-color: var(--rosa); }
+  .recado-erro { display: none; font-size: .78rem; color: var(--rosa-texto); margin-bottom: var(--sp-sm); }
+  .recado-erro.mostrar { display: block; }
+  .recado-envio { display: flex; justify-content: flex-end; margin-top: var(--sp-sm); }
   .album-aviso-nome { margin-top: var(--sp-md); font-size: .74rem; color: var(--tinta-suave); line-height: 1.6; }
 
   /* ===== lightbox ===== */
@@ -217,9 +220,21 @@
   .album-botao-postar svg { width: 18px; height: 18px; flex-shrink: 0; }
 
   .album-composer-acoes { display: flex; flex-direction: column; gap: .7rem; margin: .3rem 0 1.1rem; }
-  .album-composer-acoes .btn-pilula { width: 100%; justify-content: center; }
-  .album-acao-galeria { padding: 15px 24px; font-size: .7rem; }
-  .album-acao-camera { padding: 11px 24px; font-size: .64rem; }
+  .album-composer-acoes .btn { width: 100%; }
+  .album-acao-galeria { padding: 17px 24px; font-size: .72rem; font-weight: 700; }
+  .album-acao-camera { padding: 13px 24px; font-size: .66rem; font-weight: 700; }
+
+  .album-btn-publicar {
+    display: flex; width: 100%; align-items: center; justify-content: center; gap: .55rem;
+    min-height: 52px; padding: 15px 24px; margin-top: var(--sp-sm);
+    border: none; border-radius: 999px; cursor: pointer;
+    background: var(--gradiente-luxo); color: var(--tinta-clara);
+    font-family: var(--f-corpo); font-size: .7rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    box-shadow: 0 12px 26px -10px rgba(58,42,30,.5);
+    transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .album-btn-publicar:hover, .album-btn-publicar:focus-visible { transform: translateY(-2px); box-shadow: 0 16px 30px -10px rgba(58,42,30,.55); }
+  .album-btn-publicar:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
   .album-composer-erro { font-size: .8rem; color: var(--rosa-texto); margin-bottom: .8rem; }
   .album-composer-previews { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: var(--sp-sm); }
   .album-preview-item { position: relative; width: 82px; height: 82px; border-radius: 4px; overflow: hidden; background: var(--areia-1); flex-shrink: 0; }
@@ -374,8 +389,8 @@
       <h2 id="tituloComposer">Compartilhe um momento</h2>
 
       <div class="album-composer-acoes">
-        <button type="button" class="btn-pilula btn-pilula-rosa album-acao-galeria" id="btnEscolherGaleria">Escolher da galeria</button>
-        <button type="button" class="btn-pilula btn-pilula-coral album-acao-camera" id="btnTirarFoto">Tirar foto</button>
+        <button type="button" class="btn btn-primario album-acao-galeria" id="btnEscolherGaleria">Escolher da galeria</button>
+        <button type="button" class="btn btn-secundario album-acao-camera" id="btnTirarFoto">Tirar foto</button>
       </div>
       <input type="file" id="inputCamera" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" hidden>
       <input type="file" id="inputGaleria" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
@@ -386,9 +401,7 @@
 
       <p class="album-composer-consentimento">Ao publicar, você concorda que a foto fique visível aos convidados e possa integrar o álbum de Luana &amp; Heitor.</p>
 
-      <div class="recado-envio">
-        <button class="btn btn-primario" type="button" id="btnPublicar" disabled>Publicar</button>
-      </div>
+      <button class="album-btn-publicar" type="button" id="btnPublicar" disabled>Publicar</button>
     </div>
   </div>
 
