@@ -118,9 +118,13 @@ function mensagemCobranca(nome) {
   return `Olá, ${nome}! Tudo bem? 😊\n\nSou a Roberta, assessora do casamento da Luana e do Heitor. Estamos organizando os últimos detalhes e vimos que a sua confirmação ainda não chegou.\n\nVocês conseguirão estar com a gente nesse dia tão especial? 💛 A confirmação é muito importante para conseguirmos organizar tudo direitinho.\n\nQuando puder, confirme sua presença pelo link abaixo:\n\n${LINK_CONFIRMACAO}\n\nVamos adorar contar com vocês! ✨`;
 }
 
-function linkWhatsAppConvidado(telefone, nomeCompleto) {
+function linkWhatsAppConvidado(telefone, nomeCompleto, confirmed) {
   const numero = (telefone || '').replace(/\D/g, '');
   if (!numero) return '';
+  // só manda o textão de cobrança pra quem ainda não respondeu — depois que
+  // vira "sim" ou "não", o botão continua existindo, mas só como atalho pro
+  // número, sem reabrir a cobrança de confirmação.
+  if (confirmed === true || confirmed === false) return `https://wa.me/${numero}`;
   const primeiroNome = (nomeCompleto || '').trim().split(/\s+/)[0] || nomeCompleto;
   return `https://wa.me/${numero}?text=${encodeURIComponent(mensagemCobranca(primeiroNome))}`;
 }
@@ -168,7 +172,7 @@ function renderConfirmacoes() {
     const linhas = membros.map((c) => {
       const estado = c.confirmed === true ? 'sim' : c.confirmed === false ? 'nao' : 'sem';
       const rotulo = estado === 'sim' ? 'Confirmado' : estado === 'nao' ? 'Não vai' : 'Sem resposta';
-      const linkWpp = linkWhatsAppConvidado(c.phone, c.guest_name);
+      const linkWpp = linkWhatsAppConvidado(c.phone, c.guest_name, c.confirmed);
       const botaoWpp = linkWpp
         ? `<a class="linha-whatsapp" href="${linkWpp}" target="_blank" rel="noopener" aria-label="Chamar ${escaparHtml(c.guest_name)} no WhatsApp" title="Chamar no WhatsApp">${ICONE_WHATSAPP}</a>`
         : '';
