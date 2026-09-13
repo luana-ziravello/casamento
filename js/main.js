@@ -82,6 +82,17 @@ document.documentElement.classList.add('js');
   setInterval(tick, 1000);
 })();
 
+/* ===== botão do álbum de fotos (troca "Confirmar presença" quando ativado) ===== */
+(function () {
+  const btn = document.getElementById('ctaConfirmarPresenca');
+  if (!btn || !window.SITE_CONFIG) return;
+  window.SITE_CONFIG.albumEstaNoAr().then((noAr) => {
+    if (!noAr) return;
+    btn.textContent = 'Álbum de fotos';
+    btn.setAttribute('href', 'album.html');
+  });
+})();
+
 /* ===== modais (traje / padrinhos / recado / etc.) ===== */
 const __ultimoFocoModal = {};
 function abrirModal(id) {

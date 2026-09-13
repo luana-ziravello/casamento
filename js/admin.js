@@ -312,8 +312,101 @@ async function carregarRecados() {
   `).join('');
 }
 
+/* ===== álbum de fotos ===== */
+async function carregarAlbum() {
+  const client = getClient();
+  const cartoes = document.getElementById('albumCartoes');
+  const lista = document.getElementById('albumLista');
+  if (!client) { lista.innerHTML = '<p class="estado">Não foi possível conectar.</p>'; return; }
+
+  const [fotosRes, comentariosRes, reacoesRes] = await Promise.all([
+    client.from('album_photos').select('id, author_name, caption, thumb_path, created_at').order('created_at', { ascending: false }),
+    client.from('album_comments').select('id, photo_id, author_name, body, created_at').order('created_at', { ascending: false }),
+    client.from('album_reactions').select('photo_id'),
+  ]);
+
+  if (fotosRes.error) { lista.innerHTML = '<p class="estado">Não foi possível carregar o álbum.</p>'; return; }
+
+  const fotos = fotosRes.data || [];
+  const comentarios = comentariosRes.data || [];
+  const reacoes = reacoesRes.data || [];
+
+  cartoes.innerHTML =
+    cartao(fotos.length, 'Fotos', 'destaque') +
+    cartao(comentarios.length, 'Comentários') +
+    cartao(reacoes.length, 'Reações');
+
+  if (!fotos.length) {
+    lista.innerHTML = '<p class="estado">Nenhuma foto publicada ainda.</p>';
+    return;
+  }
+
+  const comentariosPorFoto = new Map();
+  comentarios.forEach((c) => {
+    if (!comentariosPorFoto.has(c.photo_id)) comentariosPorFoto.set(c.photo_id, []);
+    comentariosPorFoto.get(c.photo_id).push(c);
+  });
+
+  lista.innerHTML = fotos.map((f) => {
+    const url = client.storage.from('album').getPublicUrl(f.thumb_path).data.publicUrl;
+    const seusComentarios = comentariosPorFoto.get(f.id) || [];
+    const comentariosHtml = seusComentarios.map((c) => `
+      <div class="album-admin-comentario">
+        <span><strong>${escaparHtml(c.author_name)}</strong> ${escaparHtml(c.body)}</span>
+        <button type="button" class="pedido-remover" data-comentario="${c.id}" aria-label="Remover comentário" title="Remover">✕</button>
+      </div>
+    `).join('');
+    return `
+      <div class="pedido">
+        <div class="pedido-topo">
+          <div style="display:flex;gap:.7rem;align-items:center;">
+            <img src="${url}" alt="" class="album-admin-thumb" loading="lazy">
+            <div>
+              <span class="pedido-nome">${escaparHtml(f.author_name)}</span>
+              <div class="pedido-data">${fmtData(f.created_at)}</div>
+            </div>
+          </div>
+          <span class="pedido-acoes">
+            <button type="button" class="pedido-remover" data-foto-remover="${f.id}" aria-label="Remover esta foto" title="Remover foto">✕</button>
+          </span>
+        </div>
+        ${f.caption ? `<div class="pedido-msg">${escaparHtml(f.caption)}</div>` : ''}
+        ${comentariosHtml ? `<div class="album-admin-comentarios">${comentariosHtml}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('albumLista').addEventListener('click', async (e) => {
+  const client = getClient();
+  if (!client) return;
+
+  const btnFoto = e.target.closest('[data-foto-remover]');
+  if (btnFoto) {
+    if (!confirm('Remover esta foto do álbum? Essa ação não pode ser desfeita.')) return;
+    btnFoto.disabled = true;
+    const id = Number(btnFoto.dataset.fotoRemover);
+    const { data: foto } = await client.from('album_photos').select('storage_path, thumb_path').eq('id', id).single();
+    if (foto) await client.storage.from('album').remove([foto.storage_path, foto.thumb_path].filter(Boolean));
+    const { error } = await client.from('album_photos').delete().eq('id', id);
+    if (error) { alert('Não foi possível remover agora.'); btnFoto.disabled = false; return; }
+    carregarAlbum();
+    return;
+  }
+
+  const btnComentario = e.target.closest('[data-comentario]');
+  if (btnComentario) {
+    if (!confirm('Remover este comentário?')) return;
+    btnComentario.disabled = true;
+    const { error } = await client.from('album_comments').delete().eq('id', Number(btnComentario.dataset.comentario));
+    if (error) { alert('Não foi possível remover agora.'); btnComentario.disabled = false; return; }
+    carregarAlbum();
+  }
+});
+
 function carregarTudo() {
   carregarConfirmacoes();
   carregarPresentes();
   carregarRecados();
+  carregarAlbum();
 }
