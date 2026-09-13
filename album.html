@@ -228,7 +228,6 @@
   .album-composer-acoes { display: flex; flex-direction: column; gap: .7rem; margin: .3rem 0 1.1rem; }
   .album-composer-acoes .btn { width: 100%; }
   .album-acao-galeria { padding: 17px 24px; font-size: .72rem; font-weight: 700; }
-  .album-acao-camera { padding: 13px 24px; font-size: .66rem; font-weight: 700; }
 
   .album-btn-publicar {
     display: flex; width: 100%; align-items: center; justify-content: center; gap: .55rem;
@@ -259,13 +258,14 @@
 
   /* ===== toast ===== */
   .album-toast {
-    position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom));
-    transform: translateX(-50%) translateY(10px);
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(.94);
     background: var(--tinta); color: var(--tinta-clara);
-    padding: 13px 22px; border-radius: 999px; font-size: .82rem; text-align: center; max-width: 88vw;
-    box-shadow: var(--sombra-card); z-index: 600; opacity: 0; transition: opacity .3s ease, transform .3s ease;
+    padding: 22px 30px; border-radius: 8px; font-family: var(--f-display); font-style: italic; font-size: 1.1rem;
+    text-align: center; line-height: 1.5; max-width: min(86vw, 380px);
+    box-shadow: var(--sombra-modal); z-index: 600; opacity: 0; transition: opacity .3s ease, transform .3s ease;
   }
-  .album-toast.mostrar { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .album-toast.mostrar { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
   @media (max-width: 480px) {
     .album-hero { height: 82vh; }
@@ -396,9 +396,7 @@
 
       <div class="album-composer-acoes">
         <button type="button" class="btn btn-primario album-acao-galeria" id="btnEscolherGaleria">Escolher da galeria</button>
-        <button type="button" class="btn btn-secundario album-acao-camera" id="btnTirarFoto">Tirar foto</button>
       </div>
-      <input type="file" id="inputCamera" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" hidden>
       <input type="file" id="inputGaleria" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
 
       <p class="album-composer-erro" id="erroComposer" role="alert" hidden></p>

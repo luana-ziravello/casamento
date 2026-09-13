@@ -111,9 +111,7 @@
   const btnAbrirComposer = document.getElementById('btnAbrirComposer');
   const modalComposer = document.getElementById('modalComposer');
   const btnFecharComposer = document.getElementById('btnFecharComposer');
-  const btnTirarFoto = document.getElementById('btnTirarFoto');
   const btnEscolherGaleria = document.getElementById('btnEscolherGaleria');
-  const inputCamera = document.getElementById('inputCamera');
   const inputGaleria = document.getElementById('inputGaleria');
   const erroComposer = document.getElementById('erroComposer');
   const previewsComposer = document.getElementById('previewsComposer');
@@ -722,19 +720,14 @@
     });
   }
 
-  btnTirarFoto.addEventListener('click', () => {
-    if (limiteAtingido()) { mostrarErroComposer(`Limite de ${MAX_FILES} fotos por publicação.`); return; }
-    inputCamera.click();
-  });
   btnEscolherGaleria.addEventListener('click', () => {
     if (limiteAtingido()) { mostrarErroComposer(`Limite de ${MAX_FILES} fotos por publicação.`); return; }
     inputGaleria.click();
   });
-  inputCamera.addEventListener('change', () => { adicionarArquivos(inputCamera.files); inputCamera.value = ''; });
   inputGaleria.addEventListener('change', () => { adicionarArquivos(inputGaleria.files); inputGaleria.value = ''; });
 
   function abrirComposer() {
-    abrirOverlay(modalComposer, btnTirarFoto);
+    abrirOverlay(modalComposer, btnEscolherGaleria);
   }
   function fecharComposerTotal() {
     if (publicando) return;
