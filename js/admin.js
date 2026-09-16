@@ -11,12 +11,21 @@
    Copie o valor impresso e cole em ADMIN_PASSWORD_SHA256 abaixo.
 
    Senha atual: luana-heitor-1010
+
+   Existe também uma segunda senha, "padrinhos1010" (não diferencia
+   maiúsculas/minúsculas), que abre o painel só com a aba Fornecedores
+   visível — pra dar acesso a alguém sem mostrar convidados, presentes ou
+   recados. O hash dela fica em ADMIN_PASSWORD_FORNECEDORES_SHA256.
+
    Observação: esta é uma proteção simples (só esconde a página). Os dados
    das tabelas continuam acessíveis pela chave pública do Supabase.
    ─────────────────────────────────────────────────────────────────────── */
 
 const ADMIN_PASSWORD_SHA256 = 'ee3f889ad08f3f9119a1236e205a2b854f83ad4d167990f1badcf3de46626c17';
+const ADMIN_PASSWORD_FORNECEDORES_SHA256 = '095a9da26221c4a7ebcdbcff98919cca645d40925c3634707e6d8f68255e2df0';
 const CHAVE_SESSAO = 'painel-noivos-ok';
+const CHAVE_SESSAO_NIVEL = 'painel-noivos-nivel';
+let nivelAcessoAtual = 'completo';
 
 const SUPABASE_URL = 'https://huggafwjjceoekgjzbxi.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_BzOM_a4GHiAiiAThr5N0GA_ZV0bkE4D';
@@ -70,32 +79,56 @@ portaoOlho.addEventListener('click', () => {
   portaoSenha.focus();
 });
 
-function abrirPainel() {
+function aplicarNivelAcesso(nivel) {
+  const somenteFornecedores = nivel === 'fornecedores';
+  document.querySelectorAll('.aba').forEach((aba) => {
+    aba.style.display = (somenteFornecedores && aba.dataset.secao !== 'fornecedores') ? 'none' : '';
+  });
+  if (somenteFornecedores) {
+    document.querySelectorAll('.aba').forEach((a) => a.classList.toggle('ativa', a.dataset.secao === 'fornecedores'));
+    document.querySelectorAll('.secao').forEach((s) => s.classList.toggle('ativa', s.id === 'secao-fornecedores'));
+    document.getElementById('fabAddFornecedor')?.classList.add('visivel');
+  }
+}
+
+function abrirPainel(nivel) {
+  nivelAcessoAtual = nivel || 'completo';
   portao.classList.add('escondido');
   painel.classList.add('visivel');
+  aplicarNivelAcesso(nivelAcessoAtual);
   carregarTudo();
 }
 
 portaoForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   portaoErro.textContent = '';
-  const hash = await sha256Hex(portaoSenha.value);
-  if (hash === ADMIN_PASSWORD_SHA256) {
-    try { sessionStorage.setItem(CHAVE_SESSAO, '1'); } catch { /* segue sem persistir na sessão */ }
-    abrirPainel();
-  } else {
-    portaoErro.textContent = 'Senha incorreta.';
-    portaoSenha.select();
+
+  const hashOriginal = await sha256Hex(portaoSenha.value);
+  if (hashOriginal === ADMIN_PASSWORD_SHA256) {
+    try { sessionStorage.setItem(CHAVE_SESSAO, '1'); sessionStorage.setItem(CHAVE_SESSAO_NIVEL, 'completo'); } catch { /* segue sem persistir na sessão */ }
+    abrirPainel('completo');
+    return;
   }
+
+  // segunda senha: não diferencia maiúsculas/minúsculas, e só libera Fornecedores.
+  const hashMinusculo = await sha256Hex(portaoSenha.value.trim().toLowerCase());
+  if (hashMinusculo === ADMIN_PASSWORD_FORNECEDORES_SHA256) {
+    try { sessionStorage.setItem(CHAVE_SESSAO, '1'); sessionStorage.setItem(CHAVE_SESSAO_NIVEL, 'fornecedores'); } catch { /* segue sem persistir na sessão */ }
+    abrirPainel('fornecedores');
+    return;
+  }
+
+  portaoErro.textContent = 'Senha incorreta.';
+  portaoSenha.select();
 });
 
 document.getElementById('btnSair').addEventListener('click', () => {
-  try { sessionStorage.removeItem(CHAVE_SESSAO); } catch { /* nada a limpar */ }
+  try { sessionStorage.removeItem(CHAVE_SESSAO); sessionStorage.removeItem(CHAVE_SESSAO_NIVEL); } catch { /* nada a limpar */ }
   location.reload();
 });
 
 try {
-  if (sessionStorage.getItem(CHAVE_SESSAO) === '1') abrirPainel();
+  if (sessionStorage.getItem(CHAVE_SESSAO) === '1') abrirPainel(sessionStorage.getItem(CHAVE_SESSAO_NIVEL) || 'completo');
 } catch { /* sessionStorage indisponível: mostra o portão normalmente */ }
 
 /* ===== modais (mesmo padrão simples usado no site principal) ===== */
@@ -712,6 +745,12 @@ fornFormRemover.addEventListener('click', async () => {
 });
 
 function carregarTudo() {
+  // com a senha restrita, nem chega a buscar os dados das outras abas
+  // (convidados, presentes, recados, álbum) — só o que a aba liberada usa.
+  if (nivelAcessoAtual === 'fornecedores') {
+    carregarFornecedores();
+    return;
+  }
   carregarConfirmacoes();
   carregarPresentes();
   carregarRecados();
