@@ -128,6 +128,69 @@
   .recado-quando { font-size: .72rem; color: var(--tinta-suave); }
   .recado-txt { font-size: .88rem; color: var(--tinta); line-height: 1.75; }
 
+  /* ===== fornecedores ===== */
+  .forn-linha {
+    display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+    padding: .8rem 0; border-top: 1px solid var(--linha);
+  }
+  .forn-linha:first-child { border-top: none; }
+  .forn-info { display: flex; flex-direction: column; gap: 2px; cursor: pointer; min-width: 0; background: none; border: none; text-align: left; padding: 0; font: inherit; }
+  .forn-empresa { font-weight: 600; color: var(--tinta); }
+  .forn-empresa:hover, .forn-info:focus-visible .forn-empresa { color: var(--rosa-texto); }
+  .forn-servico { font-size: .76rem; color: var(--tinta-suave); }
+  .forn-acoes { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+  .forn-icone {
+    width: 28px; height: 28px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: none; border: 1px solid var(--linha-forte);
+    color: var(--tinta-suave); cursor: pointer; transition: transform .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .forn-icone:hover, .forn-icone:focus-visible { transform: scale(1.08); border-color: var(--rosa-texto); color: var(--rosa-texto); }
+  .forn-icone svg { width: 14px; height: 14px; }
+  .forn-icone.whatsapp { background-color: #25D366; border-color: #25D366; color: #fff; }
+  .forn-icone.whatsapp svg { width: 15px; height: 15px; }
+  .forn-icone.whatsapp:hover, .forn-icone.whatsapp:focus-visible { color: #fff; border-color: #25D366; }
+  .forn-icone.desativado { opacity: .3; pointer-events: none; }
+  .selo.quitado { background: var(--verde-bg); color: var(--verde); }
+  .selo.pendente { background: rgba(255,201,77,.22); color: #8a6d1e; }
+
+  /* botão flutuante "+" pra adicionar fornecedor */
+  .fab-add {
+    position: fixed; right: 24px; bottom: 24px; z-index: 260;
+    width: 54px; height: 54px; border-radius: 50%;
+    background: var(--gradiente-luxo); color: var(--tinta-clara); border: none;
+    font-size: 1.8rem; line-height: 1; cursor: pointer;
+    box-shadow: var(--sombra-botao);
+    display: none; align-items: center; justify-content: center;
+    transition: transform .2s ease;
+  }
+  .fab-add.visivel { display: flex; }
+  .fab-add:hover, .fab-add:focus-visible { transform: scale(1.08); }
+
+  /* modal de detalhe/edição de fornecedor */
+  .forn-detalhe-campo { margin-bottom: var(--sp-md); }
+  .forn-detalhe-rotulo { display: block; font-size: .66rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); margin-bottom: .3rem; }
+  .forn-detalhe-valor { font-size: .92rem; color: var(--tinta); }
+  .forn-toggle-linha { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .7rem 0; border-top: 1px solid var(--linha); }
+  .forn-toggle-linha:first-child { border-top: none; }
+  .forn-toggle-btn {
+    border: 1px solid var(--linha-forte); background: var(--areia-0); cursor: pointer;
+    padding: .4rem .9rem; font-family: var(--f-corpo); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-suave);
+  }
+  .forn-toggle-btn.ativo { background: var(--verde); border-color: var(--verde); color: #fff; }
+
+  .campo-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-md); text-align: left; }
+  .campo-form label { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-suave); }
+  .campo-form label .opcional { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+  .campo-form input, .campo-form select {
+    height: 44px; padding: 0 12px; border: 1px solid var(--linha-forte); background: var(--areia-0);
+    font-family: var(--f-corpo); font-size: .9rem; color: var(--tinta);
+  }
+  .campo-form input:focus, .campo-form select:focus { border-color: var(--rosa); outline: none; }
+  .forn-form-erro { font-size: .78rem; color: var(--rosa-texto); min-height: 1.1em; margin-bottom: .6rem; }
+  .forn-remover-link { display: block; text-align: center; margin-top: var(--sp-sm); background: none; border: none; cursor: pointer; font-size: .74rem; color: var(--tinta-suave); text-decoration: underline; }
+  .forn-remover-link:hover { color: var(--rosa-texto); }
+
   .album-admin-thumb { width: 52px; height: 52px; object-fit: cover; border-radius: 4px; flex-shrink: 0; background: var(--areia-0); }
   .album-admin-comentarios { margin-top: .7rem; padding-top: .6rem; border-top: 1px dashed var(--linha); display: flex; flex-direction: column; gap: .4rem; }
   .album-admin-comentario { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-size: .82rem; color: var(--tinta); }
@@ -162,6 +225,7 @@
     <button class="aba" data-secao="presentes" role="tab" type="button">Presentes</button>
     <button class="aba" data-secao="recados" role="tab" type="button">Recados</button>
     <button class="aba" data-secao="album" role="tab" type="button">Álbum</button>
+    <button class="aba" data-secao="fornecedores" role="tab" type="button">Fornecedores</button>
   </div>
 
   <section class="secao ativa" id="secao-confirmacoes">
@@ -194,9 +258,76 @@
     <div class="cartoes" id="albumCartoes"></div>
     <div id="albumLista"><p class="estado">Carregando…</p></div>
   </section>
+
+  <section class="secao" id="secao-fornecedores">
+    <div class="cartoes" id="fornCartoes"></div>
+    <div id="fornLista"><p class="estado">Carregando…</p></div>
+  </section>
 </main>
 
+<button class="fab-add" id="fabAddFornecedor" type="button" aria-label="Adicionar fornecedor" title="Adicionar fornecedor">+</button>
+
+<!-- MODAL DETALHE DO FORNECEDOR -->
+<div class="modal-overlay" id="modalFornDetalhe" role="dialog" aria-modal="true" aria-labelledby="fornDetalheTitulo" onclick="fecharModalFora(event, 'modalFornDetalhe')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalFornDetalhe')" aria-label="Fechar">✕</button>
+    <span class="modal-tag" id="fornDetalheServico"></span>
+    <h2 id="fornDetalheTitulo"></h2>
+    <div id="fornDetalheCorpo"></div>
+  </div>
+</div>
+
+<!-- MODAL ADICIONAR/EDITAR FORNECEDOR -->
+<div class="modal-overlay" id="modalFornForm" role="dialog" aria-modal="true" aria-labelledby="fornFormTitulo" onclick="fecharModalFora(event, 'modalFornForm')">
+  <div class="modal-caixa">
+    <button class="modal-fechar" onclick="fecharModal('modalFornForm')" aria-label="Fechar">✕</button>
+    <span class="modal-tag">Fornecedor</span>
+    <h2 id="fornFormTitulo">Adicionar fornecedor</h2>
+    <form id="fornForm">
+      <input type="hidden" id="fornFormId">
+      <div class="campo-form">
+        <label for="fornFormServico">Serviço</label>
+        <input type="text" id="fornFormServico" required placeholder="Ex.: Buffet, DJ, Fotografia…">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormEmpresa">Empresa</label>
+        <input type="text" id="fornFormEmpresa" required placeholder="Nome da empresa">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormResponsavel">Responsável <span class="opcional">(opcional)</span></label>
+        <input type="text" id="fornFormResponsavel" placeholder="Nome de quem atende">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormTelefone">Telefone <span class="opcional">(opcional)</span></label>
+        <input type="text" id="fornFormTelefone" placeholder="+55 11 90000-0000">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormStatus">Status</label>
+        <select id="fornFormStatus">
+          <option value="quitado">Quitado</option>
+          <option value="pendente">Pendente</option>
+        </select>
+      </div>
+      <div class="campo-form">
+        <label for="fornFormStatusDetalhe">Valor pendente <span class="opcional">(opcional — deixe "total" se nada foi pago)</span></label>
+        <input type="text" id="fornFormStatusDetalhe" placeholder="Ex.: 1100 ou total">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormReuniaoData">Reunião agendada <span class="opcional">(opcional)</span></label>
+        <input type="text" id="fornFormReuniaoData" placeholder="Ex.: 02/10 às 21h">
+      </div>
+      <div class="campo-form">
+        <label for="fornFormReuniaoLink">Link da reunião <span class="opcional">(opcional)</span></label>
+        <input type="text" id="fornFormReuniaoLink" placeholder="Link do Meet/Zoom, se houver">
+      </div>
+      <p class="forn-form-erro" id="fornFormErro"></p>
+      <button class="btn btn-primario" type="submit" id="fornFormSalvar">Salvar</button>
+    </form>
+    <button class="forn-remover-link" id="fornFormRemover" type="button">Remover este fornecedor</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/admin.js?v=5"></script>
+<script src="js/admin.js?v=6"></script>
 </body>
 </html>

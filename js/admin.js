@@ -98,12 +98,35 @@ try {
   if (sessionStorage.getItem(CHAVE_SESSAO) === '1') abrirPainel();
 } catch { /* sessionStorage indisponível: mostra o portão normalmente */ }
 
+/* ===== modais (mesmo padrão simples usado no site principal) ===== */
+function abrirModal(id) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.classList.add('aberta');
+  document.body.style.overflow = 'hidden';
+}
+function fecharModal(id) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.classList.remove('aberta');
+  document.body.style.overflow = '';
+}
+function fecharModalFora(event, id) {
+  if (event.target.id === id) fecharModal(id);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.modal-overlay.aberta').forEach((m) => fecharModal(m.id));
+});
+
 /* ===== navegação por abas ===== */
+const fabAddFornecedor = document.getElementById('fabAddFornecedor');
 document.querySelectorAll('.aba').forEach((aba) => {
   aba.addEventListener('click', () => {
     document.querySelectorAll('.aba').forEach((a) => a.classList.toggle('ativa', a === aba));
     const alvo = aba.dataset.secao;
     document.querySelectorAll('.secao').forEach((s) => s.classList.toggle('ativa', s.id === `secao-${alvo}`));
+    if (fabAddFornecedor) fabAddFornecedor.classList.toggle('visivel', alvo === 'fornecedores');
   });
 });
 
@@ -426,9 +449,237 @@ document.getElementById('albumLista').addEventListener('click', async (e) => {
   }
 });
 
+/* ===== fornecedores ===== */
+let fornecedoresLista = [];
+
+const ICONE_CONTRATO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>';
+const ICONE_EDITAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+
+function linkWhatsAppFornecedor(telefone) {
+  const numero = (telefone || '').replace(/\D/g, '');
+  return numero ? `https://wa.me/${numero}` : '';
+}
+
+function rotuloStatusFornecedor(f) {
+  if (f.status !== 'pendente') return 'Quitado';
+  if (!f.status_detalhe) return 'Pendente';
+  return f.status_detalhe === 'total' ? 'Pendente (total)' : `Pendente · R$ ${f.status_detalhe}`;
+}
+
+function renderFornecedores() {
+  const cartoes = document.getElementById('fornCartoes');
+  const lista = document.getElementById('fornLista');
+
+  const quitados = fornecedoresLista.filter((f) => f.status !== 'pendente');
+  const pendentes = fornecedoresLista.filter((f) => f.status === 'pendente');
+  const comContrato = fornecedoresLista.filter((f) => f.contrato_arquivo);
+
+  cartoes.innerHTML =
+    cartao(fornecedoresLista.length, 'Fornecedores', 'destaque') +
+    cartao(quitados.length, 'Quitados', 'verde') +
+    cartao(pendentes.length, 'Pendentes') +
+    cartao(comContrato.length, 'Com contrato');
+
+  if (!fornecedoresLista.length) {
+    lista.innerHTML = '<p class="estado">Nenhum fornecedor cadastrado ainda.</p>';
+    return;
+  }
+
+  lista.innerHTML = fornecedoresLista.map((f) => {
+    const linkWpp = linkWhatsAppFornecedor(f.telefone);
+    const botaoWpp = `<a class="forn-icone whatsapp${linkWpp ? '' : ' desativado'}" href="${linkWpp || '#'}" target="_blank" rel="noopener" aria-label="Chamar ${escaparHtml(f.empresa)} no WhatsApp" title="WhatsApp">${ICONE_WHATSAPP}</a>`;
+    const botaoContrato = f.contrato_arquivo
+      ? `<a class="forn-icone" href="${escaparHtml(f.contrato_arquivo)}" target="_blank" rel="noopener" aria-label="Abrir contrato de ${escaparHtml(f.empresa)}" title="Ver contrato">${ICONE_CONTRATO}</a>`
+      : `<span class="forn-icone desativado" title="Sem contrato anexado">${ICONE_CONTRATO}</span>`;
+    const botaoEditar = `<button type="button" class="forn-icone" data-editar-fornecedor="${f.id}" aria-label="Editar ${escaparHtml(f.empresa)}" title="Editar">${ICONE_EDITAR}</button>`;
+    return `
+      <div class="forn-linha">
+        <button type="button" class="forn-info" data-abrir-fornecedor="${f.id}">
+          <span class="forn-empresa">${escaparHtml(f.empresa)}</span>
+          <span class="forn-servico">${escaparHtml(f.servico)}</span>
+        </button>
+        <div class="forn-acoes">
+          <span class="selo ${f.status}">${rotuloStatusFornecedor(f)}</span>
+          ${botaoContrato}
+          ${botaoWpp}
+          ${botaoEditar}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function carregarFornecedores() {
+  const client = getClient();
+  const lista = document.getElementById('fornLista');
+  if (!client) { lista.innerHTML = '<p class="estado">Não foi possível conectar.</p>'; return; }
+  const { data, error } = await client
+    .from('fornecedores')
+    .select('*')
+    .order('sort_order', { ascending: true });
+  if (error) { lista.innerHTML = '<p class="estado">Não foi possível carregar os fornecedores.</p>'; return; }
+  fornecedoresLista = data || [];
+  renderFornecedores();
+}
+
+function abrirDetalheFornecedor(id) {
+  const f = fornecedoresLista.find((x) => x.id === id);
+  if (!f) return;
+  document.getElementById('fornDetalheServico').textContent = f.servico;
+  document.getElementById('fornDetalheTitulo').textContent = f.empresa;
+
+  const linkWpp = linkWhatsAppFornecedor(f.telefone);
+  const reuniaoTexto = f.reuniao_data
+    ? `Reunião marcada, agendado para ${escaparHtml(f.reuniao_data)}${f.reuniao_link ? ` — <a href="${escaparHtml(f.reuniao_link)}" target="_blank" rel="noopener">acessar link</a>` : ''}`
+    : 'Nenhuma reunião agendada ainda.';
+
+  document.getElementById('fornDetalheCorpo').innerHTML = `
+    <div class="forn-detalhe-campo">
+      <span class="forn-detalhe-rotulo">Responsável</span>
+      <span class="forn-detalhe-valor">${escaparHtml(f.responsavel || '—')}</span>
+    </div>
+    <div class="forn-detalhe-campo">
+      <span class="forn-detalhe-rotulo">Telefone</span>
+      <span class="forn-detalhe-valor">${f.telefone ? `<a href="${linkWpp}" target="_blank" rel="noopener">${escaparHtml(f.telefone)}</a>` : '—'}</span>
+    </div>
+    <div class="forn-detalhe-campo">
+      <span class="forn-detalhe-rotulo">Status</span>
+      <span class="forn-detalhe-valor">${rotuloStatusFornecedor(f)}</span>
+    </div>
+    <div class="forn-detalhe-campo">
+      <span class="forn-detalhe-rotulo">Reunião</span>
+      <span class="forn-detalhe-valor">${reuniaoTexto}</span>
+    </div>
+    <div class="forn-toggle-linha">
+      <span class="forn-detalhe-rotulo" style="margin:0">Confirmação enviada</span>
+      <button type="button" class="forn-toggle-btn${f.confirmacao_enviada ? ' ativo' : ''}" data-toggle-forn="${f.id}" data-campo="confirmacao_enviada">${f.confirmacao_enviada ? 'Sim' : 'Não'}</button>
+    </div>
+    <div class="forn-toggle-linha">
+      <span class="forn-detalhe-rotulo" style="margin:0">Confirmação recebida</span>
+      <button type="button" class="forn-toggle-btn${f.confirmacao_recebida ? ' ativo' : ''}" data-toggle-forn="${f.id}" data-campo="confirmacao_recebida">${f.confirmacao_recebida ? 'Sim' : 'Não'}</button>
+    </div>
+  `;
+  abrirModal('modalFornDetalhe');
+}
+
+document.getElementById('fornDetalheCorpo').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-toggle-forn]');
+  if (!btn) return;
+  const client = getClient();
+  if (!client) return;
+  const id = Number(btn.dataset.toggleForn);
+  const campo = btn.dataset.campo;
+  const f = fornecedoresLista.find((x) => x.id === id);
+  if (!f) return;
+  const novoValor = !f[campo];
+  btn.disabled = true;
+  const { error } = await client.from('fornecedores').update({ [campo]: novoValor }).eq('id', id);
+  btn.disabled = false;
+  if (error) { alert('Não foi possível salvar agora.'); return; }
+  f[campo] = novoValor;
+  abrirDetalheFornecedor(id);
+});
+
+/* ===== adicionar / editar fornecedor ===== */
+const fornForm = document.getElementById('fornForm');
+const fornFormErro = document.getElementById('fornFormErro');
+const fornFormRemover = document.getElementById('fornFormRemover');
+
+function abrirFormFornecedor(id) {
+  const f = id ? fornecedoresLista.find((x) => x.id === id) : null;
+  document.getElementById('fornFormTitulo').textContent = f ? 'Editar fornecedor' : 'Adicionar fornecedor';
+  document.getElementById('fornFormId').value = f ? f.id : '';
+  document.getElementById('fornFormServico').value = f ? f.servico : '';
+  document.getElementById('fornFormEmpresa').value = f ? f.empresa : '';
+  document.getElementById('fornFormResponsavel').value = f ? (f.responsavel || '') : '';
+  document.getElementById('fornFormTelefone').value = f ? (f.telefone || '') : '';
+  document.getElementById('fornFormStatus').value = f ? f.status : 'pendente';
+  document.getElementById('fornFormStatusDetalhe').value = f ? (f.status_detalhe || '') : '';
+  document.getElementById('fornFormReuniaoData').value = f ? (f.reuniao_data || '') : '';
+  document.getElementById('fornFormReuniaoLink').value = f ? (f.reuniao_link || '') : '';
+  fornFormErro.textContent = '';
+  fornFormRemover.style.display = f ? 'block' : 'none';
+  abrirModal('modalFornForm');
+}
+
+document.getElementById('fornLista').addEventListener('click', (e) => {
+  const btnAbrir = e.target.closest('[data-abrir-fornecedor]');
+  if (btnAbrir) { abrirDetalheFornecedor(Number(btnAbrir.dataset.abrirFornecedor)); return; }
+  const btnEditar = e.target.closest('[data-editar-fornecedor]');
+  if (btnEditar) { abrirFormFornecedor(Number(btnEditar.dataset.editarFornecedor)); }
+});
+
+fabAddFornecedor?.addEventListener('click', () => abrirFormFornecedor(null));
+
+fornForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  fornFormErro.textContent = '';
+
+  const servico = document.getElementById('fornFormServico').value.trim();
+  const empresa = document.getElementById('fornFormEmpresa').value.trim();
+  if (!servico || !empresa) {
+    fornFormErro.textContent = 'Preencha ao menos o serviço e a empresa.';
+    return;
+  }
+
+  const idBruto = document.getElementById('fornFormId').value;
+  const id = idBruto ? Number(idBruto) : null;
+  const payload = {
+    servico,
+    empresa,
+    responsavel: document.getElementById('fornFormResponsavel').value.trim() || null,
+    telefone: document.getElementById('fornFormTelefone').value.replace(/[^\d+]/g, '') || null,
+    status: document.getElementById('fornFormStatus').value,
+    status_detalhe: document.getElementById('fornFormStatusDetalhe').value.trim() || null,
+    reuniao_data: document.getElementById('fornFormReuniaoData').value.trim() || null,
+    reuniao_link: document.getElementById('fornFormReuniaoLink').value.trim() || null,
+  };
+
+  const botao = document.getElementById('fornFormSalvar');
+  botao.disabled = true;
+  botao.textContent = 'Salvando…';
+
+  const client = getClient();
+  if (!client) { fornFormErro.textContent = 'Não foi possível conectar agora.'; botao.disabled = false; botao.textContent = 'Salvar'; return; }
+
+  let erro;
+  if (id) {
+    ({ error: erro } = await client.from('fornecedores').update(payload).eq('id', id));
+  } else {
+    payload.sort_order = fornecedoresLista.length + 1;
+    ({ error: erro } = await client.from('fornecedores').insert(payload));
+  }
+
+  botao.disabled = false;
+  botao.textContent = 'Salvar';
+
+  if (erro) { fornFormErro.textContent = 'Não foi possível salvar agora. Tente novamente.'; return; }
+
+  fecharModal('modalFornForm');
+  carregarFornecedores();
+});
+
+fornFormRemover.addEventListener('click', async () => {
+  const id = Number(document.getElementById('fornFormId').value);
+  if (!id) return;
+  const f = fornecedoresLista.find((x) => x.id === id);
+  if (!confirm(`Remover o fornecedor "${f?.empresa || ''}"? Essa ação não pode ser desfeita.`)) return;
+
+  const client = getClient();
+  if (!client) return;
+  fornFormRemover.disabled = true;
+  const { error } = await client.from('fornecedores').delete().eq('id', id);
+  fornFormRemover.disabled = false;
+  if (error) { alert('Não foi possível remover agora.'); return; }
+
+  fecharModal('modalFornForm');
+  carregarFornecedores();
+});
+
 function carregarTudo() {
   carregarConfirmacoes();
   carregarPresentes();
   carregarRecados();
   carregarAlbum();
+  carregarFornecedores();
 }
