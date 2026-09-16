@@ -451,6 +451,7 @@ document.getElementById('albumLista').addEventListener('click', async (e) => {
 
 /* ===== fornecedores ===== */
 let fornecedoresLista = [];
+let fornFiltro = 'todos';
 
 const ICONE_CONTRATO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>';
 const ICONE_EDITAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -466,6 +467,22 @@ function rotuloStatusFornecedor(f) {
   return f.status_detalhe === 'total' ? 'Pendente (total)' : `Pendente · R$ ${f.status_detalhe}`;
 }
 
+function cartaoFornFiltro(n, rotulo, classe, filtroValor) {
+  const ativo = fornFiltro === filtroValor;
+  return `<button type="button" class="cartao cartao-filtro${classe ? ' ' + classe : ''}${ativo ? ' ativo-filtro' : ''}" data-forn-filtro="${filtroValor}"><div class="n">${n}</div><div class="r">${rotulo}</div></button>`;
+}
+
+function fornecedoresFiltrados() {
+  return fornecedoresLista.filter((f) => {
+    if (fornFiltro === 'quitado') return f.status !== 'pendente';
+    if (fornFiltro === 'pendente') return f.status === 'pendente';
+    if (fornFiltro === 'com-contrato') return !!f.contrato_arquivo;
+    if (fornFiltro === 'agendados') return !!f.reuniao_data;
+    if (fornFiltro === 'sem-retorno') return f.confirmacao_recebida !== true;
+    return true;
+  });
+}
+
 function renderFornecedores() {
   const cartoes = document.getElementById('fornCartoes');
   const lista = document.getElementById('fornLista');
@@ -473,19 +490,29 @@ function renderFornecedores() {
   const quitados = fornecedoresLista.filter((f) => f.status !== 'pendente');
   const pendentes = fornecedoresLista.filter((f) => f.status === 'pendente');
   const comContrato = fornecedoresLista.filter((f) => f.contrato_arquivo);
+  const agendados = fornecedoresLista.filter((f) => f.reuniao_data);
+  const semRetorno = fornecedoresLista.filter((f) => f.confirmacao_recebida !== true);
 
   cartoes.innerHTML =
-    cartao(fornecedoresLista.length, 'Fornecedores', 'destaque') +
-    cartao(quitados.length, 'Quitados', 'verde') +
-    cartao(pendentes.length, 'Pendentes') +
-    cartao(comContrato.length, 'Com contrato');
+    cartaoFornFiltro(fornecedoresLista.length, 'Fornecedores', 'destaque', 'todos') +
+    cartaoFornFiltro(quitados.length, 'Quitados', 'verde', 'quitado') +
+    cartaoFornFiltro(pendentes.length, 'Pagamentos pendentes', '', 'pendente') +
+    cartaoFornFiltro(comContrato.length, 'Com contrato', '', 'com-contrato') +
+    cartaoFornFiltro(agendados.length, 'Agendamentos', '', 'agendados') +
+    cartaoFornFiltro(semRetorno.length, 'Pendente de retorno', '', 'sem-retorno');
 
   if (!fornecedoresLista.length) {
     lista.innerHTML = '<p class="estado">Nenhum fornecedor cadastrado ainda.</p>';
     return;
   }
 
-  lista.innerHTML = fornecedoresLista.map((f) => {
+  const filtrados = fornecedoresFiltrados();
+  if (!filtrados.length) {
+    lista.innerHTML = '<p class="estado">Nenhum fornecedor nesse filtro.</p>';
+    return;
+  }
+
+  lista.innerHTML = filtrados.map((f) => {
     const linkWpp = linkWhatsAppFornecedor(f.telefone);
     const botaoWpp = `<a class="forn-icone whatsapp${linkWpp ? '' : ' desativado'}" href="${linkWpp || '#'}" target="_blank" rel="noopener" aria-label="Chamar ${escaparHtml(f.empresa)} no WhatsApp" title="WhatsApp">${ICONE_WHATSAPP}</a>`;
     const botaoContrato = f.contrato_arquivo
@@ -496,7 +523,7 @@ function renderFornecedores() {
       <div class="forn-linha">
         <button type="button" class="forn-info" data-abrir-fornecedor="${f.id}">
           <span class="forn-empresa">${escaparHtml(f.empresa)}</span>
-          <span class="forn-servico">${escaparHtml(f.servico)}</span>
+          <span class="forn-servico">${escaparHtml(f.servico)}${f.responsavel ? ` · ${escaparHtml(f.responsavel)}` : ''}</span>
         </button>
         <div class="forn-acoes">
           <span class="selo ${f.status}">${rotuloStatusFornecedor(f)}</span>
@@ -610,6 +637,14 @@ document.getElementById('fornLista').addEventListener('click', (e) => {
 });
 
 fabAddFornecedor?.addEventListener('click', () => abrirFormFornecedor(null));
+
+document.getElementById('fornCartoes').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-forn-filtro]');
+  if (!btn) return;
+  const valor = btn.dataset.fornFiltro;
+  fornFiltro = fornFiltro === valor ? 'todos' : valor;
+  renderFornecedores();
+});
 
 fornForm.addEventListener('submit', async (e) => {
   e.preventDefault();
