@@ -177,11 +177,22 @@
   .forn-detalhe-valor { font-size: .92rem; color: var(--tinta); }
   .forn-toggle-linha { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .7rem 0; border-top: 1px solid var(--linha); }
   .forn-toggle-linha:first-child { border-top: none; }
-  .forn-toggle-btn {
-    border: 1px solid var(--linha-forte); background: var(--areia-0); cursor: pointer;
-    padding: .4rem .9rem; font-family: var(--f-corpo); font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-suave);
+  /* interruptor sim/não (verde/vermelho) das confirmações do fornecedor */
+  .forn-switch { display: inline-flex; align-items: center; gap: 9px; background: none; border: none; cursor: pointer; padding: 0; }
+  .forn-switch-trilho {
+    position: relative; width: 40px; height: 22px; border-radius: 999px;
+    background: #c0392b; transition: background-color .25s ease;
   }
-  .forn-toggle-btn.ativo { background: var(--verde); border-color: var(--verde); color: #fff; }
+  .forn-switch.ligado .forn-switch-trilho { background: var(--verde); }
+  .forn-switch-bolinha {
+    position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.35);
+    transition: transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .forn-switch.ligado .forn-switch-bolinha { transform: translateX(18px); }
+  .forn-switch-rotulo { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #c0392b; min-width: 26px; }
+  .forn-switch.ligado .forn-switch-rotulo { color: var(--verde); }
+  .forn-switch:focus-visible .forn-switch-trilho { outline: 2px solid var(--rosa-texto); outline-offset: 2px; }
 
   .campo-form { display: flex; flex-direction: column; gap: 6px; margin-bottom: var(--sp-md); text-align: left; }
   .campo-form label { font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-suave); }
@@ -318,7 +329,7 @@
       </div>
       <div class="campo-form">
         <label for="fornFormReuniaoData">Reunião agendada <span class="opcional">(opcional)</span></label>
-        <input type="text" id="fornFormReuniaoData" placeholder="Ex.: 02/10 às 21h">
+        <input type="datetime-local" id="fornFormReuniaoData">
       </div>
       <div class="campo-form">
         <label for="fornFormReuniaoLink">Link da reunião <span class="opcional">(opcional)</span></label>
@@ -332,6 +343,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/admin.js?v=8"></script>
+<script src="js/admin.js?v=9"></script>
 </body>
 </html>

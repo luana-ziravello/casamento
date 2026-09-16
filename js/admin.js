@@ -582,6 +582,24 @@ async function carregarFornecedores() {
   renderFornecedores();
 }
 
+function formatarReuniao(valor) {
+  if (!valor) return '';
+  const d = new Date(valor);
+  if (Number.isNaN(d.getTime())) return valor; // dado antigo em texto livre, mostra como veio
+  const dataFmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(d);
+  const horaFmt = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(d);
+  return `${dataFmt} às ${horaFmt}`;
+}
+
+function fornSwitchHtml(id, campo, valor) {
+  return `
+    <button type="button" class="forn-switch ${valor ? 'ligado' : 'desligado'}" data-toggle-forn="${id}" data-campo="${campo}" role="switch" aria-checked="${valor ? 'true' : 'false'}">
+      <span class="forn-switch-trilho" aria-hidden="true"><span class="forn-switch-bolinha"></span></span>
+      <span class="forn-switch-rotulo">${valor ? 'Sim' : 'Não'}</span>
+    </button>
+  `;
+}
+
 function abrirDetalheFornecedor(id) {
   const f = fornecedoresLista.find((x) => x.id === id);
   if (!f) return;
@@ -590,7 +608,7 @@ function abrirDetalheFornecedor(id) {
 
   const linkWpp = linkWhatsAppFornecedor(f.telefone);
   const reuniaoTexto = f.reuniao_data
-    ? `Reunião marcada, agendado para ${escaparHtml(f.reuniao_data)}${f.reuniao_link ? ` — <a href="${escaparHtml(f.reuniao_link)}" target="_blank" rel="noopener">acessar link</a>` : ''}`
+    ? `Reunião marcada, agendado para ${escaparHtml(formatarReuniao(f.reuniao_data))}${f.reuniao_link ? ` — <a href="${escaparHtml(f.reuniao_link)}" target="_blank" rel="noopener">acessar link</a>` : ''}`
     : 'Nenhuma reunião agendada ainda.';
 
   document.getElementById('fornDetalheCorpo').innerHTML = `
@@ -612,11 +630,11 @@ function abrirDetalheFornecedor(id) {
     </div>
     <div class="forn-toggle-linha">
       <span class="forn-detalhe-rotulo" style="margin:0">Confirmação enviada</span>
-      <button type="button" class="forn-toggle-btn${f.confirmacao_enviada ? ' ativo' : ''}" data-toggle-forn="${f.id}" data-campo="confirmacao_enviada">${f.confirmacao_enviada ? 'Sim' : 'Não'}</button>
+      ${fornSwitchHtml(f.id, 'confirmacao_enviada', f.confirmacao_enviada)}
     </div>
     <div class="forn-toggle-linha">
       <span class="forn-detalhe-rotulo" style="margin:0">Confirmação recebida</span>
-      <button type="button" class="forn-toggle-btn${f.confirmacao_recebida ? ' ativo' : ''}" data-toggle-forn="${f.id}" data-campo="confirmacao_recebida">${f.confirmacao_recebida ? 'Sim' : 'Não'}</button>
+      ${fornSwitchHtml(f.id, 'confirmacao_recebida', f.confirmacao_recebida)}
     </div>
   `;
   abrirModal('modalFornDetalhe');
