@@ -117,10 +117,12 @@ export function ehUuid(v: unknown): v is string {
 // deno-lint-ignore no-explicit-any
 export type PagamentoMP = Record<string, any>;
 
-export async function buscarPagamentoMP(id: string): Promise<PagamentoMP | null> {
+/** Pagamento na API oficial. `undefined` = não existe nesta conta; `null` = falha temporária. */
+export async function buscarPagamentoMP(id: string): Promise<PagamentoMP | null | undefined> {
   const res = await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(id)}`, {
     headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
   });
+  if (res.status === 404) return undefined;
   if (!res.ok) {
     console.error('Falha ao consultar pagamento', id, res.status, await res.text().catch(() => ''));
     return null;

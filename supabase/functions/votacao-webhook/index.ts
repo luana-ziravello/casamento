@@ -40,6 +40,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const pagamento = await buscarPagamentoMP(paymentId);
+    if (pagamento === undefined) return ok(); // não existe nesta conta: notificação falsa ou de outra conta
     // Falha temporária na API: responde erro para o Mercado Pago tentar de novo.
     if (!pagamento) return new Response('tente novamente', { status: 503 });
     if (!contribuicaoDaReferencia(pagamento.external_reference)) return ok(); // não é da votação
