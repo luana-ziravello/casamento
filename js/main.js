@@ -104,6 +104,21 @@ document.documentElement.classList.add('js');
   });
 })();
 
+/* ===== item "Votação" no menu: só a partir de 10/10/2026 às 18h (horário de Brasília) ===== */
+(function () {
+  const itens = document.querySelectorAll('[data-menu-votacao]');
+  if (!itens.length || !window.SITE_CONFIG || !window.SITE_CONFIG.votacaoNoAr) return;
+  const mostrar = () => itens.forEach((li) => { li.hidden = false; });
+  window.SITE_CONFIG.votacaoNoAr().then((noAr) => {
+    if (noAr) { mostrar(); return; }
+    // página aberta antes do horário: aparece sozinho na hora certa
+    window.SITE_CONFIG.obterAgora().then((agoraServidor) => {
+      const falta = new Date(window.SITE_CONFIG.VOTACAO_LIBERACAO_ISO).getTime() - agoraServidor.getTime();
+      if (falta > 0 && falta < 2 ** 31 - 1) setTimeout(mostrar, falta + 1000);
+    });
+  });
+})();
+
 /* ===== modais (traje / padrinhos / recado / etc.) ===== */
 const __ultimoFocoModal = {};
 function abrirModal(id) {

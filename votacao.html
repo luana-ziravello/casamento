@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Votação — Luana &amp; Heitor</title>
+<meta name="description" content="Brincadeira da gravata do casamento de Luana &amp; Heitor.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2730%27 fill=%27%23FEF8E0%27/%3E%3Ccircle cx=%2726%27 cy=%2732%27 r=%2716%27 fill=%27%23F46B30%27 opacity=%27.9%27/%3E%3Ccircle cx=%2738%27 cy=%2732%27 r=%2716%27 fill=%27%23E82F5D%27 opacity=%27.85%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css?v=9">
+<style>
+  [hidden] { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  /* ===== cabeçalho (mesmo padrão de presentes.html) ===== */
+  .cabecalho-pagina { position: relative; z-index: 2; padding: 132px clamp(1.3rem, 4vw, 3rem) var(--sp-lg); text-align: center; }
+  .cabecalho-mancha { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .voltar {
+    position: relative; z-index: 1;
+    display: inline-flex; align-items: center; gap: .5rem;
+    text-decoration: none; font-size: .68rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--tinta-suave); opacity: .8;
+    margin-bottom: var(--sp-lg);
+    transition: opacity .3s, letter-spacing .3s;
+  }
+  .voltar:hover, .voltar:focus-visible { opacity: 1; letter-spacing: .18em; }
+  .cabecalho-pagina .eyebrow { position: relative; z-index: 1; justify-content: center; }
+  .cabecalho-pagina h1 {
+    position: relative; z-index: 1;
+    font-family: var(--f-display); font-weight: 400; font-style: italic;
+    font-size: clamp(2.6rem, 7vw, 3.8rem); color: var(--tinta); margin-bottom: var(--sp-sm); line-height: 1.15;
+  }
+  .cabecalho-pagina p { position: relative; z-index: 1; font-size: .92rem; color: var(--tinta-suave); max-width: 440px; margin: 0 auto; line-height: 1.85; }
+
+  main.votacao { position: relative; z-index: 2; max-width: 540px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 1.5rem) var(--sp-2xl); }
+
+  /* ===== cartão principal ===== */
+  .votacao-cartao {
+    position: relative;
+    background-color: var(--tinta-clara);
+    border: 1px solid var(--dourado-linha);
+    box-shadow: var(--sombra-card);
+    padding: var(--sp-lg) clamp(1.3rem, 5vw, 2.4rem) var(--sp-lg);
+  }
+  .votacao-cartao::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gradiente-luxo); }
+
+  .votacao-timer { text-align: center; padding-bottom: var(--sp-md); margin-bottom: var(--sp-md); border-bottom: 1px solid var(--linha); }
+  .votacao-timer-rotulo { font-size: .66rem; font-weight: 600; letter-spacing: .24em; text-transform: uppercase; color: var(--rosa-texto); }
+  .votacao-timer-digitos {
+    font-family: var(--f-display); font-size: clamp(3.4rem, 15vw, 4.6rem); line-height: 1.1;
+    color: var(--tinta); font-variant-numeric: tabular-nums; letter-spacing: .02em; margin: .15rem 0 .1rem;
+  }
+  .votacao-timer.urgente .votacao-timer-digitos { color: var(--rosa-texto); }
+  .votacao-mensagem { font-family: var(--f-display); font-style: italic; font-size: 1.08rem; color: var(--tinta-suave); line-height: 1.6; }
+  .votacao-timer.encerrada .votacao-mensagem { color: var(--rosa-texto); }
+
+  /* ===== formulário ===== */
+  .campo-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: var(--sp-md); text-align: left; }
+  .campo-form label { font-size: .68rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-suave); }
+  .campo-form input {
+    width: 100%; padding: 12px 2px; border: none; border-bottom: 1px solid var(--linha-forte); border-radius: 0;
+    background: transparent; font-family: var(--f-corpo); font-size: 1rem; color: var(--tinta);
+    transition: border-color .3s;
+  }
+  .campo-form input:focus { border-color: var(--rosa); outline: none; }
+  .campo-form input:disabled { opacity: .55; }
+  .campo-valor { position: relative; }
+  .campo-valor-prefixo { position: absolute; left: 2px; bottom: 13px; font-family: var(--f-display); font-size: 1.05rem; color: var(--tinta-suave); }
+  .campo-valor input { padding-left: 34px; font-family: var(--f-display); font-size: 1.2rem; }
+  .campo-ajuda { font-size: .72rem; color: var(--tinta-suave); opacity: .85; }
+
+  /* ===== destaque da maior contribuição (logo acima do botão) ===== */
+  .votacao-lider {
+    text-align: center; margin: var(--sp-md) 0 var(--sp-sm);
+    padding: 1rem .8rem; border-top: 1px solid var(--linha); border-bottom: 1px solid var(--linha);
+    background: var(--gradiente-suave);
+  }
+  .votacao-lider-texto { font-size: .82rem; color: var(--tinta-suave); line-height: 1.5; }
+  .votacao-lider-nome {
+    display: block; font-family: var(--f-display); font-style: italic; font-size: clamp(1.5rem, 6vw, 1.9rem);
+    color: var(--coral-nome); line-height: 1.25; margin-top: .2rem; overflow-wrap: anywhere;
+  }
+  .votacao-lider-nome.trocou { animation: liderTrocou .9s ease; }
+  .votacao-lider-vazio { font-family: var(--f-display); font-style: italic; font-size: 1.25rem; color: var(--tinta); }
+  @keyframes liderTrocou { 0% { transform: scale(.92); opacity: .2; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: scale(1); } }
+
+  .votacao-cartao .btn { width: 100%; }
+  .btn:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
+  .btn:disabled:hover { color: var(--rosa-texto); letter-spacing: .16em; }
+  .btn:disabled::before { display: none; }
+  .votacao-erro { display: none; font-size: .8rem; color: var(--rosa-texto); margin-top: .8rem; text-align: center; }
+  .votacao-erro.mostrar { display: block; }
+  .votacao-nota { font-size: .74rem; color: var(--tinta-suave); text-align: center; margin-top: .8rem; line-height: 1.6; }
+
+  /* ===== aviso de retorno do Mercado Pago ===== */
+  .banner-pagamento {
+    padding: 1rem 1.2rem; margin-bottom: var(--sp-md);
+    border: 1px solid var(--linha-forte); font-size: .86rem; color: var(--tinta); line-height: 1.6;
+    background-color: var(--tinta-clara);
+  }
+  .banner-pagamento.aprovado { border-color: var(--rosa-texto); }
+  .banner-pagamento.recusado { border-color: var(--coral-texto); }
+
+  /* ===== tela indisponível ===== */
+  .votacao-indisponivel { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; text-align: center; }
+  .votacao-indisponivel-caixa { max-width: 420px; }
+  .votacao-indisponivel-caixa h1 { font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: 1.8rem; margin: .7rem 0 .9rem; color: var(--tinta); }
+  .votacao-indisponivel-caixa p { color: var(--tinta-suave); margin-bottom: 1.5rem; line-height: 1.8; }
+
+  /* ===== animação decorativa "+1 voto" ===== */
+  .camada-votos { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+  .voto-flutuante {
+    position: absolute; left: 0; top: 0;
+    font-family: var(--f-display); font-style: italic; font-size: var(--tam, 1rem); white-space: nowrap;
+    color: var(--cor, var(--rosa-texto));
+    padding: .2em .65em; border-radius: 999px;
+    background: rgba(254, 248, 224, .82); border: 1px solid var(--dourado-linha);
+    opacity: 0; will-change: transform, opacity;
+    animation: votoSubir var(--dur, 3s) cubic-bezier(.22,.7,.3,1) forwards;
+  }
+  @keyframes votoSubir {
+    0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(.7); }
+    15% { opacity: 1; transform: translate(calc(var(--x) + var(--dx) * .15), calc(var(--y) - var(--sobe) * .15)) scale(1); }
+    75% { opacity: .9; }
+    100% { opacity: 0; transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) - var(--sobe))) scale(.95); }
+  }
+  @media (prefers-reduced-motion: reduce) { .camada-votos { display: none; } }
+
+  /* ===== painel administrativo (?admin) ===== */
+  .admin-votacao { position: relative; z-index: 2; max-width: 540px; margin: 0 auto var(--sp-lg); padding: 0 clamp(1rem, 4vw, 1.5rem); }
+  .admin-caixa { background: var(--tinta); color: var(--tinta-clara); padding: 1.3rem 1.3rem 1.4rem; border-radius: 2px; }
+  .admin-caixa h2 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.35rem; margin-bottom: .3rem; }
+  .admin-caixa p { font-size: .8rem; line-height: 1.6; color: var(--tinta-clara-soft); }
+  .admin-caixa .tag { font-size: .62rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--amarelo); }
+  .admin-caixa input {
+    width: 100%; margin: .8rem 0; padding: 12px; border: 1px solid rgba(254,248,224,.3); border-radius: 2px;
+    background: rgba(254,248,224,.06); color: var(--tinta-clara); font-family: var(--f-corpo); font-size: 1rem;
+  }
+  .admin-botoes { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+  .admin-botao {
+    flex: 1 1 auto; min-height: 44px; padding: 10px 14px; border-radius: 2px; cursor: pointer;
+    font-size: .66rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    background: transparent; color: var(--tinta-clara); border: 1px solid rgba(254,248,224,.45);
+  }
+  .admin-botao.principal { background: var(--gradiente-luxo); border-color: transparent; color: #fff; font-size: .74rem; }
+  .admin-botao:disabled { opacity: .45; cursor: not-allowed; }
+  .admin-botao.discreto { flex: 0 0 auto; border-color: transparent; color: rgba(254,248,224,.6); text-decoration: underline; text-underline-offset: 3px; }
+  .admin-status { margin-top: .9rem; font-size: .82rem; line-height: 1.7; }
+  .admin-status strong { color: var(--amarelo); font-weight: 600; }
+  .admin-erro { color: #FFB4C2; font-size: .78rem; margin-top: .4rem; min-height: 1em; }
+  .admin-lista { margin-top: 1rem; border-top: 1px solid rgba(254,248,224,.18); }
+  .admin-item { display: grid; grid-template-columns: 1fr auto; gap: .15rem .8rem; padding: .7rem 0; border-bottom: 1px solid rgba(254,248,224,.12); font-size: .82rem; }
+  .admin-item-nome { font-weight: 500; overflow-wrap: anywhere; }
+  .admin-item-valor { font-family: var(--f-display); font-size: 1rem; text-align: right; }
+  .admin-item-info { grid-column: 1 / -1; font-size: .72rem; color: rgba(254,248,224,.62); }
+  .selo { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .62rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-right: .35rem; }
+  .selo.conta { background: #2E7D4F; color: #fff; }
+  .selo.fora { background: #8A6D1F; color: #fff; }
+  .selo.pendente { background: rgba(254,248,224,.18); color: var(--tinta-clara); }
+  .selo.recusado { background: #8E2B3C; color: #fff; }
+  .selo.previa { background: transparent; border: 1px solid rgba(254,248,224,.4); color: rgba(254,248,224,.75); }
+
+  @media (max-width: 600px) {
+    .cabecalho-pagina { padding: 112px 1.3rem var(--sp-md); }
+    .votacao-cartao { padding: var(--sp-md) 1.2rem var(--sp-md); }
+  }
+</style>
+</head>
+<body>
+
+<a href="#votacaoCartao" class="skip-link">Pular para o conteúdo</a>
+<div class="camada-votos" id="camadaVotos" aria-hidden="true"></div>
+
+<nav class="nav" id="navbar">
+  <a href="index.html" class="nav-brand" aria-label="Luana &amp; Heitor — início">
+    <img class="nav-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Início</a></li>
+    <li><a href="index.html#grande-dia">O grande dia</a></li>
+    <li><a href="index.html#informacoes">Informações</a></li>
+    <li><a href="index.html#recados">Recados</a></li>
+    <li><a href="presentes.html">Presentes</a></li>
+    <li><a href="confirmacao.html">Confirmação</a></li>
+    <li data-menu-votacao hidden><a href="votacao.html" aria-current="page">Votação</a></li>
+  </ul>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Antes da liberação (ou se o servidor não responder) -->
+<div class="votacao-indisponivel" id="votacaoIndisponivel" hidden>
+  <div class="votacao-indisponivel-caixa">
+    <span class="modal-tag">Em breve</span>
+    <h1 id="indisponivelTitulo">A votação ainda não está disponível</h1>
+    <p id="indisponivelTexto">Ela abre no dia da festa. Até lá!</p>
+    <a class="btn btn-secundario" href="index.html">Voltar ao site</a>
+  </div>
+</div>
+
+<!-- Painel do administrador (somente com ?admin na URL) -->
+<section class="admin-votacao" id="adminVotacao" hidden aria-label="Controle da votação">
+  <div class="admin-caixa" id="adminLogin" hidden>
+    <span class="tag">Prévia do administrador</span>
+    <h2>Controle da votação</h2>
+    <p>Digite a senha da votação para ver a prévia e os controles.</p>
+    <form id="adminLoginForm">
+      <label for="adminSenha" class="sr-only">Senha da votação</label>
+      <input type="password" id="adminSenha" autocomplete="current-password" placeholder="Senha da votação" required>
+      <button class="admin-botao principal" type="submit" style="width:100%">Entrar</button>
+      <p class="admin-erro" id="adminLoginErro" role="alert"></p>
+    </form>
+  </div>
+
+  <div class="admin-caixa" id="adminPainel" hidden>
+    <span class="tag" id="adminTag">Prévia do administrador</span>
+    <h2>Controle da votação</h2>
+    <div class="admin-status" id="adminStatus">Carregando…</div>
+    <div class="admin-botoes">
+      <button class="admin-botao principal" type="button" id="btnIniciarVotacao">Iniciar votação</button>
+    </div>
+    <div class="admin-botoes">
+      <button class="admin-botao" type="button" id="btnConferirPagamentos">Conferir pagamentos</button>
+      <button class="admin-botao" type="button" id="btnAtualizarAdmin">Atualizar</button>
+    </div>
+    <p class="admin-erro" id="adminErro" role="alert"></p>
+    <div class="admin-lista" id="adminLista"></div>
+    <div class="admin-botoes">
+      <button class="admin-botao discreto" type="button" id="btnReiniciarVotacao">Reiniciar votação…</button>
+      <button class="admin-botao discreto" type="button" id="btnSairAdmin">Sair</button>
+    </div>
+  </div>
+</section>
+
+<div id="votacaoApp" hidden>
+  <header class="cabecalho-pagina" id="cabecalhoVotacao">
+    <svg class="cabecalho-mancha" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs><filter id="vb1"><feGaussianBlur stdDeviation="30"/></filter></defs>
+      <ellipse cx="90" cy="60" rx="200" ry="150" fill="var(--rosa)" opacity="0.07" filter="url(#vb1)"/>
+      <ellipse cx="1120" cy="440" rx="220" ry="160" fill="var(--coral)" opacity="0.08" filter="url(#vb1)"/>
+      <ellipse cx="1000" cy="30" rx="120" ry="90" fill="var(--amarelo)" opacity="0.14" filter="url(#vb1)"/>
+    </svg>
+    <a class="voltar" href="index.html">← Voltar ao site</a>
+    <span class="eyebrow">Brincadeira da gravata</span>
+    <h1>Votação</h1>
+    <p>Chegou a hora da brincadeira da gravata! Participe com uma contribuição para os noivos e entre nessa disputa com a gente.</p>
+  </header>
+
+  <main class="votacao" id="conteudo">
+    <div id="bannerPagamento" aria-live="polite"></div>
+
+    <section class="votacao-cartao" id="votacaoCartao" aria-labelledby="timerRotulo">
+      <div class="votacao-timer" id="votacaoTimer">
+        <div class="votacao-timer-rotulo" id="timerRotulo">Tempo da votação</div>
+        <div class="votacao-timer-digitos" id="timerDigitos" role="timer" aria-describedby="timerRotulo">20:00</div>
+        <p class="votacao-mensagem" id="votacaoMensagem" aria-live="polite">A votação começará em instantes!</p>
+      </div>
+
+      <form id="formContribuicao" novalidate>
+        <div class="campo-form">
+          <label for="campoNome">Seu nome</label>
+          <input type="text" id="campoNome" name="nome" maxlength="60" autocomplete="name" required placeholder="Como você quer aparecer?">
+        </div>
+        <div class="campo-form">
+          <label for="campoValor">Valor da contribuição</label>
+          <div class="campo-valor">
+            <span class="campo-valor-prefixo" aria-hidden="true">R$</span>
+            <input type="text" id="campoValor" name="valor" inputmode="decimal" autocomplete="off" required placeholder="0,00" aria-describedby="valorAjuda">
+          </div>
+          <span class="campo-ajuda" id="valorAjuda">Digite o valor que quiser.</span>
+        </div>
+
+        <div class="votacao-lider" id="votacaoLider" aria-live="polite">
+          <span class="votacao-lider-vazio">Quem vai inaugurar a brincadeira?</span>
+        </div>
+
+        <button class="btn btn-primario" type="submit" id="btnContribuir" disabled>Contribuir pelo Mercado Pago</button>
+        <p class="votacao-erro" id="votacaoErro" role="alert"></p>
+        <p class="votacao-nota">Pix ou cartão, no ambiente seguro do Mercado Pago. O destaque muda só depois que o pagamento é aprovado.</p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <a href="index.html" class="rodape-monograma-link" aria-label="Luana &amp; Heitor — início">
+      <img class="rodape-monograma" src="imagens/monograma.png" alt="" width="1254" height="1254">
+    </a>
+    <p>Feito com amor para <span class="destaque">Luana &amp; Heitor</span> · 10.10.2026</p>
+    <div class="rodape-links">
+      <a href="index.html">Início</a>
+      <a href="presentes.html">Presentes</a>
+    </div>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/config.js?v=2"></script>
+<script src="js/main.js?v=6"></script>
+<script src="js/votacao.js?v=1"></script>
+</body>
+</html>

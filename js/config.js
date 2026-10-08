@@ -44,6 +44,16 @@ window.SITE_CONFIG = (function () {
     return horaServidorPromise;
   }
 
+  /* Votação da brincadeira da gravata: o item "Votação" aparece no menu a
+     partir deste horário (America/Sao_Paulo, -03:00). A própria página e o
+     banco também conferem esse horário no servidor. */
+  const VOTACAO_LIBERACAO_ISO = '2026-10-10T18:00:00-03:00';
+
+  async function votacaoNoAr() {
+    const agora = await obterAgora();
+    return agora.getTime() >= new Date(VOTACAO_LIBERACAO_ISO).getTime();
+  }
+
   async function albumEstaNoAr() {
     if (!PHOTO_ALBUM_ENABLED) return false;
     const agora = await obterAgora();
@@ -57,5 +67,7 @@ window.SITE_CONFIG = (function () {
     SUPABASE_PUBLISHABLE_KEY,
     obterAgora,
     albumEstaNoAr,
+    VOTACAO_LIBERACAO_ISO,
+    votacaoNoAr,
   };
 })();
