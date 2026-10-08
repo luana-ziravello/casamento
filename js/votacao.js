@@ -310,6 +310,15 @@
     return rects.some((p) => r.left < p.right + folga && r.right > p.left - folga && r.top < p.bottom + folga && r.bottom > p.top - folga);
   }
 
+  // Nasce quase sempre nas laterais (faixa de ~1/4 da tela de cada lado);
+  // só de vez em quando um balão cruza mais perto do centro.
+  function posicaoLateral(vw, largura) {
+    const max = Math.max(8, vw - largura - 8);
+    if (Math.random() < 0.1) return sorteio(8, max);
+    const faixa = Math.max(30, vw * 0.24);
+    return Math.random() < 0.5 ? sorteio(8, Math.min(max, 8 + faixa)) : sorteio(Math.max(8, max - faixa), max);
+  }
+
   function soltarVoto() {
     if (fase !== 'aberta' || reduzMovimento.matches || document.hidden || baloes.length >= MAX_BALOES) return;
     const vw = window.innerWidth;
@@ -331,16 +340,17 @@
       no,
       largura,
       altura: no.offsetHeight || 46,
-      x0: sorteio(8, Math.max(9, vw - largura - 8)),
+      x0: posicaoLateral(vw, largura),
+      faixa: Math.max(30, vw * 0.24),
       y0: vh + sorteio(10, 60),
       inicio: performance.now(),
       duracao: sorteio(7000, 12500),           // tempo para atravessar a tela
       subida: vh + 140,
       // vento: duas ondas lentas + uma rápida, com fases sorteadas
-      a1: sorteio(25, 70), f1: sorteio(0.18, 0.35), p1: sorteio(0, Math.PI * 2),
-      a2: sorteio(10, 30), f2: sorteio(0.45, 0.8), p2: sorteio(0, Math.PI * 2),
-      a3: sorteio(3, 8), f3: sorteio(1.4, 2.4), p3: sorteio(0, Math.PI * 2),
-      deriva: sorteio(-40, 40),                // tendência geral para um lado
+      a1: sorteio(14, 34), f1: sorteio(0.18, 0.35), p1: sorteio(0, Math.PI * 2),
+      a2: sorteio(6, 16), f2: sorteio(0.45, 0.8), p2: sorteio(0, Math.PI * 2),
+      a3: sorteio(2, 6), f3: sorteio(1.4, 2.4), p3: sorteio(0, Math.PI * 2),
+      deriva: sorteio(-20, 20),                // tendência geral para um lado
       ritmo: sorteio(0.12, 0.3),               // variação da velocidade de subida
       pRitmo: sorteio(0, Math.PI * 2),
       opacidade: 0,
@@ -361,6 +371,12 @@
       const y = b.y0 - b.subida * subidaProg;
       const onda = (w, f, p) => w * Math.sin(t * f * Math.PI * 2 + p);
       let x = b.x0 + b.deriva * prog + onda(b.a1, b.f1, b.p1) + onda(b.a2, b.f2, b.p2) + onda(b.a3, b.f3, b.p3);
+      const centro = (vw - b.largura) / 2;
+      if (Math.abs(b.x0 - centro) > b.faixa * 0.6) {
+        // balão de lateral não avança além de ~1/3 da tela em direção ao meio
+        const limite = vw * 0.34;
+        x = b.x0 < centro ? Math.min(x, limite - b.largura * 0.5) : Math.max(x, vw - limite - b.largura * 0.5);
+      }
       x = Math.min(Math.max(x, 4), vw - b.largura - 4);
       // inclinação acompanha o movimento lateral
       const vel = b.a1 * b.f1 * Math.cos(t * b.f1 * Math.PI * 2 + b.p1) + b.a2 * b.f2 * Math.cos(t * b.f2 * Math.PI * 2 + b.p2);
@@ -370,8 +386,11 @@
       // some ao passar sobre campos/botão; aparece e desaparece suave nas pontas
       const caixa = { left: x, right: x + b.largura, top: y, bottom: y + b.altura };
       const pontas = Math.min(1, prog / 0.08, (1 - prog) / 0.12);
-      const alvo = sobrepoe(caixa, rects, 6) ? 0 : 0.95 * pontas;
-      b.opacidade += (alvo - b.opacidade) * (alvo < b.opacidade ? 0.35 : 0.12);
+      // começa a sumir um pouco antes de encostar no campo/botão
+      const perto = sobrepoe(caixa, rects, 22);
+      const alvo = perto ? 0 : 0.95 * pontas;
+      b.opacidade = perto ? Math.min(b.opacidade, b.opacidade * 0.4) : b.opacidade + (alvo - b.opacidade) * 0.12;
+      if (sobrepoe(caixa, rects, 0)) b.opacidade = 0;
 
       b.no.style.opacity = b.opacidade.toFixed(3);
       b.no.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${giro.toFixed(2)}deg) scale(${escala.toFixed(3)})`;
