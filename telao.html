@@ -103,6 +103,8 @@
     transition: opacity .4s;
   }
   body.cursor-oculto .controles button { opacity: 0; }
+  body.cursor-oculto .controles button.pede-atencao { opacity: 1; }
+  .controles button.pede-atencao { border-color: var(--amarelo); color: var(--amarelo); }
   .controles button:focus-visible { outline: 2px solid var(--amarelo); outline-offset: 3px; }
 
   /* ===== balões "+1 voto" ===== */
@@ -196,6 +198,7 @@
       <p class="participe-texto"><strong>Participe pelo celular</strong>Aponte a câmera para o código</p>
     </div>
     <div class="controles">
+      <button type="button" id="btnSom" aria-pressed="false">Ativar som</button>
       <button type="button" id="btnTelaCheia">Tela cheia</button>
     </div>
   </footer>
@@ -211,6 +214,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="js/config.js?v=2"></script>
-<script src="js/telao.js?v=1"></script>
+<script src="js/som-recorde.js?v=1"></script>
+<script src="js/telao.js?v=2"></script>
 </body>
 </html>

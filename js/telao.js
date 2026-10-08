@@ -30,6 +30,7 @@
     confete: $('confete'),
     qr: $('qrParticipe'),
     btnTelaCheia: $('btnTelaCheia'),
+    btnSom: $('btnSom'),
   };
 
   let estado = null;
@@ -172,6 +173,7 @@
     void el.recorde.offsetWidth; // reinicia as animações
     el.recorde.classList.add('ativo');
     soltarConfete();
+    tocarSomRecorde();
     // se vierem vários recordes seguidos, encurta cada comemoração
     const dur = filaRecordes.length ? 3500 : DURACAO_RECORDE;
     setTimeout(() => {
@@ -355,7 +357,37 @@
   }
 
   /* ---------------------------------------------- telão: tela cheia e cursor */
+  /* ------------------------------------------- som do recorde (moedinhas) */
+  // Navegadores só liberam áudio depois de um clique na página: o clique em
+  // "Tela cheia" ou em "Ativar som" liga o som.
+  let audio = null;
+  let somLigado = false;
+  function ligarSom() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      audio.resume?.();
+      somLigado = true;
+    } catch { somLigado = false; }
+    atualizarBotaoSom();
+  }
+  function atualizarBotaoSom() {
+    el.btnSom.textContent = somLigado ? 'Som ligado' : 'Ativar som';
+    el.btnSom.setAttribute('aria-pressed', String(somLigado));
+    el.btnSom.classList.toggle('pede-atencao', !somLigado);
+  }
+  function tocarSomRecorde() {
+    if (!somLigado || !audio || !window.SomRecorde) return;
+    try { audio.resume?.(); window.SomRecorde.tocar(audio); } catch { /* sem som */ }
+  }
+  el.btnSom.addEventListener('click', () => {
+    if (somLigado) { somLigado = false; atualizarBotaoSom(); return; }
+    ligarSom();
+    tocarSomRecorde(); // toca uma vez para conferir o volume
+  });
+  atualizarBotaoSom();
+
   el.btnTelaCheia.addEventListener('click', () => {
+    if (!somLigado) ligarSom();
     if (document.fullscreenElement) document.exitFullscreen?.();
     else document.documentElement.requestFullscreen?.().catch(() => {});
   });
