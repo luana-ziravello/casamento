@@ -105,7 +105,12 @@ portaoForm.addEventListener('submit', async (e) => {
 
   const hashOriginal = await sha256Hex(portaoSenha.value);
   if (hashOriginal === ADMIN_PASSWORD_SHA256) {
-    try { sessionStorage.setItem(CHAVE_SESSAO, '1'); sessionStorage.setItem(CHAVE_SESSAO_NIVEL, 'completo'); } catch { /* segue sem persistir na sessão */ }
+    try {
+      sessionStorage.setItem(CHAVE_SESSAO, '1');
+      sessionStorage.setItem(CHAVE_SESSAO_NIVEL, 'completo');
+      // mesma senha abre o controle da Votação (conferida de novo no servidor)
+      sessionStorage.setItem('votacao-senha-admin', portaoSenha.value);
+    } catch { /* segue sem persistir na sessão */ }
     abrirPainel('completo');
     return;
   }
@@ -123,7 +128,7 @@ portaoForm.addEventListener('submit', async (e) => {
 });
 
 document.getElementById('btnSair').addEventListener('click', () => {
-  try { sessionStorage.removeItem(CHAVE_SESSAO); sessionStorage.removeItem(CHAVE_SESSAO_NIVEL); } catch { /* nada a limpar */ }
+  try { sessionStorage.removeItem(CHAVE_SESSAO); sessionStorage.removeItem(CHAVE_SESSAO_NIVEL); sessionStorage.removeItem('votacao-senha-admin'); } catch { /* nada a limpar */ }
   location.reload();
 });
 
