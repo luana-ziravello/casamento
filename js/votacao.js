@@ -256,7 +256,7 @@
     el.nome.disabled = fase === 'encerrada';
     el.valor.disabled = fase === 'encerrada';
     if (!enviando) {
-      el.botao.textContent = fase === 'encerrada' ? 'Votação encerrada' : 'Contribuir pelo Mercado Pago';
+      el.botao.textContent = fase === 'encerrada' ? 'Votação encerrada' : 'Pagar';
     }
   }
 
@@ -284,75 +284,126 @@
 
   /* ------------------------------------------------- animação "+1 voto" */
   // Puramente decorativa: não lê nem altera dados, não conta nada.
+  // Cada "+1 voto" sobe do pé ao topo da tela como um balão: deriva lateral
+  // irregular (soma de ondas com frequências e fases sorteadas), velocidade que
+  // varia, leve balanço e inclinação acompanhando o vento.
   const CORES = ['var(--rosa-texto)', 'var(--coral-texto)', '#A87A22'];
+  const MAX_BALOES = 12;
+  const PROTEGIDOS = '#campoNome, #campoValor, #btnContribuir, #votacaoErro, #adminVotacao, #navbar, #navLinks.is-open, .whatsapp-flutuante';
   let timerVotos = null;
+  let quadro = null;
+  let baloes = [];
+
+  const sorteio = (min, max) => min + Math.random() * (max - min);
 
   function areasProtegidas() {
-    const seletores = ['#votacaoCartao', '#navbar', '#adminVotacao', '.voltar', '#bannerPagamento > *', '.whatsapp-flutuante'];
     const rects = [];
-    seletores.forEach((s) => document.querySelectorAll(s).forEach((n) => {
-      if (n.offsetParent === null && n.id !== 'navbar') return;
+    document.querySelectorAll(PROTEGIDOS).forEach((n) => {
+      if (n.hidden || n.offsetParent === null && getComputedStyle(n).position !== 'fixed') return;
       const r = n.getBoundingClientRect();
       if (r.width && r.height) rects.push(r);
-    }));
+    });
     return rects;
   }
 
-  function cruza(a, rects) {
-    const folga = 10;
-    return rects.some((r) => a.left < r.right + folga && a.right > r.left - folga && a.top < r.bottom + folga && a.bottom > r.top - folga);
+  function sobrepoe(r, rects, folga) {
+    return rects.some((p) => r.left < p.right + folga && r.right > p.left - folga && r.top < p.bottom + folga && r.bottom > p.top - folga);
   }
 
   function soltarVoto() {
-    if (fase !== 'aberta' || reduzMovimento.matches || document.hidden) return;
+    if (fase !== 'aberta' || reduzMovimento.matches || document.hidden || baloes.length >= MAX_BALOES) return;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
+    const no = document.createElement('div');
+    no.className = 'voto-flutuante';
+    const texto = document.createElement('span');
+    texto.className = 'voto-flutuante-texto';
+    texto.textContent = '+1 voto';
+    const fio = document.createElement('span');
+    fio.className = 'voto-flutuante-fio';
+    no.append(texto, fio);
+    no.style.setProperty('--tam', `${sorteio(0.8, 1.15).toFixed(2)}rem`);
+    no.style.setProperty('--cor', CORES[Math.floor(Math.random() * CORES.length)]);
+    el.camada.appendChild(no);
+
+    const largura = no.offsetWidth || 80;
+    baloes.push({
+      no,
+      largura,
+      altura: no.offsetHeight || 46,
+      x0: sorteio(8, Math.max(9, vw - largura - 8)),
+      y0: vh + sorteio(10, 60),
+      inicio: performance.now(),
+      duracao: sorteio(7000, 12500),           // tempo para atravessar a tela
+      subida: vh + 140,
+      // vento: duas ondas lentas + uma rápida, com fases sorteadas
+      a1: sorteio(25, 70), f1: sorteio(0.18, 0.35), p1: sorteio(0, Math.PI * 2),
+      a2: sorteio(10, 30), f2: sorteio(0.45, 0.8), p2: sorteio(0, Math.PI * 2),
+      a3: sorteio(3, 8), f3: sorteio(1.4, 2.4), p3: sorteio(0, Math.PI * 2),
+      deriva: sorteio(-40, 40),                // tendência geral para um lado
+      ritmo: sorteio(0.12, 0.3),               // variação da velocidade de subida
+      pRitmo: sorteio(0, Math.PI * 2),
+      opacidade: 0,
+    });
+    if (!quadro) quadro = requestAnimationFrame(animar);
+  }
+
+  function animar(agora) {
+    quadro = null;
+    const vw = window.innerWidth;
     const rects = areasProtegidas();
-    const largura = 84;
-    const altura = 30;
-    for (let tentativa = 0; tentativa < 14; tentativa++) {
-      const sobe = 90 + Math.random() * 150;
-      const dx = (Math.random() - .5) * 70;
-      const x = 12 + Math.random() * Math.max(1, vw - largura - 24);
-      const y = 80 + sobe + Math.random() * Math.max(1, vh - 120 - sobe);
-      // caixa que cobre toda a trajetória do "+1 voto"
-      const caminho = {
-        left: Math.min(x, x + dx), right: Math.max(x, x + dx) + largura,
-        top: y - sobe, bottom: y + altura,
-      };
-      if (caminho.right > vw - 6 || cruza(caminho, rects)) continue;
-      const voto = document.createElement('span');
-      voto.className = 'voto-flutuante';
-      voto.textContent = '+1 voto';
-      const dur = 2.4 + Math.random() * 1.8;
-      voto.style.setProperty('--x', `${x}px`);
-      voto.style.setProperty('--y', `${y}px`);
-      voto.style.setProperty('--dx', `${dx}px`);
-      voto.style.setProperty('--sobe', `${sobe}px`);
-      voto.style.setProperty('--dur', `${dur}s`);
-      voto.style.setProperty('--tam', `${(0.82 + Math.random() * 0.4).toFixed(2)}rem`);
-      voto.style.setProperty('--cor', CORES[Math.floor(Math.random() * CORES.length)]);
-      voto.addEventListener('animationend', () => voto.remove());
-      el.camada.appendChild(voto);
-      return;
-    }
+    baloes = baloes.filter((b) => {
+      const t = (agora - b.inicio) / 1000;
+      const prog = (agora - b.inicio) / b.duracao;
+      if (prog >= 1) { b.no.remove(); return false; }
+      // subida com velocidade irregular (rajadas e calmarias)
+      const subidaProg = prog + b.ritmo * Math.sin(prog * Math.PI * 2 + b.pRitmo) * 0.08 * Math.sin(prog * Math.PI);
+      const y = b.y0 - b.subida * subidaProg;
+      const onda = (w, f, p) => w * Math.sin(t * f * Math.PI * 2 + p);
+      let x = b.x0 + b.deriva * prog + onda(b.a1, b.f1, b.p1) + onda(b.a2, b.f2, b.p2) + onda(b.a3, b.f3, b.p3);
+      x = Math.min(Math.max(x, 4), vw - b.largura - 4);
+      // inclinação acompanha o movimento lateral
+      const vel = b.a1 * b.f1 * Math.cos(t * b.f1 * Math.PI * 2 + b.p1) + b.a2 * b.f2 * Math.cos(t * b.f2 * Math.PI * 2 + b.p2);
+      const giro = Math.max(-14, Math.min(14, vel * 0.35));
+      const escala = 1 + 0.04 * Math.sin(t * 1.7 + b.p3);
+
+      // some ao passar sobre campos/botão; aparece e desaparece suave nas pontas
+      const caixa = { left: x, right: x + b.largura, top: y, bottom: y + b.altura };
+      const pontas = Math.min(1, prog / 0.08, (1 - prog) / 0.12);
+      const alvo = sobrepoe(caixa, rects, 6) ? 0 : 0.95 * pontas;
+      b.opacidade += (alvo - b.opacidade) * (alvo < b.opacidade ? 0.35 : 0.12);
+
+      b.no.style.opacity = b.opacidade.toFixed(3);
+      b.no.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) rotate(${giro.toFixed(2)}deg) scale(${escala.toFixed(3)})`;
+      return true;
+    });
+    if (baloes.length) quadro = requestAnimationFrame(animar);
   }
 
   function proximoVoto() {
     soltarVoto();
-    // intervalos variados: às vezes em rajadas, às vezes mais espaçados
-    const ms = Math.random() < 0.25 ? 220 + Math.random() * 300 : 650 + Math.random() * 1300;
+    // intervalos variados: às vezes vários balões juntos, às vezes calmaria
+    const ms = Math.random() < 0.25 ? sorteio(250, 600) : sorteio(900, 2200);
     timerVotos = setTimeout(proximoVoto, ms);
   }
 
   function iniciarVotos() {
     if (timerVotos || reduzMovimento.matches) return;
+    // começa já com alguns balões no meio do caminho
+    for (let i = 0; i < 3; i++) {
+      soltarVoto();
+      const b = baloes[baloes.length - 1];
+      if (b) b.inicio -= sorteio(0.15, 0.6) * b.duracao;
+    }
     proximoVoto();
   }
 
   function pararVotos() {
     clearTimeout(timerVotos);
     timerVotos = null;
+    if (quadro) cancelAnimationFrame(quadro);
+    quadro = null;
+    baloes = [];
     el.camada.textContent = '';
   }
 
@@ -655,7 +706,7 @@
   /* --------------------------------------------------------- início */
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) atualizarEstado();
-    else { clearTimeout(timerPoll); el.camada.textContent = ''; }
+    else { clearTimeout(timerPoll); }
   });
 
   if (modoAdmin && !senhaAdmin) {

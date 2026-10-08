@@ -111,23 +111,26 @@
   .votacao-indisponivel-caixa h1 { font-family: var(--f-display); font-style: italic; font-weight: 400; font-size: 1.8rem; margin: .7rem 0 .9rem; color: var(--tinta); }
   .votacao-indisponivel-caixa p { color: var(--tinta-suave); margin-bottom: 1.5rem; line-height: 1.8; }
 
-  /* ===== animação decorativa "+1 voto" ===== */
-  .camada-votos { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+  /* ===== animação decorativa "+1 voto" (balões) =====
+     A camada fica acima do conteúdo para os balões cruzarem a tela toda, mas
+     nunca recebe toques (pointer-events: none) e cada balão some enquanto passa
+     sobre os campos ou o botão (controle no js/votacao.js). */
+  .camada-votos { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
   .voto-flutuante {
     position: absolute; left: 0; top: 0;
+    display: flex; flex-direction: column; align-items: center;
+    opacity: 0; will-change: transform, opacity;
+    transform-origin: 50% 100%;
+  }
+  .voto-flutuante-texto {
     font-family: var(--f-display); font-style: italic; font-size: var(--tam, 1rem); white-space: nowrap;
     color: var(--cor, var(--rosa-texto));
-    padding: .2em .65em; border-radius: 999px;
-    background: rgba(254, 248, 224, .82); border: 1px solid var(--dourado-linha);
-    opacity: 0; will-change: transform, opacity;
-    animation: votoSubir var(--dur, 3s) cubic-bezier(.22,.7,.3,1) forwards;
+    padding: .22em .7em; border-radius: 999px;
+    background: rgba(254, 248, 224, .9); border: 1px solid var(--dourado-linha);
+    box-shadow: 0 6px 14px -8px rgba(58, 42, 30, .35);
   }
-  @keyframes votoSubir {
-    0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(.7); }
-    15% { opacity: 1; transform: translate(calc(var(--x) + var(--dx) * .15), calc(var(--y) - var(--sobe) * .15)) scale(1); }
-    75% { opacity: .9; }
-    100% { opacity: 0; transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) - var(--sobe))) scale(.95); }
-  }
+  /* cordinha do balão */
+  .voto-flutuante-fio { width: 1px; height: 18px; background: linear-gradient(var(--dourado-linha), transparent); }
   @media (prefers-reduced-motion: reduce) { .camada-votos { display: none; } }
 
   /* ===== painel administrativo (?admin) ===== */
@@ -279,7 +282,7 @@
           <span class="votacao-lider-vazio">Quem vai inaugurar a brincadeira?</span>
         </div>
 
-        <button class="btn btn-primario" type="submit" id="btnContribuir" disabled>Contribuir pelo Mercado Pago</button>
+        <button class="btn btn-primario" type="submit" id="btnContribuir" disabled>Pagar</button>
         <p class="votacao-erro" id="votacaoErro" role="alert"></p>
         <p class="votacao-nota">Pix ou cartão, no ambiente seguro do Mercado Pago. O destaque muda só depois que o pagamento é aprovado.</p>
       </form>
@@ -301,6 +304,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js?v=2"></script>
 <script src="js/main.js?v=6"></script>
-<script src="js/votacao.js?v=1"></script>
+<script src="js/votacao.js?v=2"></script>
 </body>
 </html>
