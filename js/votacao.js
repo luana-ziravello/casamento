@@ -49,6 +49,7 @@
     adminLogin: $('adminLogin'),
     adminLoginForm: $('adminLoginForm'),
     adminSenha: $('adminSenha'),
+    adminOlho: $('adminOlho'),
     adminLoginErro: $('adminLoginErro'),
     adminPainel: $('adminPainel'),
     adminTag: $('adminTag'),
@@ -686,6 +687,19 @@
     el.adminSecao.hidden = false;
     if (senhaAdmin) el.adminPainel.hidden = false; else el.adminLogin.hidden = false;
 
+    // olho para mostrar/ocultar a senha digitada (mesmos ícones do painel dos noivos)
+    const OLHO_ABERTO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const OLHO_FECHADO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 10.6a3 3 0 0 0 4.2 4.2"/><path d="M9.9 5.2A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.4 4.3M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.3 9.3 0 0 0 4-.9"/></svg>';
+    el.adminOlho.innerHTML = OLHO_FECHADO;
+    el.adminOlho.addEventListener('click', () => {
+      const mostrar = el.adminSenha.type === 'password';
+      el.adminSenha.type = mostrar ? 'text' : 'password';
+      el.adminOlho.innerHTML = mostrar ? OLHO_ABERTO : OLHO_FECHADO;
+      el.adminOlho.setAttribute('aria-pressed', String(mostrar));
+      el.adminOlho.setAttribute('aria-label', mostrar ? 'Ocultar senha' : 'Mostrar senha');
+      el.adminSenha.focus();
+    });
+
     el.adminLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       el.adminLoginErro.textContent = '';
@@ -694,6 +708,10 @@
         await chamarAdmin('entrar');
         salvarSenha(senhaAdmin);
         el.adminSenha.value = '';
+        el.adminSenha.type = 'password';
+        el.adminOlho.innerHTML = OLHO_FECHADO;
+        el.adminOlho.setAttribute('aria-pressed', 'false');
+        el.adminOlho.setAttribute('aria-label', 'Mostrar senha');
         el.adminLogin.hidden = true;
         el.adminPainel.hidden = false;
         atualizarEstado();

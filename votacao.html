@@ -133,11 +133,22 @@
   @media (prefers-reduced-motion: reduce) { .camada-votos { display: none; } }
 
   /* ===== painel administrativo (?admin) ===== */
-  .admin-votacao { position: relative; z-index: 2; max-width: 540px; margin: 0 auto var(--sp-lg); padding: 0 clamp(1rem, 4vw, 1.5rem); }
+  .admin-votacao { position: relative; z-index: 2; max-width: 540px; margin: 0 auto var(--sp-lg); padding: 96px clamp(1rem, 4vw, 1.5rem) 0; }
+  /* com o controle aberto, o cabeçalho da página não precisa reservar espaço para o menu */
+  .admin-votacao:not([hidden]) ~ #votacaoApp .cabecalho-pagina { padding-top: var(--sp-md); }
   .admin-caixa { background: var(--tinta); color: var(--tinta-clara); padding: 1.3rem 1.3rem 1.4rem; border-radius: 2px; }
   .admin-caixa h2 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.35rem; margin-bottom: .3rem; }
   .admin-caixa p { font-size: .8rem; line-height: 1.6; color: var(--tinta-clara-soft); }
   .admin-caixa .tag { font-size: .62rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--amarelo); }
+  .admin-senha-campo { position: relative; }
+  .admin-senha-campo input { padding-right: 52px; }
+  .admin-olho {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    background: none; border: none; border-radius: 2px; cursor: pointer; color: var(--tinta-clara-soft);
+  }
+  .admin-olho:hover, .admin-olho:focus-visible { color: var(--amarelo); }
+  .admin-olho svg { width: 22px; height: 22px; }
   .admin-caixa input {
     width: 100%; margin: .8rem 0; padding: 12px; border: 1px solid rgba(254,248,224,.3); border-radius: 2px;
     background: rgba(254,248,224,.06); color: var(--tinta-clara); font-family: var(--f-corpo); font-size: 1rem;
@@ -213,7 +224,10 @@
     <p>Digite a senha do painel dos noivos para ver a prévia e os controles.</p>
     <form id="adminLoginForm">
       <label for="adminSenha" class="sr-only">Senha do painel dos noivos</label>
-      <input type="password" id="adminSenha" autocomplete="current-password" placeholder="Senha do painel dos noivos" required>
+      <div class="admin-senha-campo">
+        <input type="password" id="adminSenha" autocomplete="current-password" placeholder="Senha do painel dos noivos" required>
+        <button type="button" class="admin-olho" id="adminOlho" aria-label="Mostrar senha" aria-pressed="false" aria-controls="adminSenha"></button>
+      </div>
       <button class="admin-botao principal" type="submit" style="width:100%">Entrar</button>
       <p class="admin-erro" id="adminLoginErro" role="alert"></p>
     </form>
@@ -306,6 +320,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/config.js?v=2"></script>
 <script src="js/main.js?v=6"></script>
-<script src="js/votacao.js?v=4"></script>
+<script src="js/votacao.js?v=5"></script>
 </body>
 </html>
