@@ -357,16 +357,35 @@
   }
 
   /* ---------------------------------------------- telão: tela cheia e cursor */
-  /* ------------------------------------------- som do recorde (moedinhas) */
+  /* ---------------------------------------------------- som do recorde */
+  // Toca o trecho de sons/novo-recorde.mp3 (com fade in/out) e, por baixo,
+  // a chuva de moedinhas sintetizada (js/som-recorde.js).
   // Navegadores só liberam áudio depois de um clique na página: o clique em
   // "Tela cheia" ou em "Ativar som" liga o som.
+  const ARQUIVO_SOM = 'sons/novo-recorde.mp3?v=1';
+  const VOLUME_TRECHO = 1;
+  const VOLUME_MOEDAS = 0.45;
   let audio = null;
   let somLigado = false;
+  let trecho = null;          // AudioBuffer já decodificado
+  let carregandoTrecho = null;
+
+  function carregarTrecho() {
+    if (trecho || carregandoTrecho || !audio) return carregandoTrecho;
+    carregandoTrecho = fetch(ARQUIVO_SOM)
+      .then((r) => { if (!r.ok) throw new Error('som'); return r.arrayBuffer(); })
+      .then((b) => new Promise((ok, erro) => audio.decodeAudioData(b, ok, erro)))
+      .then((buf) => { trecho = buf; return buf; })
+      .catch(() => { carregandoTrecho = null; return null; });
+    return carregandoTrecho;
+  }
+
   function ligarSom() {
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       audio.resume?.();
       somLigado = true;
+      carregarTrecho();
     } catch { somLigado = false; }
     atualizarBotaoSom();
   }
@@ -375,10 +394,39 @@
     el.btnSom.setAttribute('aria-pressed', String(somLigado));
     el.btnSom.classList.toggle('pede-atencao', !somLigado);
   }
-  function tocarSomRecorde() {
-    if (!somLigado || !audio || !window.SomRecorde) return;
-    try { audio.resume?.(); window.SomRecorde.tocar(audio); } catch { /* sem som */ }
+
+  function tocarTrecho(buf) {
+    const t = audio.currentTime + 0.03;
+    const fonte = audio.createBufferSource();
+    fonte.buffer = buf;
+    const g = audio.createGain();
+    // fade também no código (o arquivo já vem com fade in/out)
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(VOLUME_TRECHO, t + 0.5);
+    g.gain.setValueAtTime(VOLUME_TRECHO, t + Math.max(0.6, buf.duration - 1.2));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + buf.duration);
+    fonte.connect(g).connect(audio.destination);
+    fonte.start(t);
   }
+
+  function tocarMoedas() {
+    if (!window.SomRecorde) return;
+    const g = audio.createGain();
+    g.gain.value = VOLUME_MOEDAS;
+    g.connect(audio.destination);
+    window.SomRecorde.tocar(audio, audio.currentTime + 0.05, g);
+  }
+
+  function tocarSomRecorde() {
+    if (!somLigado || !audio) return;
+    try {
+      audio.resume?.();
+      if (trecho) tocarTrecho(trecho);
+      else carregarTrecho()?.then((buf) => { if (buf && somLigado) tocarTrecho(buf); });
+      tocarMoedas();
+    } catch { /* sem som */ }
+  }
+
   el.btnSom.addEventListener('click', () => {
     if (somLigado) { somLigado = false; atualizarBotaoSom(); return; }
     ligarSom();

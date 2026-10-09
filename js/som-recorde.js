@@ -99,14 +99,14 @@ window.SomRecorde = (function () {
     n.start(t);
   }
 
-  function tocar(ctx, inicio) {
+  function tocar(ctx, inicio, destino) {
     const t0 = inicio ?? ctx.currentTime + 0.05;
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -14;
     comp.ratio.value = 4;
     const master = ctx.createGain();
     master.gain.value = 0.85;
-    master.connect(comp).connect(ctx.destination);
+    master.connect(comp).connect(destino || ctx.destination);
 
     caixaRegistradora(ctx, master, t0);
     notas(ctx, master, t0 + 0.25);
