@@ -408,6 +408,12 @@
   .cta-coluna h3 { font-family: var(--f-display); font-weight: 400; font-style: italic; font-size: 1.6rem; color: var(--tinta); margin-bottom: var(--sp-sm); }
   .cta-coluna p { font-size: .88rem; color: var(--tinta-suave); line-height: 1.8; margin-bottom: var(--sp-lg); max-width: 320px; margin-left: auto; margin-right: auto; }
 
+  /* ===== Álbum de fotos (abaixo de presentes / confirmação) ===== */
+  .album-faixa { padding-top: 0; }
+  .album-chamada { max-width: 520px; margin: 0 auto; text-align: center; padding: var(--sp-xl) var(--sp-lg); border: 1px solid var(--dourado-linha); border-radius: 4px; }
+  .album-chamada-icone { width: 52px; height: 52px; display: block; margin: 0 auto var(--sp-md); }
+  .album-chamada .sub-secao { margin: var(--sp-sm) auto var(--sp-lg); }
+
   @media (max-width: 760px) {
     .cta-colunas { grid-template-columns: 1fr; gap: var(--sp-lg); }
     .cta-coluna { padding: 0 1rem; }
@@ -663,12 +669,30 @@
       <div class="cta-coluna" data-reveal style="--atraso:90ms">
         <img class="cta-icone" src="imagens/icons/icone-confirmado.png" alt="" aria-hidden="true">
         <h3>Confirme sua presença</h3>
-        <p>Busque pelo nome da sua família e nos conte quem estará com a gente nesse dia.</p>
+        <p>Busque pelo seu nome, pelo nome da sua família ou pelo seu @ do Instagram e nos conte se estará com a gente.</p>
         <a class="btn btn-primario" href="confirmacao.html" id="ctaConfirmarPresenca">Confirmar presença</a>
       </div>
     </div>
   </div>
   <img class="marca-dagua" src="imagens/marca%20dagua.png" alt="" style="width:140px; left:-26px; bottom:-16px; transform:rotate(10deg);">
+</section>
+
+<!-- ÁLBUM DE FOTOS -->
+<section id="album" class="album-faixa">
+  <div class="container">
+    <div class="album-chamada" data-reveal>
+      <svg class="album-chamada-icone" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M8.5 16.5c0-2 1.4-3.4 3.4-3.4h5.2l2.6-4h8.6l2.6 4h5.2c2 0 3.4 1.4 3.4 3.4v18.2c0 2-1.4 3.4-3.4 3.4H11.9c-2 0-3.4-1.4-3.4-3.4Z" stroke="var(--dourado)" stroke-width="1.3" stroke-linejoin="round"/>
+        <circle cx="24" cy="25.5" r="7.2" stroke="var(--rosa-texto)" stroke-width="1.3"/>
+        <circle cx="24" cy="25.5" r="3.4" stroke="var(--coral-texto)" stroke-width="1.1"/>
+        <circle cx="34.6" cy="18.4" r="1" fill="var(--dourado)"/>
+      </svg>
+      <span class="eyebrow">Álbum de fotos</span>
+      <h2 class="titulo-secao">O nosso dia, pelo seu olhar</h2>
+      <p class="sub-secao">Veja os registros da festa e compartilhe as fotos que você tirou. Cada clique ajuda a contar a nossa história.</p>
+      <a class="btn btn-primario" href="album.html">Ver o álbum de fotos</a>
+    </div>
+  </div>
 </section>
 
 <footer class="rodape">
@@ -682,6 +706,7 @@
     <a href="#recados">Recados</a>
     <a href="presentes.html">Presentes</a>
     <a href="confirmacao.html">Confirmação</a>
+    <a href="album.html">Álbum</a>
   </div>
 </footer>
 

@@ -93,16 +93,9 @@ document.documentElement.classList.add('js');
   });
 })();
 
-/* ===== botão do álbum de fotos (troca "Confirmar presença" quando ativado) ===== */
-(function () {
-  const btn = document.getElementById('ctaConfirmarPresenca');
-  if (!btn || !window.SITE_CONFIG) return;
-  window.SITE_CONFIG.albumEstaNoAr().then((noAr) => {
-    if (!noAr) return;
-    btn.textContent = 'Álbum de fotos';
-    btn.setAttribute('href', 'album.html');
-  });
-})();
+/* ===== botão "Confirmar presença" =====
+   O botão não vira mais "Álbum de fotos": o álbum tem a própria seção (#album)
+   logo abaixo de presentes / confirmação. */
 
 /* ===== item "Votação" no menu: só a partir de 10/10/2026 às 18h (horário de Brasília) ===== */
 (function () {
