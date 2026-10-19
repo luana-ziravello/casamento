@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Esteira de Sushi</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E9C48E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Cellipse cx=%2732%27 cy=%2740%27 rx=%2726%27 ry=%2714%27 fill=%27%23F4F1EA%27/%3E%3Cellipse cx=%2732%27 cy=%2730%27 rx=%2728%27 ry=%2714%27 fill=%27%23E23B4E%27/%3E%3C/svg%3E">
+<style>
+  /* Jogo da esteira de sushi: tudo é desenhado num canvas de 390×844
+     (proporção de celular) e escalado para caber na tela. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: #2A1D14;
+    font-family: 'Fredoka', -apple-system, sans-serif;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #palco {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .tela {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(42, 29, 20, .55);
+    backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+    padding: 6%;
+  }
+  .cartao {
+    width: 100%;
+    background: #FFF8EC;
+    border: 4px solid #8A5A34;
+    border-radius: 26px;
+    box-shadow: 0 10px 0 #5E3B20, 0 18px 40px rgba(0,0,0,.35);
+    padding: 26px 22px 24px;
+    text-align: center;
+    color: #4A2E1A;
+    animation: entra .35s cubic-bezier(.2, 1.4, .5, 1);
+  }
+  @keyframes entra { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .cartao .emoji { font-size: 54px; line-height: 1; margin-bottom: 8px; }
+  .cartao h1 { font-size: 30px; font-weight: 700; line-height: 1.1; margin-bottom: 10px; color: #C2372B; }
+  .cartao p { font-size: 17px; font-weight: 500; line-height: 1.35; margin-bottom: 10px; }
+  .cartao .detalhes {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    margin: 14px 0 6px;
+  }
+  .cartao .detalhes span {
+    background: #F3DFC1; border-radius: 999px; padding: 6px 12px;
+    font-size: 15px; font-weight: 600;
+  }
+  .botao {
+    margin-top: 14px;
+    font-family: inherit; font-size: 22px; font-weight: 700; color: #fff;
+    background: linear-gradient(#5DCB4A, #3FA531);
+    border: none; border-radius: 18px;
+    padding: 14px 38px;
+    box-shadow: 0 6px 0 #2C7A22;
+    cursor: pointer;
+    text-shadow: 0 2px 0 rgba(0,0,0,.2);
+  }
+  .botao:active { transform: translateY(4px); box-shadow: 0 2px 0 #2C7A22; }
+</style>
+</head>
+<body>
+
+<div id="palco">
+  <canvas id="jogo"></canvas>
+
+  <div class="tela" id="telaInicio">
+    <div class="cartao">
+      <div class="emoji">🍣</div>
+      <h1>Esteira de Sushi</h1>
+      <p><b>Segure o dedo numa coluna</b> para mandar os sushis do topo para a esteira.</p>
+      <p>Cada cliente pega o sushi que pediu quando ele passa na frente.</p>
+      <p>Complete todos os pedidos antes do tempo acabar e <b>não deixe a esteira lotar!</b></p>
+      <button class="botao" id="btnInicio">Jogar</button>
+    </div>
+  </div>
+
+  <div class="tela" id="telaFase" hidden>
+    <div class="cartao">
+      <div class="emoji" id="faseEmoji">🍙</div>
+      <h1 id="faseTitulo">Fase 1</h1>
+      <p id="faseTexto"></p>
+      <div class="detalhes" id="faseDetalhes"></div>
+      <button class="botao" id="btnFase">Começar</button>
+    </div>
+  </div>
+
+  <div class="tela" id="telaFim" hidden>
+    <div class="cartao">
+      <div class="emoji" id="fimEmoji">🎉</div>
+      <h1 id="fimTitulo"></h1>
+      <p id="fimTexto"></p>
+      <button class="botao" id="btnFim"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- Medidas lógicas ----------
+  const W = 390, H = 844;
+  const palco = document.getElementById('palco');
+  const cv = document.getElementById('jogo');
+  const g = cv.getContext('2d');
+  let escala = 1, dpr = 1;
+
+  function redimensiona() {
+    let h = window.innerHeight, w = h * W / H;
+    if (w > window.innerWidth) { w = window.innerWidth; h = w * H / W; }
+    dpr = Math.min(window.devicePixelRatio || 1, 3);
+    palco.style.width = w + 'px';
+    palco.style.height = h + 'px';
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    escala = w / W;
+  }
+  window.addEventListener('resize', redimensiona);
+  redimensiona();
+
+  // ---------- Fases ----------
+  const TIPOS = ['onigiri', 'maguro', 'tamago', 'ebi', 'ikura', 'kappa', 'tako', 'unagi'];
+  const FASES = [
+    { nome: 'Fase 1', emoji: '🍙', texto: 'Para aquecer: poucos tipos de sushi e pedidos pequenos.',
+      tipos: 4, pedidosPorCliente: 3, qtd: [3, 5], blocos: [2, 5], mistura: 0,
+      tempo: 100, velocidade: 115, capacidade: 50 },
+    { nome: 'Fase 2', emoji: '🍣', texto: 'Mais tipos de sushi, pedidos maiores e a esteira mais rápida.',
+      tipos: 6, pedidosPorCliente: 4, qtd: [4, 7], blocos: [1, 4], mistura: .35,
+      tempo: 130, velocidade: 140, capacidade: 45 },
+    { nome: 'Fase 3', emoji: '🔥', texto: 'Hora do rush! Todos os sushis, colunas bem misturadas e menos espaço na esteira.',
+      tipos: 8, pedidosPorCliente: 5, qtd: [5, 8], blocos: [1, 3], mistura: .6,
+      tempo: 150, velocidade: 165, capacidade: 40 },
+  ];
+
+  const aleat = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const embaralha = (v) => { for (let i = v.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [v[i], v[j]] = [v[j], v[i]]; } return v; };
+
+  // ---------- Imagens (rostos) ----------
+  function carrega(src) { const i = new Image(); i.src = src; return i; }
+  const FOTO_CHEF = carrega('imagens/jogo/chef.jpg');
+
+  // Clientes: posição do rosto, onde pegam na esteira e cor da roupa
+  const CLIENTES = [
+    { foto: carrega('imagens/jogo/cliente1.jpg'), x: 78,  y: 104, lado: -1, cima: true,  roupa: '#F7F1E6', detalhe: '#E9DFCC' },
+    { foto: carrega('imagens/jogo/cliente2.jpg'), x: 312, y: 104, lado: 1,  cima: true,  roupa: '#22345E', detalhe: '#F2802E' },
+    { foto: carrega('imagens/jogo/cliente3.jpg'), x: 80,  y: 448, lado: -1, cima: false, roupa: '#D3355B', detalhe: '#F27C97' },
+    { foto: carrega('imagens/jogo/cliente4.jpg'), x: 310, y: 448, lado: 1,  cima: false, roupa: '#EFE3D2', detalhe: '#D9C8AE' },
+  ];
+
+  // ---------- Esteira (caminho em retângulo arredondado, sentido horário) ----------
+  const EST = { L: 36, R: 354, T: 172, B: 388, r: 44, largura: 46 };
+  const segs = [];
+  (function montaCaminho() {
+    const { L, R, T, B, r } = EST, cx = (L + R) / 2;
+    const reta = (x1, y1, x2, y2) => segs.push({ t: 'l', x1, y1, x2, y2, len: Math.hypot(x2 - x1, y2 - y1) });
+    const arco = (cx, cy, a1, a2) => segs.push({ t: 'a', cx, cy, a1, a2, len: r * Math.abs(a2 - a1) });
+    reta(cx, B, L + r, B);
+    arco(L + r, B - r, Math.PI / 2, Math.PI);
+    reta(L, B - r, L, T + r);
+    arco(L + r, T + r, Math.PI, Math.PI * 1.5);
+    reta(L + r, T, R - r, T);
+    arco(R - r, T + r, Math.PI * 1.5, Math.PI * 2);
+    reta(R, T + r, R, B - r);
+    arco(R - r, B - r, 0, Math.PI / 2);
+    reta(R - r, B, cx, B);
+  })();
+  const COMPR = segs.reduce((s, x) => s + x.len, 0);
+
+  function pontoEm(s) {
+    s = ((s % COMPR) + COMPR) % COMPR;
+    for (const sg of segs) {
+      if (s <= sg.len) {
+        const f = s / sg.len;
+        if (sg.t === 'l') return { x: sg.x1 + (sg.x2 - sg.x1) * f, y: sg.y1 + (sg.y2 - sg.y1) * f };
+        const a = sg.a1 + (sg.a2 - sg.a1) * f;
+        return { x: sg.cx + Math.cos(a) * EST.r, y: sg.cy + Math.sin(a) * EST.r };
+      }
+      s -= sg.len;
+    }
+    return { x: (EST.L + EST.R) / 2, y: EST.B };
+  }
+  function caminhoEsteira() {
+    const p = new Path2D();
+    const { L, R, T, B, r } = EST, cx = (L + R) / 2;
+    p.moveTo(cx, B);
+    p.lineTo(L + r, B); p.arc(L + r, B - r, r, Math.PI / 2, Math.PI);
+    p.lineTo(L, T + r); p.arc(L + r, T + r, r, Math.PI, Math.PI * 1.5);
+    p.lineTo(R - r, T); p.arc(R - r, T + r, r, Math.PI * 1.5, Math.PI * 2);
+    p.lineTo(R, B - r); p.arc(R - r, B - r, r, 0, Math.PI / 2);
+    p.lineTo(cx, B);
+    return p;
+  }
+  const PATH_EST = caminhoEsteira();
+
+  // Ponto da esteira (s) mais próximo de cada cliente
+  for (const c of CLIENTES) {
+    let melhor = 0, dist = Infinity;
+    for (let s = 0; s < COMPR; s += 2) {
+      const p = pontoEm(s), d = Math.hypot(p.x - c.x, p.y - (c.cima ? EST.T : EST.B));
+      if (d < dist) { dist = d; melhor = s; }
+    }
+    c.s = melhor;
+  }
+
+  // ---------- Desenho dos sushis (pré-renderizados) ----------
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function elipse(c, x, y, rx, ry, rot = 0) { c.beginPath(); c.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2); }
+  const CONTORNO = 'rgba(60, 30, 10, .35)';
+
+  function arroz(c) {
+    elipse(c, 32, 43, 23, 12); c.fillStyle = '#F4F1EA'; c.fill();
+    c.lineWidth = 1.6; c.strokeStyle = CONTORNO; c.stroke();
+    c.fillStyle = '#FFFFFF';
+    [[18, 46], [26, 50], [36, 51], [45, 47], [22, 52], [41, 53]].forEach(([x, y]) => { elipse(c, x, y, 2.4, 1.4, .4); c.fill(); });
+  }
+  function fatia(c, cor, listra, rim) {
+    c.save();
+    elipse(c, 32, 33, 26, 13, -.06); c.fillStyle = cor; c.fill();
+    c.clip();
+    c.strokeStyle = listra; c.lineWidth = 3.2;
+    for (let x = -4; x < 70; x += 9) { c.beginPath(); c.moveTo(x, 18); c.quadraticCurveTo(x + 6, 33, x - 2, 48); c.stroke(); }
+    if (rim) { elipse(c, 32, 30, 26, 13, -.06); c.lineWidth = 5; c.strokeStyle = rim; c.stroke(); }
+    c.restore();
+    elipse(c, 32, 33, 26, 13, -.06); c.lineWidth = 1.6; c.strokeStyle = CONTORNO; c.stroke();
+    c.fillStyle = 'rgba(255,255,255,.45)'; elipse(c, 22, 27, 8, 2.6, -.2); c.fill();
+  }
+  const NORI = '#1F2B26';
+  const DESENHA = {
+    onigiri(c) {
+      c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(32, 9); c.lineTo(55, 50); c.lineTo(9, 50); c.closePath();
+      c.lineWidth = 12; c.strokeStyle = '#FBFAF6'; c.stroke(); c.fillStyle = '#FBFAF6'; c.fill();
+      c.beginPath(); c.moveTo(32, 3); c.lineTo(61, 55); c.lineTo(3, 55); c.closePath();
+      c.lineWidth = 1.6; c.strokeStyle = 'rgba(60,30,10,.25)'; c.stroke();
+      rr(c, 21, 37, 22, 19, 3); c.fillStyle = NORI; c.fill();
+      c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(23, 39, 3, 15);
+      c.fillStyle = '#E8E2D2'; [[28, 22], [36, 26], [30, 30]].forEach(([x, y]) => { elipse(c, x, y, 1.6, 1); c.fill(); });
+    },
+    maguro(c) { arroz(c); fatia(c, '#E23B4E', 'rgba(255,150,160,.55)'); },
+    tamago(c) {
+      arroz(c);
+      rr(c, 8, 20, 48, 23, 8); c.fillStyle = '#F6C431'; c.fill(); c.lineWidth = 1.6; c.strokeStyle = CONTORNO; c.stroke();
+      rr(c, 10, 21, 44, 7, 4); c.fillStyle = '#FFE27E'; c.fill();
+      rr(c, 27, 16, 11, 34, 2); c.fillStyle = NORI; c.fill();
+    },
+    ebi(c) {
+      arroz(c);
+      c.beginPath(); c.moveTo(52, 32); c.lineTo(62, 22); c.lineTo(60, 42); c.closePath(); c.fillStyle = '#E5482B'; c.fill();
+      c.save(); elipse(c, 30, 33, 24, 12, -.05); c.fillStyle = '#FFF0E4'; c.fill(); c.clip();
+      c.strokeStyle = '#F3713D'; c.lineWidth = 4.5;
+      for (let x = 4; x < 60; x += 9) { c.beginPath(); c.moveTo(x, 20); c.quadraticCurveTo(x + 5, 33, x, 46); c.stroke(); }
+      c.restore();
+      elipse(c, 30, 33, 24, 12, -.05); c.lineWidth = 1.6; c.strokeStyle = CONTORNO; c.stroke();
+    },
+    ikura(c) {
+      rr(c, 11, 26, 42, 26, 8); c.fillStyle = NORI; c.fill();
+      c.fillStyle = 'rgba(255,255,255,.1)'; c.fillRect(15, 32, 4, 16);
+      elipse(c, 32, 26, 21, 9); c.fillStyle = '#2E3D35'; c.fill();
+      const bolas = [[20, 24], [28, 22], [36, 22], [44, 24], [24, 28], [32, 27], [40, 28], [28, 18], [36, 17], [32, 13], [22, 19], [42, 19]];
+      for (const [x, y] of bolas) {
+        c.beginPath(); c.arc(x, y, 4.6, 0, Math.PI * 2); c.fillStyle = '#F04A2B'; c.fill();
+        c.lineWidth = 1; c.strokeStyle = '#B92A16'; c.stroke();
+        c.beginPath(); c.arc(x - 1.5, y - 1.5, 1.4, 0, Math.PI * 2); c.fillStyle = '#FFD3C4'; c.fill();
+      }
+      elipse(c, 47, 14, 8, 4, -.7); c.fillStyle = '#4FB43C'; c.fill();
+    },
+    kappa(c) {
+      rr(c, 12, 30, 40, 18, 4); c.fillStyle = NORI; c.fill();
+      elipse(c, 32, 48, 20, 7); c.fill();
+      elipse(c, 32, 30, 20, 12); c.fillStyle = '#2A3832'; c.fill();
+      elipse(c, 32, 30, 16, 9); c.fillStyle = '#F4F1EA'; c.fill();
+      elipse(c, 32, 30, 7, 4.5); c.fillStyle = '#4CAF3A'; c.fill();
+      elipse(c, 32, 30, 4, 2.4); c.fillStyle = '#B9E58C'; c.fill();
+    },
+    tako(c) {
+      arroz(c); fatia(c, '#F6C4CC', 'rgba(255,255,255,.35)', '#B83A68');
+      c.fillStyle = '#FBE3E7'; c.strokeStyle = '#D9839A'; c.lineWidth = 1;
+      [[20, 34], [30, 37], [40, 34], [26, 29], [37, 29]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 2.6, 0, Math.PI * 2); c.fill(); c.stroke(); });
+    },
+    unagi(c) {
+      arroz(c); fatia(c, '#8A4520', 'rgba(60,25,8,.6)');
+      rr(c, 28, 19, 9, 30, 2); c.fillStyle = NORI; c.fill();
+      c.fillStyle = '#F6E7C8'; [[18, 31], [44, 29], [22, 36], [47, 35]].forEach(([x, y]) => { elipse(c, x, y, 1.7, 1, .5); c.fill(); });
+    },
+  };
+  const SPRITE = {};
+  for (const t of TIPOS) {
+    const cnv = document.createElement('canvas');
+    cnv.width = cnv.height = 160;
+    const c = cnv.getContext('2d');
+    c.scale(2.5, 2.5);
+    c.shadowColor = 'rgba(0,0,0,.18)'; c.shadowOffsetY = 1.5; c.shadowBlur = 2;
+    DESENHA[t](c);
+    SPRITE[t] = cnv;
+  }
+  function sushi(t, x, y, tam) { g.drawImage(SPRITE[t], x - tam / 2, y - tam / 2, tam, tam); }
+
+  // ---------- Áudio ----------
+  let audio = null;
+  function iniciaAudio() {
+    if (audio) { if (audio.state === 'suspended') audio.resume(); return; }
+    try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; }
+  }
+  function tom(freq, dur, tipo = 'sine', vol = .12, atraso = 0, freqFim) {
+    if (!audio) return;
+    const t0 = audio.currentTime + atraso;
+    const o = audio.createOscillator(), v = audio.createGain();
+    o.type = tipo; o.frequency.setValueAtTime(freq, t0);
+    if (freqFim) o.frequency.exponentialRampToValueAtTime(freqFim, t0 + dur);
+    v.gain.setValueAtTime(0, t0); v.gain.linearRampToValueAtTime(vol, t0 + .01);
+    v.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+    o.connect(v); v.connect(audio.destination); o.start(t0); o.stop(t0 + dur + .02);
+  }
+  const som = {
+    sai: () => tom(520 + Math.random() * 80, .06, 'sine', .06, 0, 760),
+    pega: () => { tom(880, .09, 'triangle', .1); tom(1320, .12, 'triangle', .08, .05); },
+    completo: () => [660, 880, 1100, 1320].forEach((f, i) => tom(f, .16, 'triangle', .1, i * .07)),
+    vitoria: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tom(f, .22, 'triangle', .12, i * .12)),
+    derrota: () => [440, 370, 311, 262].forEach((f, i) => tom(f, .3, 'sawtooth', .05, i * .16)),
+  };
+
+  // ---------- Estado ----------
+  let estado = 'menu';
+  let faseAtual = 0;
+  let P; // parâmetros da fase
+  let colunas, slots, slotsS, espaco, deslocamento, segurando, tempoRestante, feitos, totalPedidos;
+  let voando, particulas, dicaVisivel, alertaEsteira, relogio = 0;
+
+  const COL = { x0: 12, w: 70, gap: 4, topo: 538, passo: 33, tam: 46 };
+
+  function montaFase(n) {
+    P = FASES[n];
+    const tipos = TIPOS.slice(0, P.tipos);
+    // Pedidos de cada cliente, em "ondas" (o 1º pedido de todos, depois o 2º...)
+    const ondas = [];
+    for (let k = 0; k < P.pedidosPorCliente; k++) {
+      const sorteio = embaralha(tipos.slice());
+      ondas.push(CLIENTES.map((_, i) => ({ tipo: sorteio[i % sorteio.length], qtd: aleat(P.qtd[0], P.qtd[1]) })));
+    }
+    CLIENTES.forEach((c, i) => {
+      c.fila = ondas.map(o => o[i]);
+      c.pedido = null; c.resta = 0; c.espera = .4 + i * .25;
+      c.pulo = 0; c.feliz = 0; c.ok = 0;
+    });
+    totalPedidos = CLIENTES.length * P.pedidosPorCliente;
+    feitos = 0;
+
+    // Colunas: os sushis de cada onda vêm antes dos da onda seguinte,
+    // quebrados em blocos de mesmo tipo e espalhados pelas 5 colunas.
+    let blocos = [];
+    for (const onda of ondas) {
+      const daOnda = [];
+      for (const ped of onda) {
+        let r = ped.qtd;
+        while (r > 0) { const b = Math.min(r, aleat(P.blocos[0], P.blocos[1])); daOnda.push({ tipo: ped.tipo, n: b }); r -= b; }
+      }
+      blocos.push(...embaralha(daOnda));
+    }
+    for (let i = 0; i < blocos.length; i++) {
+      if (Math.random() < P.mistura) {
+        const j = Math.min(blocos.length - 1, i + aleat(1, 4));
+        [blocos[i], blocos[j]] = [blocos[j], blocos[i]];
+      }
+    }
+    colunas = Array.from({ length: 5 }, () => ({ itens: [], desloc: 0, brilho: 0 }));
+    for (const b of blocos) {
+      const ordem = colunas.map((c, i) => i).sort((a, b2) => colunas[a].itens.length - colunas[b2].itens.length);
+      const escolhida = colunas[ordem[Math.random() < .7 ? 0 : aleat(0, 2)]];
+      const ult = escolhida.itens[escolhida.itens.length - 1];
+      // evita juntar dois blocos do mesmo tipo (formaria um bloco maior do que o planejado)
+      if (ult === b.tipo) { const alt = colunas[ordem[1]]; for (let k = 0; k < b.n; k++) alt.itens.push(b.tipo); }
+      else for (let k = 0; k < b.n; k++) escolhida.itens.push(b.tipo);
+    }
+
+    slots = new Array(P.capacidade).fill(null);
+    slotsS = new Array(P.capacidade).fill(0);
+    espaco = COMPR / P.capacidade;
+    deslocamento = 0;
+    segurando = -1;
+    tempoRestante = P.tempo;
+    voando = []; particulas = [];
+    dicaVisivel = n === 0;
+    alertaEsteira = 0;
+  }
+
+  // ---------- Entrada (segurar coluna) ----------
+  function colunaEm(ev) {
+    const r = cv.getBoundingClientRect();
+    const x = (ev.clientX - r.left) / escala, y = (ev.clientY - r.top) / escala;
+    if (y < COL.topo - 30) return -1;
+    const i = Math.floor((x - COL.x0 + COL.gap / 2) / (COL.w + COL.gap));
+    return i >= 0 && i < 5 ? i : -1;
+  }
+  cv.addEventListener('pointerdown', (ev) => {
+    iniciaAudio();
+    if (estado !== 'jogando') return;
+    cv.setPointerCapture(ev.pointerId);
+    segurando = colunaEm(ev);
+  });
+  cv.addEventListener('pointermove', (ev) => {
+    if (estado !== 'jogando' || segurando === -1 || !(ev.buttons & 1) && ev.pointerType === 'mouse') return;
+    const i = colunaEm(ev);
+    if (i !== -1) segurando = i;
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => cv.addEventListener(t, () => { segurando = -1; }));
+  cv.addEventListener('contextmenu', e => e.preventDefault());
+
+  // ---------- Lógica ----------
+  function atualiza(dt) {
+    relogio += dt;
+    for (const c of colunas) { c.desloc *= Math.pow(.0005, dt); c.brilho = Math.max(0, c.brilho - dt * 4); }
+    for (const c of CLIENTES) { c.pulo = Math.max(0, c.pulo - dt * 3); c.feliz = Math.max(0, c.feliz - dt); c.ok = Math.max(0, c.ok - dt); }
+    atualizaParticulas(dt);
+    if (estado !== 'jogando') return;
+
+    tempoRestante -= dt;
+    if (tempoRestante <= 0) { tempoRestante = 0; return perde('tempo'); }
+
+    // Clientes recebem o próximo pedido
+    for (const c of CLIENTES) {
+      if (!c.pedido && c.fila.length) {
+        c.espera -= dt;
+        if (c.espera <= 0) { c.pedido = c.fila.shift(); c.resta = c.pedido.qtd; c.pulo = 1; }
+      }
+    }
+
+    // Move a esteira
+    deslocamento = (deslocamento + P.velocidade * dt) % COMPR;
+    const N = P.capacidade;
+    for (let i = 0; i < N; i++) {
+      if (!slots[i]) continue;
+      const s = (i * espaco + deslocamento) % COMPR, ant = slotsS[i];
+      slotsS[i] = s;
+      for (const c of CLIENTES) {
+        const passou = ant <= s ? (ant < c.s && s >= c.s) : (c.s > ant || c.s <= s);
+        if (passou && c.pedido && c.resta > 0 && slots[i] === c.pedido.tipo) {
+          const p = pontoEm(s);
+          voando.push({ tipo: slots[i], x0: p.x, y0: p.y, cli: c, t: 0 });
+          slots[i] = null;
+          c.resta--;
+          som.pega();
+          break;
+        }
+      }
+    }
+
+    // Coloca sushi na esteira enquanto segura a coluna
+    if (segurando !== -1) {
+      const col = colunas[segurando];
+      const iEntrada = ((-Math.floor(deslocamento / espaco)) % N + N) % N;
+      if (col.itens.length && !slots[iEntrada]) {
+        slots[iEntrada] = col.itens.shift();
+        slotsS[iEntrada] = (iEntrada * espaco + deslocamento) % COMPR;
+        col.desloc += COL.passo; col.brilho = 1;
+        dicaVisivel = false;
+        som.sai();
+      }
+    }
+
+    // Sushis voando até o cliente
+    for (const v of voando) {
+      v.t += dt / .38;
+      if (v.t >= 1 && !v.chegou) {
+        v.chegou = true;
+        const c = v.cli;
+        c.pulo = 1; c.feliz = .9;
+        coracoes(c.x + c.lado * 10, c.y - 20, 3);
+        if (c.resta === 0 && c.pedido && !voando.some(o => o !== v && o.cli === c && !o.chegou)) completaPedido(c);
+      }
+    }
+    voando = voando.filter(v => !v.chegou);
+
+    const naEsteira = slots.reduce((n, x) => n + (x ? 1 : 0), 0);
+    alertaEsteira = naEsteira / N;
+    if (naEsteira >= N) return perde('esteira');
+  }
+
+  function completaPedido(c) {
+    c.pedido = null; c.ok = 1.1; c.espera = 1.1;
+    feitos++;
+    coracoes(c.x, c.y - 30, 7);
+    som.completo();
+    if (feitos >= totalPedidos) setTimeout(vence, 700);
+  }
+
+  function coracoes(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      particulas.push({ x: x + (Math.random() - .5) * 30, y, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 50,
+        vida: 1 + Math.random() * .5, tam: 12 + Math.random() * 8 });
+    }
+  }
+  function atualizaParticulas(dt) {
+    for (const p of particulas) { p.x += p.vx * dt; p.y += p.vy * dt; p.vida -= dt; }
+    particulas = particulas.filter(p => p.vida > 0);
+  }
+
+  // ---------- Desenho ----------
+  function desenha() {
+    g.setTransform(escala * dpr, 0, 0, escala * dpr, 0, 0);
+    fundo();
+    for (const c of CLIENTES) if (c.cima) cliente(c);
+    esteira();
+    cozinha();
+    for (const c of CLIENTES) if (!c.cima) cliente(c);
+    for (const c of CLIENTES) balao(c);
+    for (const v of voando) {
+      const t = Math.min(1, v.t), e = 1 - Math.pow(1 - t, 2);
+      const x = v.x0 + (v.cli.x - v.x0) * e, y = v.y0 + (v.cli.y - v.y0) * e - Math.sin(t * Math.PI) * 30;
+      sushi(v.tipo, x, y, 34 * (1 - t * .5));
+    }
+    for (const p of particulas) {
+      g.globalAlpha = Math.min(1, p.vida);
+      g.fillStyle = '#FF5C8A'; g.font = `${p.tam}px Fredoka, sans-serif`; g.textAlign = 'center';
+      g.fillText('❤', p.x, p.y);
+    }
+    g.globalAlpha = 1;
+    hud();
+    barraEsteira();
+    desenhaColunas();
+  }
+
+  function fundo() {
+    const gr = g.createLinearGradient(0, 0, 0, 520);
+    gr.addColorStop(0, '#F6DDB5'); gr.addColorStop(1, '#E7BE86');
+    g.fillStyle = gr; g.fillRect(0, 0, W, 520);
+    g.strokeStyle = 'rgba(150,95,45,.12)'; g.lineWidth = 2;
+    for (let x = 0; x < W; x += 30) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 520); g.stroke(); }
+    // faixa de madeira atrás dos clientes de cima
+    g.fillStyle = '#B9733C'; g.fillRect(0, 128, W, 10);
+    g.fillStyle = '#8F5426'; g.fillRect(0, 138, W, 4);
+    // plantinhas nas laterais
+    for (const x of [6, 384]) {
+      rr(g, x - 8, 300, 16, 16, 3); g.fillStyle = '#7A4A26'; g.fill();
+      g.fillStyle = '#4E8A3A';
+      [[0, 290, 9], [-5, 296, 6], [5, 295, 7]].forEach(([dx, y, r]) => { g.beginPath(); g.arc(x + dx, y, r, 0, Math.PI * 2); g.fill(); });
+    }
+  }
+
+  function esteira() {
+    const { L, R, T, B, largura } = EST;
+    const m = largura / 2;
+    // base vermelha (balcão)
+    rr(g, L - m - 4, T - m + 4, R - L + largura + 8, B - T + largura + 10, 58);
+    g.fillStyle = '#9E2A22'; g.fill();
+    rr(g, L - m - 4, T - m, R - L + largura + 8, B - T + largura + 4, 58);
+    g.fillStyle = '#C2372B'; g.fill();
+    // borda externa metálica
+    rr(g, L - m - 2, T - m - 2, R - L + largura + 4, B - T + largura + 4, 56);
+    g.fillStyle = '#8D959B'; g.fill();
+    // superfície da esteira com as placas se mexendo
+    g.lineCap = 'butt';
+    g.lineWidth = largura; g.strokeStyle = '#C3C9CD'; g.stroke(PATH_EST);
+    g.setLineDash([2, espaco - 2]); g.lineDashOffset = -deslocamento;
+    g.strokeStyle = 'rgba(80,90,98,.35)'; g.stroke(PATH_EST);
+    g.setLineDash([]);
+    g.lineWidth = 3; g.strokeStyle = 'rgba(255,255,255,.35)';
+    // brilho
+    g.save(); g.translate(0, -m + 3); g.lineWidth = 2; g.stroke(PATH_EST); g.restore();
+    // sushis
+    if (!slots) return;
+    for (let i = 0; i < slots.length; i++) {
+      if (!slots[i]) continue;
+      const s = (i * espaco + deslocamento) % COMPR;
+      const p = pontoEm(s);
+      const novo = s < espaco * 1.2 ? .6 + (s / (espaco * 1.2)) * .4 : 1;
+      sushi(slots[i], p.x, p.y - 2, 38 * novo);
+    }
+  }
+
+  function cozinha() {
+    const { L, R, T, B, largura } = EST;
+    const m = largura / 2;
+    const x = L + m, y = T + m, w = R - L - largura, h = B - T - largura;
+    // borda interna
+    rr(g, x - 2, y - 2, w + 4, h + 4, 24); g.fillStyle = '#8D959B'; g.fill();
+    g.save();
+    rr(g, x, y, w, h, 22); g.clip();
+    const gr = g.createLinearGradient(0, y, 0, y + h);
+    gr.addColorStop(0, '#34466E'); gr.addColorStop(1, '#25335A');
+    g.fillStyle = gr; g.fillRect(x, y, w, h);
+    // faixa vermelha e prateleira
+    g.fillStyle = '#A9302A'; g.fillRect(x, y, w, 14);
+    g.fillStyle = '#4A5E8C'; g.fillRect(x + 14, y + 40, 90, 6);
+    g.fillStyle = '#6A7DAA'; g.fillRect(x + w - 90, y + 30, 70, 30);
+    sushi('maguro', x + 32, y + 32, 22); sushi('tamago', x + 56, y + 32, 22); sushi('ikura', x + 80, y + 32, 22);
+
+    chef(195, y + 72);
+
+    // vitrine
+    const vx = x + 64, vy = y + h - 36, vw = w - 128;
+    rr(g, vx - 4, vy - 4, vw + 8, 40, 8); g.fillStyle = '#C9D3D9'; g.fill();
+    rr(g, vx, vy, vw, 32, 6); g.fillStyle = '#D9F0EE'; g.fill();
+    const peixes = ['#E23B4E', '#F3713D', '#F6C431', '#F6C4CC', '#E23B4E', '#8A4520'];
+    peixes.forEach((cor, i) => { elipse(g, vx + 12 + i * (vw - 24) / 5, vy + 20, 11, 7); g.fillStyle = cor; g.fill(); });
+    g.fillStyle = '#5DBB46'; g.fillRect(vx + 4, vy + 26, vw - 8, 4);
+    g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(vx + 4, vy + 3, vw - 8, 4);
+    g.restore();
+  }
+
+  function fotoRedonda(img, x, y, r, borda) {
+    g.save();
+    g.beginPath(); g.arc(x, y, r + 3, 0, Math.PI * 2); g.fillStyle = borda; g.fill();
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.clip();
+    if (img.complete && img.naturalWidth) g.drawImage(img, x - r, y - r, r * 2, r * 2);
+    else { g.fillStyle = '#E8C9A8'; g.fill(); }
+    g.restore();
+  }
+
+  function chef(x, y) {
+    const corte = Math.sin(relogio * 6) * 4;
+    // corpo (quimono)
+    g.beginPath();
+    g.moveTo(x - 58, y + 110); g.quadraticCurveTo(x - 56, y + 40, x - 20, y + 30);
+    g.lineTo(x + 20, y + 30); g.quadraticCurveTo(x + 56, y + 40, x + 58, y + 110); g.closePath();
+    g.fillStyle = '#CFE2F2'; g.fill(); g.strokeStyle = '#9DB8D0'; g.lineWidth = 2; g.stroke();
+    g.beginPath(); g.moveTo(x - 16, y + 31); g.lineTo(x + 4, y + 70); g.lineTo(x + 16, y + 31);
+    g.strokeStyle = '#2B4C7E'; g.lineWidth = 4; g.stroke();
+    // braços e faca
+    g.fillStyle = '#CFE2F2'; g.strokeStyle = '#9DB8D0'; g.lineWidth = 2;
+    elipse(g, x - 40, y + 72, 12, 22, .5); g.fill(); g.stroke();
+    elipse(g, x + 40, y + 72, 12, 22, -.5); g.fill(); g.stroke();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(x - 30 + corte, y + 90, 8, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.arc(x + 30 - corte, y + 90, 8, 0, Math.PI * 2); g.fill();
+    g.save(); g.translate(x - 30 + corte, y + 90); g.rotate(-.9);
+    rr(g, -2, -30, 6, 26, 2); g.fillStyle = '#DDE3E8'; g.fill(); g.restore();
+    // cabeça
+    fotoRedonda(FOTO_CHEF, x, y, 30, '#2B4C7E');
+    // bandana
+    g.beginPath(); g.arc(x, y + 6, 33, Math.PI * 1.13, Math.PI * 1.87);
+    g.strokeStyle = '#2B4C7E'; g.lineWidth = 9; g.stroke();
+    g.fillStyle = '#fff';
+    for (let a = 1.2; a < 1.85; a += .12) { g.beginPath(); g.arc(x + Math.cos(Math.PI * a) * 33, y + 6 + Math.sin(Math.PI * a) * 33, 1.4, 0, Math.PI * 2); g.fill(); }
+    g.fillStyle = '#2B4C7E';
+    g.beginPath(); g.moveTo(x + 30, y - 10); g.lineTo(x + 46, y - 18); g.lineTo(x + 42, y - 4); g.closePath(); g.fill();
+  }
+
+  function cliente(c) {
+    const pulo = Math.sin(c.pulo * Math.PI) * 6;
+    const x = c.x, y = c.y - pulo;
+    // ombros
+    g.beginPath();
+    g.moveTo(x - 40, y + 64); g.quadraticCurveTo(x - 40, y + 26, x - 12, y + 24);
+    g.lineTo(x + 12, y + 24); g.quadraticCurveTo(x + 40, y + 26, x + 40, y + 64); g.closePath();
+    g.fillStyle = c.roupa; g.fill(); g.strokeStyle = 'rgba(0,0,0,.15)'; g.lineWidth = 2; g.stroke();
+    g.beginPath(); g.moveTo(x - 7, y + 25); g.lineTo(x, y + 44); g.lineTo(x + 7, y + 25); g.fillStyle = c.detalhe; g.fill();
+    fotoRedonda(c.foto, x, y, 30, c.feliz > 0 ? '#FF7FA3' : '#FFFFFF');
+    if (c.ok > 0) {
+      g.globalAlpha = Math.min(1, c.ok * 2);
+      g.beginPath(); g.arc(x + 22, y + 20, 12, 0, Math.PI * 2); g.fillStyle = '#3FA531'; g.fill();
+      g.strokeStyle = '#fff'; g.lineWidth = 3.5; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(x + 16, y + 20); g.lineTo(x + 21, y + 25); g.lineTo(x + 28, y + 15); g.stroke();
+      g.globalAlpha = 1; g.lineCap = 'butt';
+    }
+  }
+
+  function balao(c) {
+    if (estado === 'menu') return;
+    const terminou = !c.pedido && !c.fila.length && c.ok <= 0;
+    if (!c.pedido || terminou) return;
+    const bx = c.x + c.lado * 46, by = c.y - 26;
+    const s = 1 + Math.sin(c.pulo * Math.PI) * .15;
+    g.save(); g.translate(bx, by); g.scale(s, s);
+    g.shadowColor = 'rgba(0,0,0,.2)'; g.shadowOffsetY = 2; g.shadowBlur = 4;
+    g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.fillStyle = '#fff'; g.fill();
+    g.beginPath(); g.moveTo(-c.lado * 12, 16); g.lineTo(-c.lado * 26, 26); g.lineTo(-c.lado * 2, 22); g.fill();
+    g.shadowColor = 'transparent';
+    sushi(c.pedido.tipo, -2, -3, 36);
+    g.font = '700 17px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 4; g.strokeStyle = '#fff'; g.strokeText(c.resta, 13, 13);
+    g.fillStyle = '#3A2A1E'; g.fillText(c.resta, 13, 13);
+    g.restore();
+  }
+
+  function hud() {
+    // pedidos completos
+    rr(g, 120, 16, 150, 40, 20); g.fillStyle = 'rgba(90,55,30,.55)'; g.fill();
+    rr(g, 110, 10, 52, 52, 12); g.fillStyle = '#fff'; g.fill();
+    g.strokeStyle = '#E2D6C4'; g.lineWidth = 2; g.stroke();
+    g.strokeStyle = '#46B236'; g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(123, 36); g.lineTo(133, 46); g.lineTo(150, 25); g.stroke();
+    g.lineCap = 'butt';
+    g.font = '700 24px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#fff';
+    g.fillText(`${feitos || 0}/${totalPedidos || 0}`, 216, 37);
+    if (estado === 'menu') return;
+    // fase e tempo
+    rr(g, 10, 20, 84, 32, 16); g.fillStyle = 'rgba(90,55,30,.55)'; g.fill();
+    g.font = '700 16px Fredoka, sans-serif'; g.fillStyle = '#fff';
+    g.fillText(P.nome.toUpperCase(), 52, 37);
+    const seg = Math.ceil(tempoRestante), urg = tempoRestante < 15;
+    rr(g, 296, 20, 84, 32, 16); g.fillStyle = urg ? '#D63A2E' : 'rgba(90,55,30,.55)'; g.fill();
+    g.fillStyle = '#fff';
+    g.fillText(`⏱ ${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`, 338, 37);
+  }
+
+  function barraEsteira() {
+    const x = 40, y = 494, w = 310, h = 26;
+    g.fillStyle = '#E7BE86'; g.fillRect(0, 480, W, 40);
+    rr(g, x, y, w, h, 13); g.fillStyle = '#5A3A22'; g.fill();
+    const n = slots ? slots.reduce((a, s) => a + (s ? 1 : 0), 0) : 0;
+    const cap = P ? P.capacidade : 50;
+    const f = n / cap;
+    if (f > 0) {
+      rr(g, x + 3, y + 3, Math.max(20, (w - 6) * f), h - 6, 10);
+      g.fillStyle = f > .8 ? '#E0402F' : f > .6 ? '#F2A12E' : '#4CB83A'; g.fill();
+    }
+    g.font = '700 17px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 3; g.strokeStyle = 'rgba(0,0,0,.35)'; g.strokeText(`${n}/${cap}`, x + w / 2, y + h / 2 + 1);
+    g.fillStyle = '#fff'; g.fillText(`${n}/${cap}`, x + w / 2, y + h / 2 + 1);
+  }
+
+  function desenhaColunas() {
+    const y0 = 520;
+    g.fillStyle = '#D9A86C'; g.fillRect(0, y0, W, H - y0);
+    if (!colunas) return;
+    colunas.forEach((col, i) => {
+      const x = COL.x0 + i * (COL.w + COL.gap);
+      g.fillStyle = '#9A5B2C'; g.fillRect(x, y0 + 6, COL.w, H - y0);
+      const gr = g.createLinearGradient(x, 0, x + COL.w, 0);
+      gr.addColorStop(0, '#B06D37'); gr.addColorStop(.5, '#C27B40'); gr.addColorStop(1, '#A5642F');
+      g.fillStyle = gr; g.fillRect(x + 4, y0 + 6, COL.w - 8, H - y0);
+      if (segurando === i || col.brilho > 0) {
+        g.fillStyle = `rgba(255,240,180,${segurando === i ? .3 : col.brilho * .3})`;
+        g.fillRect(x, y0 + 6, COL.w, H - y0);
+      }
+      for (let j = 0; j < col.itens.length; j++) {
+        const y = COL.topo + j * COL.passo + col.desloc;
+        if (y > H + 30) break;
+        sushi(col.itens[j], x + COL.w / 2, y, COL.tam);
+      }
+    });
+    if (dicaVisivel && estado === 'jogando') {
+      const a = .75 + Math.sin(relogio * 5) * .25;
+      g.globalAlpha = a;
+      g.font = '700 30px Fredoka, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.lineWidth = 6; g.strokeStyle = '#3A2A1E';
+      g.strokeText('SEGURE PARA', W / 2, 700); g.strokeText('JOGAR', W / 2, 734);
+      g.fillStyle = '#fff';
+      g.fillText('SEGURE PARA', W / 2, 700); g.fillText('JOGAR', W / 2, 734);
+      g.font = '44px sans-serif';
+      g.fillText('👆', 240 + Math.sin(relogio * 5) * 4, 640);
+      g.globalAlpha = 1;
+    }
+  }
+
+  // ---------- Telas ----------
+  const $ = (id) => document.getElementById(id);
+  function mostra(id) { ['telaInicio', 'telaFase', 'telaFim'].forEach(t => $(t).hidden = t !== id); }
+
+  function introFase(n) {
+    faseAtual = n;
+    montaFase(n);
+    estado = 'intro';
+    $('faseEmoji').textContent = P.emoji;
+    $('faseTitulo').textContent = `${P.nome} de ${FASES.length}`;
+    $('faseTexto').textContent = P.texto;
+    const min = Math.floor(P.tempo / 60), s = P.tempo % 60;
+    $('faseDetalhes').innerHTML =
+      `<span>🧾 ${totalPedidos} pedidos</span><span>⏱ ${min}:${String(s).padStart(2, '0')}</span><span>🍣 esteira: ${P.capacidade}</span>`;
+    mostra('telaFase');
+  }
+
+  function vence() {
+    if (estado !== 'jogando') return;
+    estado = 'fim';
+    segurando = -1;
+    som.vitoria();
+    const ultima = faseAtual === FASES.length - 1;
+    $('fimEmoji').textContent = ultima ? '🏆' : '🎉';
+    $('fimTitulo').textContent = ultima ? 'Você venceu!' : `${P.nome} concluída!`;
+    $('fimTexto').textContent = ultima
+      ? 'Todos os pedidos foram entregues. A família saiu de barriga cheia! 🍣'
+      : `Sobraram ${Math.ceil(tempoRestante)} segundos. Bora para a próxima?`;
+    $('btnFim').textContent = ultima ? 'Jogar de novo' : 'Próxima fase';
+    $('btnFim').onclick = () => introFase(ultima ? 0 : faseAtual + 1);
+    mostra('telaFim');
+  }
+
+  function perde(motivo) {
+    estado = 'fim';
+    segurando = -1;
+    som.derrota();
+    $('fimEmoji').textContent = motivo === 'tempo' ? '⏰' : '😵';
+    $('fimTitulo').textContent = motivo === 'tempo' ? 'O tempo acabou!' : 'A esteira lotou!';
+    $('fimTexto').textContent = motivo === 'tempo'
+      ? `Você completou ${feitos} de ${totalPedidos} pedidos. Tente de novo!`
+      : 'Escolha melhor as colunas: mande só o que os clientes estão pedindo.';
+    $('btnFim').textContent = 'Tentar de novo';
+    $('btnFim').onclick = () => introFase(faseAtual);
+    mostra('telaFim');
+  }
+
+  $('btnInicio').onclick = () => { iniciaAudio(); introFase(0); };
+  $('btnFase').onclick = () => { iniciaAudio(); mostra(null); estado = 'jogando'; };
+
+  // ---------- Laço principal ----------
+  montaFase(0);
+  let ultimo = performance.now();
+  function quadro(t) {
+    const dt = Math.min(.05, (t - ultimo) / 1000);
+    ultimo = t;
+    atualiza(dt);
+    desenha();
+    requestAnimationFrame(quadro);
+  }
+  requestAnimationFrame(quadro);
+  document.addEventListener('visibilitychange', () => { ultimo = performance.now(); segurando = -1; });
+})();
+</script>
+</body>
+</html>
