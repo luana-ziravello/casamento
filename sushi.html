@@ -268,14 +268,12 @@ const FASES = [
     tempo: 90, tipos: 8, capacidade: 40, qtd: [5, 7], bloco: [1, 3], foco: .28, velocidade: 4.4, estrelas: [7, 13, 19] },
 ];
 
-// Quem pode aparecer como cliente (é só acrescentar fotos aqui)
+// Quem pode aparecer como cliente (é só acrescentar desenhos aqui)
 const PESSOAS = [
-  { foto: 'imagens/jogo/cliente1.jpg', roupa: '#F4EEE2', detalhe: '#E4D8C2' },
-  { foto: 'imagens/jogo/cliente2.jpg', roupa: '#22345E', detalhe: '#F2802E' },
-  { foto: 'imagens/jogo/cliente3.jpg', roupa: '#D3355B', detalhe: '#F27C97' },
-  { foto: 'imagens/jogo/cliente4.jpg', roupa: '#EFE3D2', detalhe: '#C9B394' },
-];
-const FOTO_CHEF = 'imagens/jogo/chef.jpg';
+  'cliente-noiva', 'cliente-noivo', 'cliente-vestido-vinho', 'cliente-terno-claro',
+  'cliente-gravata-rosa', 'cliente-gravata-laranja', 'cliente-rosa', 'cliente-gato',
+].map(nome => ({ foto: `imagens/jogo/${nome}.png` }));
+const FOTO_CHEF = 'imagens/jogo/chef.png';
 
 // ---------- Palco e renderizador ----------
 const palco = $('palco'), cv = $('jogo');
@@ -559,62 +557,40 @@ const ICONE = {};
 })();
 
 // ---------- Personagens ----------
-const carregador = new Map();
-function texturaRosto(src, borda, bandana) {
-  const chave = src + borda + bandana;
-  if (carregador.has(chave)) return carregador.get(chave);
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
-  const img = new Image();
-  img.onload = () => {
-    const g = c.getContext('2d');
-    g.clearRect(0, 0, 256, 256);
-    g.beginPath(); g.arc(128, 128, 126, 0, Math.PI * 2); g.fillStyle = borda; g.fill();
-    g.save(); g.beginPath(); g.arc(128, 128, 114, 0, Math.PI * 2); g.clip();
-    g.drawImage(img, 14, 14, 228, 228);
-    if (bandana) {
-      g.beginPath(); g.arc(128, 150, 112, Math.PI * 1.08, Math.PI * 1.92);
-      g.lineWidth = 34; g.strokeStyle = '#2B4C7E'; g.stroke();
-      g.fillStyle = '#fff';
-      for (let a = 1.14; a < 1.9; a += .09) { g.beginPath(); g.arc(128 + Math.cos(Math.PI * a) * 112, 150 + Math.sin(Math.PI * a) * 112, 4, 0, Math.PI * 2); g.fill(); }
-    }
-    g.restore();
-    t.needsUpdate = true;
-  };
-  img.src = src;
-  carregador.set(chave, t);
-  return t;
+// Cada personagem é o próprio desenho (busto recortado) como sprite,
+// sempre virado para a câmera e "em pé" a partir da base (center y = 0).
+const carregaTex = new THREE.TextureLoader();
+const texturas = new Map();
+function textura(src) {
+  if (!texturas.has(src)) {
+    const t = carregaTex.load(src);
+    t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    texturas.set(src, t);
+  }
+  return texturas.get(src);
 }
-function cabeca(tex, tam) {
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+function busto(src, tam) {
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: textura(src), transparent: true, alphaTest: .05 }));
+  s.center.set(.5, 0);
   s.scale.set(tam, tam, 1);
   return s;
 }
+// pré-carrega todos os desenhos
+PESSOAS.forEach(p => textura(p.foto));
 
 // Chef no centro
 const chef = new THREE.Group();
 (function constroiChef() {
-  const quimono = mat('#D5E6F3', { roughness: .8 }), azul = mat('#2B4C7E'), branco = mat('#FFFFFF');
-  chef.add(malha(new THREE.CapsuleGeometry(.78, .8, 6, 16), quimono, 0, 1.25, 0));
-  chef.add(malha(new THREE.CylinderGeometry(.8, .8, .22, 20), azul, 0, 1.0, 0));
-  for (const lado of [-1, 1]) {
-    const gola = malha(new THREE.BoxGeometry(.1, .75, .06), azul, lado * .17, 1.72, .72);
-    gola.rotation.z = lado * .45; gola.rotation.x = -.25; chef.add(gola);
-  }
-  chef.bracos = [-1, 1].map(lado => {
-    const ombro = new THREE.Group(); ombro.position.set(lado * .78, 1.75, .1);
-    const braco = malha(new THREE.CapsuleGeometry(.2, .55, 4, 10), quimono, 0, -.38, 0); ombro.add(braco);
-    const mao = malha(new THREE.SphereGeometry(.17, 12, 10), branco, 0, -.75, 0); ombro.add(mao);
-    if (lado === 1) {
-      const faca = malha(new THREE.BoxGeometry(.05, .65, .12), mat('#DDE3E8', { metalness: .8, roughness: .2 }), 0, -1.05, .1);
-      ombro.add(faca);
-    }
-    ombro.rotation.x = -1.2; ombro.rotation.z = lado * .22;
-    chef.add(ombro); return ombro;
-  });
-  const rosto = cabeca(texturaRosto(FOTO_CHEF, '#2B4C7E', true), 1.75);
-  rosto.position.set(0, 2.75, .2); chef.add(rosto); chef.rosto = rosto;
-  chef.position.set(0, .36, -8.3);
+  const corpo = busto(FOTO_CHEF, 2.7);
+  corpo.position.set(0, .2, 0); chef.add(corpo); chef.corpo = corpo;
+  // tábua com um peixe e a faca cortando
+  chef.add(malha(new RoundedBoxGeometry(1.7, .14, .8, 2, .04), mat('#D9A86C'), 0, .55, 1.35));
+  chef.add(malha(new RoundedBoxGeometry(.9, .22, .4, 2, .08), mat('#F3713D', { roughness: .45 }), -.25, .72, 1.35));
+  const faca = new THREE.Group(); faca.position.set(.45, .65, 1.35);
+  faca.add(malha(new THREE.BoxGeometry(.06, .5, .14), mat('#DDE3E8', { metalness: .8, roughness: .2 }), 0, .35, 0));
+  faca.add(malha(new THREE.BoxGeometry(.08, .25, .1), mat('#3A2A1E'), 0, .72, 0));
+  chef.add(faca); chef.faca = faca;
+  chef.position.set(0, .41, -8.3);
   cena.add(chef);
 })();
 
@@ -625,16 +601,13 @@ const LUGARES = [
   { x: -2.9, z: -1.85,  lado: -1, cima: false },
   { x: 2.9,  z: -1.85,  lado: 1,  cima: false },
 ];
+const TAM_CLIENTE = 2.5;
 const camada = $('camada');
 for (const L of LUGARES) {
   const grupo = new THREE.Group();
-  L.matRoupa = mat('#ffffff', { roughness: .8 }); L.matDetalhe = mat('#ffffff');
-  L.corpo = malha(new THREE.CapsuleGeometry(.66, .6, 6, 16), L.matRoupa, 0, .9, 0);
+  L.corpo = busto(PESSOAS[0].foto, TAM_CLIENTE);
   grupo.add(L.corpo);
-  grupo.add(malha(new THREE.BoxGeometry(.2, .6, .1), L.matDetalhe, 0, 1.3, .63));
-  L.rosto = cabeca(texturaRosto(PESSOAS[0].foto, '#FFFFFF', false), 1.8);
-  L.rosto.position.set(0, 2.2, 0); grupo.add(L.rosto);
-  grupo.position.set(L.x, L.cima ? .02 : .2, L.z);
+  grupo.position.set(L.x, L.cima ? .05 : .25, L.z);
   cena.add(grupo); L.grupo = grupo;
   // ponto da esteira onde o cliente pega
   let melhor = 0, dist = Infinity; const p = new THREE.Vector3();
@@ -650,9 +623,8 @@ for (const L of LUGARES) {
 }
 function vestir(L, pessoa) {
   L.pessoa = pessoa;
-  L.rosto.material.map = texturaRosto(pessoa.foto, '#FFFFFF', false);
-  L.rosto.material.needsUpdate = true;
-  L.matRoupa.color.set(pessoa.roupa); L.matDetalhe.color.set(pessoa.detalhe);
+  L.corpo.material.map = textura(pessoa.foto);
+  L.corpo.material.needsUpdate = true;
 }
 
 // ---------- Projeção 3D → tela ----------
@@ -787,7 +759,7 @@ function atualizaBalao(L, pula) {
   if (pula) { L.balao.classList.remove('pula'); void L.balao.offsetWidth; L.balao.classList.add('pula'); }
 }
 function posicionaBalao(L) {
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + 2.2, L.z);
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + 1.8, L.z);
   L.cabecaTela = p;
   const u = larg / 390;
   L.balao.style.left = Math.max(32 * u, Math.min(larg - 32 * u, p.x + L.lado * 60 * u)) + 'px';
@@ -803,7 +775,7 @@ function pedidoCompleto(L) {
   feitos++; totalGeral++;
   L.estado = 'hum'; L.t = 0;
   L.balao.classList.add('ok'); atualizaBalao(L, true);
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + 3.2, L.z);
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + 2.7, L.z);
   const hum = document.createElement('div'); hum.className = 'hum'; hum.textContent = 'Hummmm! 😋';
   hum.style.left = p.x + 'px'; hum.style.top = p.y + 'px';
   camada.appendChild(hum); setTimeout(() => hum.remove(), 1400);
@@ -847,9 +819,8 @@ function atualiza(dt) {
   const jogando = estado === 'jogando';
 
   // chef cortando
-  chef.bracos[0].rotation.x = -1.2 + Math.sin(relogio * 7) * .12;
-  chef.bracos[1].rotation.x = -1.3 + Math.sin(relogio * 7 + Math.PI) * .25;
-  chef.rosto.position.y = 2.75 + Math.sin(relogio * 3.5) * .03;
+  chef.faca.position.y = .65 + Math.abs(Math.sin(relogio * 6)) * .3;
+  chef.corpo.position.y = .2 + Math.sin(relogio * 3.5) * .03;
 
   // clientes
   for (const L of LUGARES) {
@@ -870,11 +841,9 @@ function atualiza(dt) {
       g.position.x = L.x + L.lado * 7 * k * k;
       if (k >= 1) { trocaPessoa(L); L.estado = 'chegando'; L.t = 0; }
     }
-    L.corpo.scale.set(1, escY - L.pulo * .1, 1);
-    L.rosto.material.rotation = rot;
-    const esc = 1.8 * (1 + Math.sin(L.pulo * Math.PI) * .12);
-    L.rosto.scale.set(esc, esc, 1);
-    L.rosto.position.y = 2.2 + (escY - 1) * 1.5 + Math.sin(L.pulo * Math.PI) * .15;
+    const pulo = Math.sin(L.pulo * Math.PI);
+    L.corpo.material.rotation = rot;
+    L.corpo.scale.set(TAM_CLIENTE * (1 + pulo * .06), TAM_CLIENTE * (escY + pulo * .1), 1);
     if (L.estado === 'esperando' || L.estado === 'hum') posicionaBalao(L);
   }
 
@@ -964,7 +933,7 @@ function atualiza(dt) {
     const v = voando[i];
     v.t += dt / .35;
     const k = Math.min(1, v.t), L = v.L;
-    _p.set(L.grupo.position.x, L.grupo.position.y + 1.9, L.z + .3);
+    _p.set(L.grupo.position.x, L.grupo.position.y + 1.3, L.z + .3);
     v.malha.position.lerpVectors(v.de, _p, suave(k));
     v.malha.position.y += Math.sin(k * Math.PI) * 1.4;
     v.malha.scale.setScalar(ESC_ESTEIRA * (1 - k * .6));
