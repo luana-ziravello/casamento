@@ -332,6 +332,24 @@
     v.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
     o.connect(v); v.connect(audio.destination); o.start(t0); o.stop(t0 + dur + .02);
   }
+  // ---------- Vibração ----------
+  // Android: API de vibração. iPhone (iOS 18+): não tem a API, mas tocar num
+  // <input switch> dispara o retorno tátil do sistema (só durante um toque).
+  const temVibracao = typeof navigator.vibrate === 'function';
+  let switchIOS = null;
+  if (!temVibracao) {
+    switchIOS = document.createElement('label');
+    switchIOS.setAttribute('aria-hidden', 'true');
+    switchIOS.style.display = 'none';
+    const inp = document.createElement('input');
+    inp.type = 'checkbox'; inp.setAttribute('switch', '');
+    switchIOS.appendChild(inp);
+    document.body.appendChild(switchIOS);
+  }
+  function vibra(padrao) {
+    try { if (temVibracao) navigator.vibrate(padrao); else switchIOS.click(); } catch (e) { /* sem vibração */ }
+  }
+
   const som = {
     sai: () => tom(520 + Math.random() * 80, .06, 'sine', .06, 0, 760),
     pega: () => { tom(880, .09, 'triangle', .1); tom(1320, .12, 'triangle', .08, .05); },
@@ -417,6 +435,7 @@
     if (estado !== 'jogando') return;
     cv.setPointerCapture(ev.pointerId);
     segurando = colunaEm(ev);
+    if (segurando !== -1) vibra(12);
   });
   cv.addEventListener('pointermove', (ev) => {
     if (estado !== 'jogando' || segurando === -1 || !(ev.buttons & 1) && ev.pointerType === 'mouse') return;
@@ -460,6 +479,7 @@
           slots[i] = null;
           c.resta--;
           som.pega();
+          vibra(18);
           break;
         }
       }
@@ -475,6 +495,7 @@
         col.desloc += COL.passo; col.brilho = 1;
         dicaVisivel = false;
         som.sai();
+        vibra(8);
       }
     }
 
@@ -501,6 +522,7 @@
     feitos++;
     coracoes(c.x, c.y - 30, 7);
     som.completo();
+    vibra([25, 40, 25]);
     if (feitos >= totalPedidos) setTimeout(vence, 700);
   }
 
@@ -787,6 +809,7 @@
     estado = 'fim';
     segurando = -1;
     som.vitoria();
+    vibra([40, 60, 40, 60, 80]);
     const ultima = faseAtual === FASES.length - 1;
     $('fimEmoji').textContent = ultima ? '🏆' : '🎉';
     $('fimTitulo').textContent = ultima ? 'Você venceu!' : `${P.nome} concluída!`;
@@ -802,6 +825,7 @@
     estado = 'fim';
     segurando = -1;
     som.derrota();
+    vibra(250);
     $('fimEmoji').textContent = motivo === 'tempo' ? '⏰' : '😵';
     $('fimTitulo').textContent = motivo === 'tempo' ? 'O tempo acabou!' : 'A esteira lotou!';
     $('fimTexto').textContent = motivo === 'tempo'
