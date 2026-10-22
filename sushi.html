@@ -163,7 +163,7 @@
     animation: entra .35s cubic-bezier(.2, 1.4, .5, 1);
   }
   @keyframes entra { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .cartao .emoji { font-size: calc(var(--u) * 52px); line-height: 1; margin-bottom: calc(var(--u) * 8px); }
+  .cartao .emoji { font-size: calc(var(--u) * 44px); line-height: 1; margin-bottom: calc(var(--u) * 8px); }
   .cartao h1 { font-size: calc(var(--u) * 30px); font-weight: 700; line-height: 1.1; margin-bottom: calc(var(--u) * 10px); color: #C2372B; }
   .cartao p { font-size: calc(var(--u) * 17px); font-weight: 500; line-height: 1.35; margin-bottom: calc(var(--u) * 8px); }
   .cartao .estrelas { font-size: calc(var(--u) * 40px); letter-spacing: .1em; margin: calc(var(--u) * 4px) 0 calc(var(--u) * 10px); }
@@ -176,6 +176,21 @@
     padding: calc(var(--u) * 6px) calc(var(--u) * 12px);
     font-size: calc(var(--u) * 15px); font-weight: 600;
   }
+  .cardapio {
+    display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 5px);
+    margin-top: calc(var(--u) * 10px);
+  }
+  .cardapio .par {
+    display: flex; align-items: center; gap: calc(var(--u) * 2px);
+    background: #F3DFC1; border-radius: calc(var(--u) * 12px);
+    padding: calc(var(--u) * 2px) calc(var(--u) * 6px);
+    text-align: left; font-size: calc(var(--u) * 11.5px); font-weight: 600; line-height: 1.1;
+  }
+  .cardapio .par.novo { background: #FFE08A; }
+  .cardapio img { width: calc(var(--u) * 34px); height: calc(var(--u) * 34px); flex: none; }
+  .cardapio .seta { font-size: calc(var(--u) * 13px); color: #8A5A34; }
+  .cardapio .nome { margin-left: calc(var(--u) * 2px); }
+  .cardapio .nome small { display: block; font-weight: 500; opacity: .75; }
   .botao {
     margin-top: calc(var(--u) * 14px);
     font-family: inherit; font-size: calc(var(--u) * 22px); font-weight: 700; color: #fff;
@@ -216,9 +231,9 @@
     <div class="cartao">
       <div class="emoji">🍣</div>
       <h1>Esteira de Sushi</h1>
-      <p><b>Segure o dedo numa coluna</b> para mandar os sushis do topo para a esteira.</p>
-      <p>Cada cliente pega o sushi que pediu quando ele passa na frente.</p>
-      <p>Sobreviva até o fim do tempo <b>sem deixar a esteira lotar</b>. Quanto mais pedidos completar, mais estrelas!</p>
+      <p><b>Segure o dedo numa coluna</b> para mandar os ingredientes do topo para a esteira.</p>
+      <p>Os clientes pedem o <b>prato pronto</b>, mas na esteira só passam <b>ingredientes</b>: quem pede nigiri de polvo pega um tentáculo, quem pede salmão pega o filé clarinho, quem pede atum pega o bloco vermelho…</p>
+      <p>Sobreviva até o fim do tempo <b>sem deixar a esteira lotar</b>. Quanto mais cheia, mais devagar ela anda!</p>
       <button class="botao" id="btnInicio">Jogar</button>
     </div>
   </div>
@@ -229,6 +244,7 @@
       <h1 id="faseTitulo">Fase 1</h1>
       <p id="faseTexto"></p>
       <div class="detalhes" id="faseDetalhes"></div>
+      <div class="cardapio" id="faseCardapio"></div>
       <button class="botao" id="btnFase">Começar</button>
     </div>
   </div>
@@ -248,24 +264,45 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const $ = (id) => document.getElementById(id);
 const aleat = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const sorteia = (v) => v[Math.floor(Math.random() * v.length)];
 const suave = (k) => k * k * (3 - 2 * k);
 const sai = (k) => 1 - (1 - k) * (1 - k);
+const TAU = Math.PI * 2;
+
+// ---------- Cardápio ----------
+// O cliente pede o PRATO (balão); na esteira só passam INGREDIENTES.
+// A ordem define quais entram em cada fase (5, 8 e depois todos os 11).
+const CARDAPIO = [
+  { id: 'maguro',     prato: 'Nigiri de atum',    ing: 'Atum' },
+  { id: 'sake',       prato: 'Nigiri de salmão',  ing: 'Salmão' },
+  { id: 'tako',       prato: 'Nigiri de polvo',   ing: 'Tentáculo' },
+  { id: 'tamago',     prato: 'Tamago',            ing: 'Ovos' },
+  { id: 'kappa',      prato: 'Kappa maki',        ing: 'Pepino' },
+  { id: 'ebi',        prato: 'Nigiri de camarão', ing: 'Camarão' },
+  { id: 'onigiri',    prato: 'Onigiri',           ing: 'Tigela de arroz' },
+  { id: 'ikura',      prato: 'Gunkan de ikura',   ing: 'Ovas' },
+  { id: 'unagi',      prato: 'Nigiri de enguia',  ing: 'Enguia' },
+  { id: 'california', prato: 'Califórnia',        ing: 'Abacate' },
+  { id: 'hotate',     prato: 'Nigiri de vieira',  ing: 'Vieira' },
+];
+const TIPOS = CARDAPIO.map(c => c.id);
+const INFO = Object.fromEntries(CARDAPIO.map(c => [c.id, c]));
 
 // ---------- Fases ----------
 // Peças infinitas e aleatórias; cada fase dura um tempo fixo e você
 // sobrevive se a esteira não lotar. As estrelas vêm dos pedidos completos.
-const TIPOS = ['onigiri', 'maguro', 'tamago', 'ebi', 'ikura', 'kappa', 'tako', 'unagi'];
+// A esteira fica mais lenta quanto mais cheia (até "freio" a menos).
 const FASES = [
-  { nome: 'Fase 1', emoji: '🍙', texto: 'Para aquecer: só 4 tipos de sushi e blocos grandes de peças iguais.',
-    tempo: 60, tipos: 4, capacidade: 50, qtd: [3, 5], bloco: [2, 4], foco: .5, velocidade: 3.4, estrelas: [8, 16, 24] },
-  { nome: 'Fase 2', emoji: '🍣', texto: 'Mais tipos de sushi, pedidos maiores e menos espaço na esteira.',
-    tempo: 75, tipos: 6, capacidade: 45, qtd: [4, 6], bloco: [1, 4], foco: .38, velocidade: 3.9, estrelas: [8, 15, 22] },
-  { nome: 'Fase 3', emoji: '🔥', texto: 'Hora do rush! Todos os sushis, colunas bem misturadas e esteira apertada.',
-    tempo: 90, tipos: 8, capacidade: 40, qtd: [5, 7], bloco: [1, 3], foco: .28, velocidade: 4.4, estrelas: [7, 13, 19] },
+  { nome: 'Fase 1', emoji: '🍙', texto: 'Para aquecer: 5 pratos e blocos grandes de ingredientes iguais.',
+    tempo: 60, tipos: 5, capacidade: 30, qtd: [3, 5], bloco: [2, 4], foco: .5, velocidade: 3.6, freio: .6, estrelas: [7, 14, 21] },
+  { nome: 'Fase 2', emoji: '🍣', texto: 'Chegam camarão, onigiri e ikura. Pedidos maiores e menos espaço na esteira.',
+    tempo: 75, tipos: 8, capacidade: 27, qtd: [4, 6], bloco: [1, 4], foco: .38, velocidade: 4.0, freio: .62, estrelas: [7, 13, 20] },
+  { nome: 'Fase 3', emoji: '🔥', texto: 'Hora do rush! Todos os 11 pratos, colunas bem misturadas e esteira apertada.',
+    tempo: 90, tipos: 11, capacidade: 24, qtd: [5, 7], bloco: [1, 3], foco: .28, velocidade: 4.4, freio: .65, estrelas: [6, 12, 18] },
 ];
 
 // Quem pode aparecer como cliente (é só acrescentar desenhos aqui)
@@ -275,53 +312,59 @@ const PESSOAS = [
 ].map(nome => ({ foto: `imagens/jogo/${nome}.png` }));
 const FOTO_CHEF = 'imagens/jogo/chef.png';
 
-// ---------- Palco e renderizador ----------
+// ---------- Palco, renderizador e câmera ----------
 const palco = $('palco'), cv = $('jogo');
 const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 const cena = new THREE.Scene();
 cena.background = new THREE.Color('#F3D9B0');
+const pmrem = new THREE.PMREMGenerator(renderer);
+cena.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+cena.environmentIntensity = .55;
 
-// Câmera ortográfica inclinada (visão de cima, como nos jogos de celular)
-const MEIA_L = 5.3, TOPO = 12.3, INCL = THREE.MathUtils.degToRad(52);
-const ALVO = new THREE.Vector3(0, 0, -4);
-const camera = new THREE.OrthographicCamera(-MEIA_L, MEIA_L, TOPO, -TOPO, .1, 120);
-camera.position.copy(ALVO).add(new THREE.Vector3(0, Math.sin(INCL), Math.cos(INCL)).multiplyScalar(50));
+// Câmera em perspectiva. O quadro "virtual" tem a proporção da tela mais
+// estreita aceita (0,42); telas mais largas mostram a parte de cima dele
+// (setViewOffset), então o topo da cena fica sempre no lugar.
+const ASPECTO = .42;
+const camera = new THREE.PerspectiveCamera(38, ASPECTO, 1, 200);
+const ALVO = new THREE.Vector3(0, 0, -3.4), INCL = THREE.MathUtils.degToRad(58), DIST = 37;
+camera.position.copy(ALVO).add(new THREE.Vector3(0, Math.sin(INCL), Math.cos(INCL)).multiplyScalar(DIST));
 camera.lookAt(ALVO);
 camera.updateMatrixWorld();
 
-let larg = 390, alt = 844;
+let larg = 390, alt = 844, qualidade = 2;
 function redimensiona() {
   let h = window.innerHeight, w = Math.min(window.innerWidth, h * .62);
-  if (w / h < .42) h = w / .42;
+  if (w / h < ASPECTO) h = w / ASPECTO;
   larg = w; alt = h;
   palco.style.width = w + 'px'; palco.style.height = h + 'px';
   palco.style.setProperty('--u', w / 390);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, qualidade >= 2 ? 2 : 1));
   renderer.setSize(w, h, false);
-  camera.top = TOPO; camera.bottom = TOPO - 2 * MEIA_L * h / w;
+  camera.aspect = ASPECTO;
+  camera.setViewOffset(w, w / ASPECTO, 0, 0, w, h);
   camera.updateProjectionMatrix();
   posicionaBarra();
 }
 
 // ---------- Luz ----------
-cena.add(new THREE.HemisphereLight('#FFF4E0', '#B5835A', 1.7));
-const sol = new THREE.DirectionalLight('#FFFFFF', 2.1);
-sol.position.set(-5, 14, 4);
-sol.target.position.set(0, 0, -4);
+cena.add(new THREE.HemisphereLight('#FFF4E0', '#B5835A', 1.0));
+const sol = new THREE.DirectionalLight('#FFF6EA', 2.4);
+sol.position.set(-6, 16, 6);
+sol.target.position.set(0, 0, -5);
 sol.castShadow = true;
 sol.shadow.mapSize.set(2048, 2048);
-Object.assign(sol.shadow.camera, { left: -13, right: 13, top: 16, bottom: -16, near: 1, far: 40 });
-sol.shadow.bias = -.0008;
-sol.shadow.radius = 3;
+Object.assign(sol.shadow.camera, { left: -14, right: 14, top: 18, bottom: -18, near: 1, far: 45 });
+sol.shadow.bias = -.0006;
+sol.shadow.normalBias = .02;
 cena.add(sol, sol.target);
 
-// ---------- Utilidades de geometria ----------
+// ---------- Utilidades ----------
 const mat = (cor, extra = {}) => new THREE.MeshStandardMaterial({ color: cor, roughness: .7, ...extra });
 function malha(geo, material, x = 0, y = 0, z = 0, { sombra = true, recebe = true } = {}) {
   const m = new THREE.Mesh(geo, material);
@@ -339,15 +382,15 @@ function retArredondado(x1, z1, x2, z2, r) {
   return s;
 }
 function extrudaChao(shape, altura, bisel = .04) {
-  const g = new THREE.ExtrudeGeometry(shape, { depth: altura, bevelEnabled: bisel > 0, bevelThickness: bisel, bevelSize: bisel, bevelSegments: 2, curveSegments: 16 });
+  const g = new THREE.ExtrudeGeometry(shape, { depth: altura, bevelEnabled: bisel > 0, bevelThickness: bisel, bevelSize: bisel, bevelSegments: 2, curveSegments: 20 });
   g.rotateX(-Math.PI / 2);
   return g;
 }
-function texturaCanvas(w, h, desenha, rep = [1, 1]) {
+function texCanvas(w, h, desenha, { rep = [1, 1], cor = true } = {}) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   desenha(c.getContext('2d'), w, h);
   const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
+  if (cor) t.colorSpace = THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(...rep);
   t.anisotropy = 4;
   return t;
@@ -364,25 +407,22 @@ function tabuas(cores) {
 }
 
 // ---------- Restaurante ----------
-const chao = malha(new THREE.PlaneGeometry(40, 50), mat('#FFFFFF', {
-  map: texturaCanvas(512, 512, tabuas(['#E7BC84', '#E2B47A', '#EAC28C', '#DFAF74']), [5, 6]) }), 0, 0, 0, { sombra: false });
+const chao = malha(new THREE.PlaneGeometry(44, 60), mat('#FFFFFF', {
+  map: texCanvas(512, 512, tabuas(['#E7BC84', '#E2B47A', '#EAC28C', '#DFAF74']), { rep: [5, 7] }) }), 0, 0, 0, { sombra: false });
 chao.rotation.x = -Math.PI / 2;
 cena.add(chao);
-
-const parede = malha(new THREE.PlaneGeometry(30, 9), mat('#FFFFFF', {
-  map: texturaCanvas(512, 256, tabuas(['#F6DDB5', '#F2D6AA', '#F6DDB5', '#F0D3A6', '#F6DDB5', '#F2D6AA']), [3, 1]) }), 0, 4.5, -15, { sombra: false });
-cena.add(parede);
-cena.add(malha(new THREE.BoxGeometry(30, .7, .3), mat('#9A5B2C'), 0, .35, -14.85));
-cena.add(malha(new THREE.BoxGeometry(30, .25, .5), mat('#B9733C'), 0, 2.3, -14.8));
-
-// vasinhos nas laterais
-for (const [x, z] of [[-5.4, -7.5], [5.4, -7.5]]) {
+cena.add(malha(new THREE.PlaneGeometry(40, 12), mat('#FFFFFF', {
+  map: texCanvas(512, 256, tabuas(['#F6DDB5', '#F2D6AA', '#F6DDB5', '#F0D3A6', '#F6DDB5', '#F2D6AA']), { rep: [4, 1] }) }), 0, 6, -14.6, { sombra: false }));
+cena.add(malha(new THREE.BoxGeometry(40, .7, .3), mat('#9A5B2C'), 0, .35, -14.45));
+cena.add(malha(new THREE.BoxGeometry(40, .25, .5), mat('#B9733C'), 0, 2.4, -14.4));
+for (const [x, z] of [[-5.6, -7.6], [5.6, -7.6]]) {
   cena.add(malha(new THREE.CylinderGeometry(.45, .35, .7, 16), mat('#7A4A26'), x, .35, z));
   for (const [dx, dy, r] of [[0, 1.05, .5], [-.3, .85, .38], [.32, .9, .4]]) cena.add(malha(new THREE.SphereGeometry(r, 14, 10), mat('#4E8A3A'), x + dx, dy, z));
 }
 
 // ---------- Esteira ----------
-const EST = { L: -4.2, R: 4.2, T: -11.8, B: -3.4, r: 1, larg: 1.1, y: .47 };
+// Pista larga e cozinha pequena no meio, para a esteira ser o destaque.
+const EST = { L: -3.55, R: 3.55, T: -10.7, B: -4.0, r: 1.3, larg: 2.3, y: .47 };
 const segs = [];
 (function montaCaminho() {
   const { L, R, T, B, r } = EST, cx = 0;
@@ -394,7 +434,7 @@ const segs = [];
   reta(L, B - r, L, T + r);
   arco(L + r, T + r, Math.PI, Math.PI * 1.5);
   reta(L + r, T, R - r, T);
-  arco(R - r, T + r, Math.PI * 1.5, Math.PI * 2);
+  arco(R - r, T + r, Math.PI * 1.5, TAU);
   reta(R, T + r, R, B - r);
   arco(R - r, B - r, 0, Math.PI / 2);
   reta(R - r, B, cx, B);
@@ -415,78 +455,251 @@ function pontoEm(s, alvo = new THREE.Vector3()) {
 }
 
 (function constroiEsteira() {
-  const { L, R, T, B, larg } = EST, m = larg / 2;
-  // base vermelha
-  const base = new THREE.Shape(retArredondado(L - m - .25, T - m - .25, R + m + .25, B + m + .35, 1.8).getPoints(40));
-  cena.add(malha(extrudaChao(base, .3, .06), mat('#C2372B', { roughness: .5 }), 0, 0, 0));
-  // superfície metálica com o buraco da cozinha
-  const anel = retArredondado(L - m, T - m, R + m, B + m, 1.55);
-  anel.holes.push(retArredondado(L + m, T + m, R - m, B - m, .45));
-  cena.add(malha(extrudaChao(anel, .1, .03), mat('#C9CFD3', { roughness: .35, metalness: .35 }), 0, .34, 0));
-  // bordas
-  const bordaExt = retArredondado(L - m - .08, T - m - .08, R + m + .08, B + m + .08, 1.62);
-  bordaExt.holes.push(retArredondado(L - m + .04, T - m + .04, R + m - .04, B + m - .04, 1.5));
-  cena.add(malha(extrudaChao(bordaExt, .2, .02), mat('#8D959B', { metalness: .5, roughness: .35 }), 0, .34, 0));
-  const bordaInt = retArredondado(L + m - .04, T + m - .04, R - m + .04, B - m + .04, .5);
-  bordaInt.holes.push(retArredondado(L + m + .08, T + m + .08, R - m - .08, B - m - .08, .4));
-  cena.add(malha(extrudaChao(bordaInt, .2, .02), mat('#8D959B', { metalness: .5, roughness: .35 }), 0, .34, 0));
+  const { L, R, T, B, larg, r } = EST, m = larg / 2;
+  const metal = mat('#C9CFD3', { roughness: .3, metalness: .6 }), borda = mat('#8D959B', { metalness: .7, roughness: .3 });
+  const base = new THREE.Shape(retArredondado(L - m - .25, T - m - .25, R + m + .25, B + m + .35, r + m + .25).getPoints(48));
+  cena.add(malha(extrudaChao(base, .3, .06), mat('#C2372B', { roughness: .45 }), 0, 0, 0));
+  const anel = retArredondado(L - m, T - m, R + m, B + m, r + m);
+  anel.holes.push(retArredondado(L + m, T + m, R - m, B - m, .35));
+  cena.add(malha(extrudaChao(anel, .1, .03), metal, 0, .34, 0));
+  const bordaExt = retArredondado(L - m - .1, T - m - .1, R + m + .1, B + m + .1, r + m + .1);
+  bordaExt.holes.push(retArredondado(L - m + .05, T - m + .05, R + m - .05, B + m - .05, r + m - .05));
+  cena.add(malha(extrudaChao(bordaExt, .22, .02), borda, 0, .34, 0));
+  const bordaInt = retArredondado(L + m - .05, T + m - .05, R - m + .05, B - m + .05, .4);
+  bordaInt.holes.push(retArredondado(L + m + .1, T + m + .1, R - m - .1, B - m - .1, .3));
+  cena.add(malha(extrudaChao(bordaInt, .22, .02), borda, 0, .34, 0));
 
-  // cozinha (dentro da esteira)
-  const piso = malha(new THREE.ShapeGeometry(retArredondado(L + m + .05, T + m + .05, R - m - .05, B - m - .05, .4)), mat('#2E3F66'), 0, .41, 0, { sombra: false });
+  // cozinha pequena no centro
+  const piso = malha(new THREE.ShapeGeometry(retArredondado(L + m + .05, T + m + .05, R - m - .05, B - m - .05, .3)), mat('#2E3F66'), 0, .41, 0, { sombra: false });
   piso.rotation.x = -Math.PI / 2; cena.add(piso);
-  cena.add(malha(new THREE.BoxGeometry(6.2, 1.1, .5), mat('#A9302A'), 0, .9, -10.9));
-  cena.add(malha(new THREE.BoxGeometry(6.4, .1, .7), mat('#D0D6DA', { metalness: .3 }), 0, 1.5, -10.85));
-  // vitrine
-  cena.add(malha(new THREE.BoxGeometry(3.4, .45, .9), mat('#B9C3C9', { metalness: .3, roughness: .4 }), 0, .6, -5.05));
-  const cores = ['#DD3346', '#F3713D', '#F6C431', '#F7C9D0', '#DD3346', '#8A4520'];
-  cores.forEach((c, i) => cena.add(malha(new RoundedBoxGeometry(.42, .14, .5, 2, .05), mat(c, { roughness: .4 }), -1.3 + i * .52, .9, -5.05)));
-  cena.add(malha(new THREE.BoxGeometry(3.2, .06, .7), mat('#5DBB46'), 0, .84, -5.05, { sombra: false }));
-  const vidro = new THREE.Mesh(new THREE.BoxGeometry(3.4, .55, .9), new THREE.MeshStandardMaterial({ color: '#CFF3F2', transparent: true, opacity: .28, roughness: .05, metalness: .1 }));
-  vidro.position.set(0, 1.1, -5.05); cena.add(vidro);
+  cena.add(malha(new THREE.BoxGeometry(4.2, .6, .4), mat('#A9302A'), 0, .7, -9.25));
+  cena.add(malha(new THREE.BoxGeometry(4.4, .08, .55), mat('#D0D6DA', { metalness: .5, roughness: .3 }), 0, 1.04, -9.2));
 })();
 
-// placas da esteira (se mexem junto com os sushis)
 let placas = null;
 function criaPlacas(n) {
   if (placas) { cena.remove(placas); placas.geometry.dispose(); }
-  placas = new THREE.InstancedMesh(new THREE.BoxGeometry(.05, .015, EST.larg - .1), mat('#9AA2A8', { metalness: .4, roughness: .4 }), n);
+  placas = new THREE.InstancedMesh(new THREE.BoxGeometry(.06, .02, EST.larg - .14), mat('#6F777D', { metalness: .6, roughness: .35 }), n);
   placas.receiveShadow = true;
   cena.add(placas);
 }
 
 // ---------- Mesa das colunas ----------
-const COL = { xs: [-4.2, -2.1, 0, 2.1, 4.2], z0: .2, passo: .8, escala: 1.3, y: .14, visiveis: 16 };
+const COL = { xs: [-4.2, -2.1, 0, 2.1, 4.2], z0: -.1, passo: .92, escala: 1.5, y: .14, visiveis: 10 };
 (function constroiMesa() {
-  cena.add(malha(new THREE.BoxGeometry(11, .2, 14), mat('#D9A86C'), 0, -.02, 6.4, { sombra: false }));
-  const tex = texturaCanvas(128, 512, tabuas(['#B8743A', '#C27E42', '#B06D35']), [1, 3]);
+  cena.add(malha(new THREE.BoxGeometry(12, .2, 16), mat('#D9A86C'), 0, -.02, 7, { sombra: false }));
+  const tex = texCanvas(128, 512, tabuas(['#B8743A', '#C27E42', '#B06D35']), { rep: [1, 3] });
   COL.xs.forEach((x, i) => {
     const t = tex.clone(); t.needsUpdate = true; t.offset.x = i * .3;
-    cena.add(malha(new THREE.BoxGeometry(1.95, .14, 13.5), mat('#FFFFFF', { map: t }), x, .07, 6.6, { sombra: false }));
+    cena.add(malha(new THREE.BoxGeometry(1.95, .14, 15.5), mat('#FFFFFF', { map: t }), x, .07, 7.2, { sombra: false }));
   });
-  for (let i = 0; i < 6; i++) cena.add(malha(new THREE.BoxGeometry(.12, .26, 13.5), mat('#7A4524'), -5.25 + i * 2.1, .13, 6.6, { sombra: false }));
-  cena.add(malha(new THREE.BoxGeometry(11, .3, .3), mat('#7A4524'), 0, .15, -.3, { sombra: false }));
+  for (let i = 0; i < 6; i++) cena.add(malha(new THREE.BoxGeometry(.12, .26, 15.5), mat('#7A4524'), -5.25 + i * 2.1, .13, 7.2, { sombra: false }));
+  cena.add(malha(new THREE.BoxGeometry(12, .3, .3), mat('#7A4524'), 0, .15, -.75, { sombra: false }));
 })();
-const ESC_ESTEIRA = 1.05;
+const ESC_ESTEIRA = 1.3;
 const brilhoColuna = COL.xs.map((x) => {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 13.4), new THREE.MeshBasicMaterial({ color: '#FFF3C4', transparent: true, opacity: 0, depthWrite: false }));
-  m.rotation.x = -Math.PI / 2; m.position.set(x, .15, 6.6); cena.add(m); return m;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 15.4), new THREE.MeshBasicMaterial({ color: '#FFF3C4', transparent: true, opacity: 0, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.set(x, .15, 7.2); cena.add(m); return m;
 });
 
-// ---------- Sushis em 3D ----------
-function peca(geo, cor, p = [0, 0, 0], r = [0, 0, 0], s = [1, 1, 1]) {
-  let g = geo.index ? geo.toNonIndexed() : geo;
-  g.scale(...s); g.rotateX(r[0]); g.rotateY(r[1]); g.rotateZ(r[2]); g.translate(...p);
-  for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal') g.deleteAttribute(k);
-  const c = new THREE.Color(cor), n = g.attributes.position.count, arr = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) { arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b; }
-  g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
-  return g;
+// ---------- Texturas dos alimentos ----------
+function graos(g, w, h, n = 1500) {
+  g.fillStyle = '#EDE7DA'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < n; i++) {
+    g.save(); g.translate(Math.random() * w, Math.random() * h); g.rotate(Math.random() * TAU);
+    g.beginPath(); g.ellipse(0, 0, 4 + Math.random() * 2.5, 1.8 + Math.random(), 0, 0, TAU);
+    g.fillStyle = sorteia(['#FFFFFF', '#FAF7F0', '#F3EEE3', '#E2D9C6']); g.fill();
+    g.lineWidth = .7; g.strokeStyle = 'rgba(120,100,70,.14)'; g.stroke();
+    g.restore();
+  }
 }
-const NORI = '#1E2A25';
-const arroz = () => peca(new RoundedBoxGeometry(.62, .24, .36, 3, .1), '#F5F2EA', [0, .12, 0]);
-const fatia = (cor) => peca(new RoundedBoxGeometry(.74, .1, .42, 3, .045), cor, [0, .285, 0]);
-const listras = (cor, larg = .04) => [-.24, -.08, .08, .24].map(x => peca(new THREE.BoxGeometry(larg, .014, .38), cor, [x, .338, 0], [0, .45, 0]));
-const faixaNori = () => [peca(new THREE.BoxGeometry(.15, .02, .45), NORI, [0, .345, 0]), peca(new THREE.BoxGeometry(.15, .34, .02), NORI, [0, .2, .222])];
+const TEX = {
+  arroz: texCanvas(256, 256, (g, w, h) => graos(g, w, h)),
+  arrozTobiko: texCanvas(256, 256, (g, w, h) => {
+    graos(g, w, h, 1100);
+    for (let i = 0; i < 260; i++) {
+      const x = Math.random() * w, y = Math.random() * h;
+      g.beginPath(); g.arc(x, y, 2.6, 0, TAU); g.fillStyle = '#F2662A'; g.fill();
+      g.beginPath(); g.arc(x - .8, y - .8, .8, 0, TAU); g.fillStyle = '#FFD0B0'; g.fill();
+    }
+  }),
+  salmao: texCanvas(256, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#FA9C6A'); gr.addColorStop(1, '#EE7440');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = -6; i < 18; i++) {
+      g.beginPath(); g.moveTo(i * 20, -10); g.bezierCurveTo(i * 20 + 40, h * .35, i * 20 - 10, h * .65, i * 20 + 30, h + 10);
+      g.lineWidth = 3.5 + Math.random() * 3; g.strokeStyle = 'rgba(255,238,226,.92)'; g.stroke();
+    }
+  }),
+  atum: texCanvas(256, 256, (g, w, h) => {
+    const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#D62E47'); gr.addColorStop(1, '#A3142C');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let i = -6; i < 20; i++) {
+      g.beginPath(); g.moveTo(i * 18, 0); g.quadraticCurveTo(i * 18 + 30, h / 2, i * 18 + 6, h);
+      g.lineWidth = 5; g.strokeStyle = 'rgba(255,120,130,.16)'; g.stroke();
+    }
+  }),
+  enguia: texCanvas(256, 256, (g, w, h) => {
+    g.fillStyle = '#6E3310'; g.fillRect(0, 0, w, h);
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,190,120,.35)'); gr.addColorStop(.5, 'rgba(255,190,120,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    for (let x = 10; x < w; x += 30) { g.fillStyle = 'rgba(40,15,3,.55)'; g.fillRect(x, 0, 7, h); }
+    for (let i = 0; i < 40; i++) { g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 2.4, 1.2, Math.random() * 3, 0, TAU); g.fillStyle = '#F3E2BC'; g.fill(); }
+  }),
+  polvoFatia: texCanvas(256, 256, (g, w, h) => {
+    g.fillStyle = '#F7E4E6'; g.fillRect(0, 0, w, h);
+    g.beginPath(); g.moveTo(0, 0); g.lineTo(w, 0);
+    for (let x = w; x >= 0; x -= 16) g.lineTo(x, h * .3 + Math.sin(x * .09) * 10);
+    g.closePath(); g.fillStyle = '#8E2450'; g.fill();
+    for (let i = 0; i < 6; i++) { g.beginPath(); g.arc(20 + i * 42, h * .3 + 22, 9, 0, TAU); g.fillStyle = '#EFC9D2'; g.fill(); }
+  }),
+  camaraoFatia: texCanvas(256, 256, (g, w, h) => {
+    g.fillStyle = '#FFEADF'; g.fillRect(0, 0, w, h);
+    for (let x = 0; x < w; x += 34) { g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + 14, h / 2, x, h); g.lineWidth = 14; g.strokeStyle = '#F2643A'; g.stroke(); }
+  }),
+  camarao: texCanvas(256, 64, (g, w, h) => {
+    for (let i = 0; i < 9; i++) { g.fillStyle = i % 2 ? '#FFD2B8' : '#F0612F'; g.fillRect(i * w / 9, 0, w / 9 + 1, h); }
+  }),
+  tamago: texCanvas(256, 256, (g, w, h) => {
+    g.fillStyle = '#F5C02E'; g.fillRect(0, 0, w, h);
+    for (let y = 8; y < h; y += 18) { g.fillStyle = 'rgba(220,150,20,.5)'; g.fillRect(0, y, w, 2); }
+    g.fillStyle = 'rgba(190,120,20,.25)'; g.fillRect(0, 0, w, 14);
+  }),
+  nori: texCanvas(128, 128, (g, w, h) => {
+    g.fillStyle = '#18221D'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 500; i++) { g.fillStyle = sorteia(['#24332A', '#0F1612', '#2C3D31']); g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  }),
+  pepino: texCanvas(128, 128, (g, w, h) => {
+    let x = 0; while (x < w) { const lw = 6 + Math.random() * 12; g.fillStyle = sorteia(['#2E6A26', '#3F8530', '#275C20']); g.fillRect(x, 0, lw, h); x += lw; }
+    for (let i = 0; i < 60; i++) { g.fillStyle = 'rgba(200,230,150,.5)'; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  }),
+  pepinoCorte: texCanvas(128, 128, (g, w, h) => {
+    g.fillStyle = '#2E6A26'; g.fillRect(0, 0, w, h);
+    g.beginPath(); g.arc(w / 2, h / 2, w * .44, 0, TAU); g.fillStyle = '#CDE89A'; g.fill();
+    g.beginPath(); g.arc(w / 2, h / 2, w * .3, 0, TAU); g.fillStyle = '#B2D873'; g.fill();
+    for (let i = 0; i < 9; i++) { const a = i / 9 * TAU; g.beginPath(); g.ellipse(w / 2 + Math.cos(a) * w * .2, h / 2 + Math.sin(a) * h * .2, 5, 3, a, 0, TAU); g.fillStyle = '#F2F6D8'; g.fill(); }
+  }),
+  abacate: texCanvas(128, 128, (g, w, h) => {
+    const gr = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    gr.addColorStop(0, '#F2EE9E'); gr.addColorStop(.55, '#C3DB62'); gr.addColorStop(.88, '#78A532'); gr.addColorStop(1, '#3A5A1C');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }),
+  californiaTopo: texCanvas(256, 256, (g, w, h) => {
+    graos(g, w, h, 1500);
+    g.beginPath(); g.arc(w / 2, h / 2, w * .3, 0, TAU); g.lineWidth = 9; g.strokeStyle = '#18221D'; g.stroke();
+    g.beginPath(); g.arc(w / 2, h / 2, w * .26, 0, TAU); g.fillStyle = '#F4EFE4'; g.fill();
+    g.beginPath(); g.moveTo(w / 2, h / 2); g.arc(w / 2, h / 2, w * .2, Math.PI * .6, Math.PI * 1.4); g.fillStyle = '#9CC548'; g.fill();
+    g.fillStyle = '#F04A3A'; g.fillRect(w / 2 + 4, h / 2 - 28, 30, 18);
+    g.fillStyle = '#FFFFFF'; g.fillRect(w / 2 + 4, h / 2 - 10, 30, 8);
+    g.fillStyle = '#F04A3A'; g.fillRect(w / 2 + 4, h / 2 - 2, 30, 14);
+    g.fillStyle = '#4CAF3A'; g.fillRect(w / 2 - 6, h / 2 + 16, 22, 14);
+  }),
+  vieira: texCanvas(128, 128, (g, w, h) => {
+    g.fillStyle = '#F6EDE0'; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 24; i++) { g.beginPath(); g.moveTo(w / 2, h / 2); g.lineTo(w / 2 + Math.cos(i / 24 * TAU) * w, h / 2 + Math.sin(i / 24 * TAU) * h); g.lineWidth = 2; g.strokeStyle = 'rgba(200,170,130,.18)'; g.stroke(); }
+  }),
+  folha: texCanvas(128, 128, (g, w, h) => {
+    g.fillStyle = '#3E8E2E'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#78C255'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke();
+    for (let x = 10; x < w; x += 18) { g.beginPath(); g.moveTo(x, h / 2); g.lineTo(x + 14, 8); g.moveTo(x, h / 2); g.lineTo(x + 14, h - 8); g.stroke(); }
+  }),
+};
+const fisico = (extra) => new THREE.MeshPhysicalMaterial({ roughness: .35, clearcoat: .5, clearcoatRoughness: .3, ...extra });
+const MATS = {
+  arroz: mat('#FFFFFF', { map: TEX.arroz, bumpMap: TEX.arroz, bumpScale: 1.2, roughness: .85 }),
+  arrozTobiko: mat('#FFFFFF', { map: TEX.arrozTobiko, bumpMap: TEX.arrozTobiko, bumpScale: 1.2, roughness: .8 }),
+  salmao: fisico({ map: TEX.salmao }),
+  atum: fisico({ map: TEX.atum, roughness: .3, clearcoat: .6 }),
+  enguia: fisico({ map: TEX.enguia, roughness: .22, clearcoat: 1 }),
+  polvoFatia: fisico({ map: TEX.polvoFatia }),
+  polvoPele: fisico({ color: '#A13660', roughness: .3, clearcoat: .8 }),
+  ventosa: mat('#F3D3DA', { roughness: .5 }),
+  camaraoFatia: fisico({ map: TEX.camaraoFatia }),
+  camarao: fisico({ map: TEX.camarao }),
+  cauda: fisico({ color: '#D8381C' }),
+  tamago: mat('#FFFFFF', { map: TEX.tamago, roughness: .55 }),
+  ovo: fisico({ color: '#F3E2C9', roughness: .45, clearcoat: .2 }),
+  nori: mat('#FFFFFF', { map: TEX.nori, roughness: .75 }),
+  pepino: fisico({ map: TEX.pepino, roughness: .4, clearcoat: .4 }),
+  pepinoCorte: mat('#FFFFFF', { map: TEX.pepinoCorte, roughness: .5 }),
+  ovas: fisico({ color: '#F4511E', roughness: .1, clearcoat: 1, emissive: '#661800', emissiveIntensity: .35 }),
+  folha: mat('#FFFFFF', { map: TEX.folha, roughness: .6, side: THREE.DoubleSide }),
+  abacateCasca: mat('#2C3A1A', { roughness: .75 }),
+  abacate: mat('#FFFFFF', { map: TEX.abacate, roughness: .5 }),
+  caroco: fisico({ color: '#6B3F1E', roughness: .3, clearcoat: .6 }),
+  vieira: fisico({ map: TEX.vieira, roughness: .35, clearcoat: .3 }),
+  concha: mat('#E3A273', { roughness: .55, side: THREE.DoubleSide }),
+  tigela: fisico({ color: '#6E2F1C', roughness: .25, clearcoat: .8 }),
+  enguiaPele: fisico({ color: '#4E3A22', roughness: .3, clearcoat: .8 }),
+  olho: mat('#111111', { roughness: .2 }),
+  californiaTopo: mat('#FFFFFF', { map: TEX.californiaTopo, roughness: .75 }),
+};
+
+// ---------- Modelos 3D (pratos e ingredientes) ----------
+// Cada parte é uma geometria + nome de material; as partes de mesmo
+// material são unidas, e o modelo vira uma malha com poucos materiais.
+function P(geo, m, { p = [0, 0, 0], r = [0, 0, 0], s = [1, 1, 1], f } = {}) {
+  geo.scale(...s); if (f) f(geo);
+  geo.rotateX(r[0]); geo.rotateY(r[1]); geo.rotateZ(r[2]); geo.translate(...p);
+  return { g: geo, m };
+}
+const hash = (x, y, z) => { const v = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return v - Math.floor(v); };
+function irregular(q) {
+  return (g) => {
+    const a = g.attributes.position;
+    for (let i = 0; i < a.count; i++) {
+      const x = a.getX(i), y = a.getY(i), z = a.getZ(i);
+      a.setXYZ(i, x + (hash(x, y, z) - .5) * q, y + (hash(y, z, x) - .5) * q, z + (hash(z, x, y) - .5) * q);
+    }
+    g.computeVertexNormals();
+  };
+}
+function dobra(k) {
+  return (g) => {
+    const a = g.attributes.position;
+    for (let i = 0; i < a.count; i++) a.setY(i, a.getY(i) - k * a.getX(i) ** 2);
+    g.computeVertexNormals();
+  };
+}
+// tubo que afina ao longo da curva (tentáculo, enguia, camarão)
+function tuboAfinando(pontos, raio, segs = 40, lados = 10) {
+  const curva = new THREE.CatmullRomCurve3(pontos);
+  const g = new THREE.TubeGeometry(curva, segs, 1, lados, false);
+  const a = g.attributes.position, c = new THREE.Vector3();
+  for (let i = 0; i <= segs; i++) {
+    curva.getPointAt(i / segs, c);
+    const k = raio(i / segs);
+    for (let j = 0; j <= lados; j++) {
+      const idx = i * (lados + 1) + j;
+      a.setXYZ(idx, c.x + (a.getX(idx) - c.x) * k, c.y + (a.getY(idx) - c.y) * k, c.z + (a.getZ(idx) - c.z) * k);
+    }
+  }
+  g.computeVertexNormals();
+  return { g, curva };
+}
+function monta(partes, larguraAlvo) {
+  const porMat = new Map();
+  for (const { g, m } of partes) {
+    const ng = g.index ? g.toNonIndexed() : g;
+    for (const k of Object.keys(ng.attributes)) if (!['position', 'normal', 'uv'].includes(k)) ng.deleteAttribute(k);
+    if (!porMat.has(m)) porMat.set(m, []);
+    porMat.get(m).push(ng);
+  }
+  const geos = [], mats = [];
+  for (const [m, gs] of porMat) { geos.push(mergeGeometries(gs)); mats.push(MATS[m]); }
+  const geo = mergeGeometries(geos, true);
+  // normaliza: centraliza em x/z, base em y = 0 e largura padrão
+  geo.computeBoundingBox();
+  const b = geo.boundingBox, esc = larguraAlvo / Math.max(b.max.x - b.min.x, b.max.z - b.min.z);
+  geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
+  geo.scale(esc, esc, esc);
+  return { geo, mats };
+}
+// peças de pratos
+const bolinhoArroz = () => P(new RoundedBoxGeometry(.62, .24, .36, 4, .1), 'arroz', { p: [0, .12, 0], f: irregular(.018) });
+const lamina = (m, esp = .1, curva = .22) => P(new RoundedBoxGeometry(.78, esp, .42, 4, .045), m, { p: [0, .29, 0], f: dobra(curva) });
+const faixaNori = (y = .35) => [P(new THREE.BoxGeometry(.15, .02, .45), 'nori', { p: [0, y, 0] }), P(new THREE.BoxGeometry(.15, y - .05, .02), 'nori', { p: [0, (y - .05) / 2 + .05, .222] })];
 function trianguloArredondado(r) {
   const pts = [[0, .36], [.35, -.24], [-.35, -.24]].map(([x, y]) => new THREE.Vector2(x, y));
   const s = new THREE.Shape();
@@ -499,61 +712,160 @@ function trianguloArredondado(r) {
   s.closePath();
   return s;
 }
-const MODELOS = {
-  onigiri: () => {
-    const g = new THREE.ExtrudeGeometry(trianguloArredondado(.13), { depth: .24, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 3, curveSegments: 8 });
-    return [peca(g, '#FBFAF5', [0, .3, -.12]), peca(new THREE.BoxGeometry(.28, .22, .42), NORI, [0, .15, 0])];
-  },
-  maguro: () => [arroz(), fatia('#DD3346'), ...listras('#F58C98')],
-  tamago: () => [arroz(), peca(new RoundedBoxGeometry(.68, .18, .4, 3, .05), '#F6C431', [0, .32, 0]), ...faixaNori().map(g => g.translate(0, .07, 0))],
-  ebi: () => [arroz(), fatia('#FFF0E4'), ...listras('#F2692F', .075),
-    peca(new THREE.ConeGeometry(.12, .22, 4), '#E5482B', [.46, .29, 0], [0, 0, -Math.PI / 2])],
-  ikura: () => {
-    const v = [peca(new THREE.CylinderGeometry(.29, .29, .3, 24), NORI, [0, .15, 0]), peca(new THREE.CylinderGeometry(.26, .26, .02, 24), '#F0EDE4', [0, .3, 0])];
-    const pos = [[0, 0], ...Array.from({ length: 7 }, (_, i) => [Math.cos(i / 7 * Math.PI * 2) * .165, Math.sin(i / 7 * Math.PI * 2) * .165])];
-    pos.forEach(([x, z], i) => v.push(peca(new THREE.SphereGeometry(.078, 10, 8), '#F04A2B', [x, .345 + (i === 0 ? .04 : 0), z])));
-    v.push(peca(new THREE.SphereGeometry(.13, 10, 8), '#4FB43C', [.18, .4, -.12], [0, 0, .3], [1, .3, .6]));
+function bolinhas(m, n, raio, alturaBase, espalha, rb = .075) {
+  const v = [];
+  for (let i = 0; i < n; i++) {
+    const a = i * 2.4, d = espalha * Math.sqrt(i / n);
+    v.push(P(new THREE.SphereGeometry(rb, 10, 8), m, { p: [Math.cos(a) * d, alturaBase + (1 - d / espalha) * raio, Math.sin(a) * d] }));
+  }
+  return v;
+}
+
+const PRATOS = {
+  maguro: () => [bolinhoArroz(), lamina('atum')],
+  sake: () => [bolinhoArroz(), lamina('salmao')],
+  tako: () => [bolinhoArroz(), lamina('polvoFatia', .09)],
+  tamago: () => [bolinhoArroz(), P(new RoundedBoxGeometry(.7, .18, .42, 3, .05), 'tamago', { p: [0, .33, 0] }), ...faixaNori(.43)],
+  kappa: () => [
+    P(new THREE.CylinderGeometry(.29, .29, .32, 28, 1, true), 'nori', { p: [0, .16, 0] }),
+    P(new THREE.CircleGeometry(.29, 28), 'arroz', { p: [0, .32, 0], r: [-Math.PI / 2, 0, 0] }),
+    P(new THREE.CircleGeometry(.1, 20), 'pepinoCorte', { p: [0, .322, 0], r: [-Math.PI / 2, 0, 0] }),
+  ],
+  ebi: () => [bolinhoArroz(), lamina('camaraoFatia', .08),
+    P(new THREE.ConeGeometry(.1, .2, 3), 'cauda', { p: [.46, .3, -.05], r: [0, 0, -Math.PI / 2] }),
+    P(new THREE.ConeGeometry(.1, .2, 3), 'cauda', { p: [.46, .3, .07], r: [0, .5, -Math.PI / 2] })],
+  onigiri: () => [
+    P(new THREE.ExtrudeGeometry(trianguloArredondado(.13), { depth: .24, bevelEnabled: true, bevelThickness: .06, bevelSize: .05, bevelSegments: 3, curveSegments: 8 }), 'arroz', { p: [0, .3, -.12], f: irregular(.01) }),
+    P(new THREE.BoxGeometry(.28, .22, .42), 'nori', { p: [0, .15, 0] })],
+  ikura: () => [
+    P(new THREE.CylinderGeometry(.29, .29, .3, 28, 1, true), 'nori', { p: [0, .15, 0] }),
+    P(new THREE.CircleGeometry(.29, 28), 'arroz', { p: [0, .29, 0], r: [-Math.PI / 2, 0, 0] }),
+    ...bolinhas('ovas', 14, .06, .31, .2),
+    P(new THREE.SphereGeometry(.14, 12, 8), 'folha', { p: [.18, .38, -.14], r: [0, .6, .3], s: [1, .25, .6] })],
+  unagi: () => [bolinhoArroz(), lamina('enguia'), ...faixaNori(.37)],
+  california: () => [
+    P(new THREE.CylinderGeometry(.3, .3, .3, 28, 1, true), 'arrozTobiko', { p: [0, .15, 0] }),
+    P(new THREE.CircleGeometry(.3, 32), 'californiaTopo', { p: [0, .3, 0], r: [-Math.PI / 2, 0, 0] })],
+  hotate: () => [bolinhoArroz(), P(new THREE.CylinderGeometry(.24, .26, .17, 28), 'vieira', { p: [0, .33, 0], s: [1.35, 1, .82] })],
+};
+
+const INGREDIENTES = {
+  // bloco de atum vermelho
+  maguro: () => [P(new RoundedBoxGeometry(.74, .34, .44, 4, .05), 'atum', { p: [0, .17, 0], f: irregular(.01) })],
+  // filé de salmão clarinho, com pele prateada
+  sake: () => [
+    P(new RoundedBoxGeometry(.82, .22, .44, 4, .07), 'salmao', { p: [0, .15, 0], f: dobra(.12) }),
+    P(new RoundedBoxGeometry(.82, .05, .44, 2, .02), 'tigela', { p: [0, .03, 0], f: dobra(.12) })],
+  // tentáculo enrolado com ventosas
+  tako: () => {
+    const raio = (t) => .11 * (1 - .82 * t) + .015;
+    const pts = [];
+    for (let i = 0; i <= 10; i++) { const t = i / 10, a = t * 1.75 * Math.PI, R = .32 * (1 - .66 * t); pts.push(new THREE.Vector3(R * Math.cos(a), raio(t) * .9, R * Math.sin(a))); }
+    const { g, curva } = tuboAfinando(pts, raio, 48, 12);
+    const v = [{ g, m: 'polvoPele' }, P(new THREE.SphereGeometry(.11, 12, 10), 'polvoPele', { p: pts[0].toArray() })];
+    const c = new THREE.Vector3();
+    for (let i = 1; i < 16; i++) {
+      const t = i / 17; curva.getPointAt(t, c);
+      const dir = new THREE.Vector3(-c.x, 0, -c.z).normalize().multiplyScalar(raio(t) * .75);
+      v.push(P(new THREE.SphereGeometry(.03 * (1 - .5 * t), 8, 6), 'ventosa', { p: [c.x + dir.x, raio(t) * .4, c.z + dir.z] }));
+    }
     return v;
   },
+  // dois ovos deitados
+  tamago: () => [
+    P(new THREE.SphereGeometry(.2, 24, 16), 'ovo', { p: [-.17, .2, 0], s: [1, 1.28, 1], r: [0, 0, 1.35] }),
+    P(new THREE.SphereGeometry(.2, 24, 16), 'ovo', { p: [.2, .2, .04], s: [1, 1.28, 1], r: [0, .6, 1.45] })],
+  // pepino com uma rodela cortada
   kappa: () => [
-    peca(new THREE.CylinderGeometry(.29, .29, .32, 24), NORI, [0, .16, 0]),
-    peca(new THREE.CylinderGeometry(.245, .245, .02, 24), '#F4F1EA', [0, .325, 0]),
-    peca(new THREE.CylinderGeometry(.095, .095, .026, 16), '#4CAF3A', [0, .332, 0]),
-    peca(new THREE.CylinderGeometry(.05, .05, .03, 12), '#B9E58C', [0, .336, 0]),
-  ],
-  tako: () => [arroz(), fatia('#F7C9D0'), ...listras('#F4AFC0'),
-    peca(new RoundedBoxGeometry(.72, .06, .08, 2, .025), '#B83A68', [0, .33, -.18]),
-    ...[[-.2, .05], [0, .08], [.2, .04], [-.1, -.06], [.12, -.07]].map(([x, z]) => peca(new THREE.SphereGeometry(.036, 8, 6), '#FBE3E7', [x, .345, z]))],
-  unagi: () => [arroz(), fatia('#8A4520'), ...listras('#4E2410'), ...faixaNori().map(g => g.translate(0, .005, 0))],
+    P(new THREE.CapsuleGeometry(.13, .55, 8, 18), 'pepino', { p: [-.05, .13, -.05], r: [0, .2, Math.PI / 2] }),
+    P(new THREE.CylinderGeometry(.13, .13, .05, 20, 1, true), 'pepino', { p: [.3, .025, .2] }),
+    P(new THREE.CircleGeometry(.13, 20), 'pepinoCorte', { p: [.3, .051, .2], r: [-Math.PI / 2, 0, 0] })],
+  // camarão inteiro, curvado, com rabo e antenas
+  ebi: () => {
+    const raio = (t) => .135 - .085 * t;
+    const pts = [];
+    for (let i = 0; i <= 8; i++) { const t = i / 8, a = Math.PI * (-.15 + 1.2 * t); pts.push(new THREE.Vector3(.22 * Math.cos(a), raio(t), .22 * Math.sin(a))); }
+    const { g } = tuboAfinando(pts, raio, 36, 12);
+    const fim = pts[8], ant = pts[7], ang = Math.atan2(fim.z - ant.z, fim.x - ant.x);
+    return [
+      { g, m: 'camarao' },
+      P(new THREE.SphereGeometry(.135, 12, 10), 'camarao', { p: pts[0].toArray(), s: [1.1, 1, 1.2] }),
+      P(new THREE.ConeGeometry(.07, .18, 3), 'cauda', { p: [fim.x + Math.cos(ang - .4) * .08, .04, fim.z + Math.sin(ang - .4) * .08], r: [0, -ang + .4, -Math.PI / 2], s: [1, 1, .4] }),
+      P(new THREE.ConeGeometry(.07, .18, 3), 'cauda', { p: [fim.x + Math.cos(ang + .4) * .08, .04, fim.z + Math.sin(ang + .4) * .08], r: [0, -ang - .4, -Math.PI / 2], s: [1, 1, .4] }),
+      P(new THREE.CylinderGeometry(.008, .008, .5, 4), 'cauda', { p: [pts[0].x + .12, .1, pts[0].z - .22], r: [Math.PI / 2, 0, .5] }),
+      P(new THREE.SphereGeometry(.022, 8, 6), 'olho', { p: [pts[0].x + .04, .15, pts[0].z - .07] }),
+    ];
+  },
+  // tigela de arroz
+  onigiri: () => [
+    P(new THREE.CylinderGeometry(.36, .22, .26, 28), 'tigela', { p: [0, .13, 0] }),
+    P(new THREE.SphereGeometry(.33, 24, 12, 0, TAU, 0, Math.PI / 2), 'arroz', { p: [0, .25, 0], s: [1, .55, 1], f: irregular(.025) })],
+  // ovas sobre uma folha
+  ikura: () => [
+    P(new THREE.SphereGeometry(.38, 18, 8), 'folha', { p: [0, .025, 0], s: [1, .06, .62] }),
+    ...bolinhas('ovas', 22, .1, .08, .24, .07)],
+  // enguia inteira em S
+  unagi: () => {
+    const raio = (t) => t < .75 ? .12 : .12 - (t - .75) * .38;
+    const pts = [];
+    for (let i = 0; i <= 10; i++) { const t = i / 10, x = -.5 + t; pts.push(new THREE.Vector3(x, .12, .13 * Math.sin(x * 6.5))); }
+    const { g } = tuboAfinando(pts, raio, 48, 12);
+    return [{ g, m: 'enguiaPele' },
+      P(new THREE.SphereGeometry(.13, 14, 10), 'enguiaPele', { p: [pts[0].x, .12, pts[0].z], s: [1.4, .9, 1] }),
+      P(new THREE.SphereGeometry(.02, 8, 6), 'olho', { p: [pts[0].x - .1, .19, pts[0].z - .07] }),
+      P(new THREE.SphereGeometry(.02, 8, 6), 'olho', { p: [pts[0].x - .1, .19, pts[0].z + .07] })];
+  },
+  // meio abacate com caroço
+  california: () => [
+    P(new THREE.SphereGeometry(1, 28, 14, 0, TAU, Math.PI / 2, Math.PI / 2), 'abacateCasca', { p: [0, .2, 0], s: [.44, .2, .31], f: irregular(.01) }),
+    P(new THREE.CircleGeometry(1, 36), 'abacate', { p: [0, .201, 0], r: [-Math.PI / 2, 0, 0], s: [.43, .3, 1] }),
+    P(new THREE.SphereGeometry(.13, 18, 12), 'caroco', { p: [-.07, .21, 0], s: [1.1, .8, 1] })],
+  // vieira na concha
+  hotate: () => {
+    const concha = new THREE.CircleGeometry(.4, 40, Math.PI * .08, Math.PI * .84);
+    const a = concha.attributes.position;
+    for (let i = 0; i < a.count; i++) {
+      const x = a.getX(i), y = a.getY(i), r = Math.hypot(x, y), ang = Math.atan2(y, x);
+      a.setZ(i, .06 * (r / .4) ** 2 + .012 * Math.sin(ang * 26) * (r / .4));
+    }
+    concha.computeVertexNormals();
+    return [
+      P(concha, 'concha', { p: [0, .02, .18], r: [-Math.PI / 2, 0, 0] }),
+      P(new THREE.CylinderGeometry(.15, .16, .14, 24), 'vieira', { p: [0, .1, -.04], s: [1.1, 1, .95] })];
+  },
 };
-const GEO = {}, MAT_SUSHI = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .45 });
-for (const t of TIPOS) GEO[t] = mergeGeometries(MODELOS[t]());
+
+const GEO_ING = {}, GEO_PRATO = {};
+for (const t of TIPOS) { GEO_ING[t] = monta(INGREDIENTES[t](), .82); GEO_PRATO[t] = monta(PRATOS[t](), .8); }
 
 const reserva = Object.fromEntries(TIPOS.map(t => [t, []]));
-function pegaSushi(tipo) {
-  const m = reserva[tipo].pop() || malha(GEO[tipo], MAT_SUSHI, 0, 0, 0, { recebe: false });
+function pegaIngrediente(tipo) {
+  const m = reserva[tipo].pop() || malha(GEO_ING[tipo].geo, GEO_ING[tipo].mats, 0, 0, 0, { recebe: false });
   m.visible = true; m.scale.setScalar(1); m.rotation.set(0, 0, 0);
   cena.add(m);
   return m;
 }
-function devolveSushi(m, tipo) { cena.remove(m); reserva[tipo].push(m); }
+function devolve(m, tipo) { cena.remove(m); reserva[tipo].push(m); }
 
-// Ícones 2D dos sushis (para os balões), renderizados uma vez
-const ICONE = {};
+// Ícones 2D (balões e cardápio), renderizados uma vez
+const ICONE_PRATO = {}, ICONE_ING = {};
 (function geraIcones() {
   const c = document.createElement('canvas');
   const r = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true, preserveDrawingBuffer: true });
   r.setSize(160, 160, false); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping;
   const sc = new THREE.Scene();
-  sc.add(new THREE.HemisphereLight('#FFFFFF', '#B5835A', 2));
-  const d = new THREE.DirectionalLight('#FFFFFF', 2); d.position.set(-1, 3, 2); sc.add(d);
-  const cam = new THREE.PerspectiveCamera(30, 1, .1, 10);
-  cam.position.set(0, 1.3, 1.45); cam.lookAt(0, .2, 0);
-  for (const t of TIPOS) {
-    const m = new THREE.Mesh(GEO[t], MAT_SUSHI); sc.add(m);
-    r.render(sc, cam); ICONE[t] = c.toDataURL(); sc.remove(m);
-  }
-  r.dispose(); r.forceContextLoss();
+  const pm = new THREE.PMREMGenerator(r);
+  sc.environment = pm.fromScene(new RoomEnvironment(), .04).texture; sc.environmentIntensity = .6;
+  sc.add(new THREE.HemisphereLight('#FFFFFF', '#B5835A', 1.4));
+  const d = new THREE.DirectionalLight('#FFFFFF', 2.2); d.position.set(-1, 3, 2); sc.add(d);
+  const cam = new THREE.PerspectiveCamera(31, 1, .1, 10);
+  cam.position.set(0, 1.25, .95); cam.lookAt(0, .14, 0);
+  const foto = ({ geo, mats }, destino, t) => {
+    const m = new THREE.Mesh(geo, mats); sc.add(m);
+    r.render(sc, cam); destino[t] = c.toDataURL(); sc.remove(m);
+  };
+  for (const t of TIPOS) { foto(GEO_PRATO[t], ICONE_PRATO, t); foto(GEO_ING[t], ICONE_ING, t); }
+  pm.dispose(); r.dispose(); r.forceContextLoss();
 })();
 
 // ---------- Personagens ----------
@@ -575,31 +887,29 @@ function busto(src, tam) {
   s.scale.set(tam, tam, 1);
   return s;
 }
-// pré-carrega todos os desenhos
 PESSOAS.forEach(p => textura(p.foto));
 
-// Chef no centro
+// Chef no centro, com a tábua e a faca cortando
 const chef = new THREE.Group();
 (function constroiChef() {
-  const corpo = busto(FOTO_CHEF, 2.7);
-  corpo.position.set(0, .2, 0); chef.add(corpo); chef.corpo = corpo;
-  // tábua com um peixe e a faca cortando
-  chef.add(malha(new RoundedBoxGeometry(1.7, .14, .8, 2, .04), mat('#D9A86C'), 0, .55, 1.35));
-  chef.add(malha(new RoundedBoxGeometry(.9, .22, .4, 2, .08), mat('#F3713D', { roughness: .45 }), -.25, .72, 1.35));
-  const faca = new THREE.Group(); faca.position.set(.45, .65, 1.35);
-  faca.add(malha(new THREE.BoxGeometry(.06, .5, .14), mat('#DDE3E8', { metalness: .8, roughness: .2 }), 0, .35, 0));
-  faca.add(malha(new THREE.BoxGeometry(.08, .25, .1), mat('#3A2A1E'), 0, .72, 0));
+  const corpo = busto(FOTO_CHEF, 2.1);
+  corpo.position.set(0, .15, 0); chef.add(corpo); chef.corpo = corpo;
+  chef.add(malha(new RoundedBoxGeometry(1.5, .12, .7, 2, .04), mat('#D9A86C'), 0, .5, 1.0));
+  const peixe = malha(GEO_ING.sake.geo, GEO_ING.sake.mats, -.25, .56, 1.0); peixe.scale.setScalar(.85); chef.add(peixe);
+  const faca = new THREE.Group(); faca.position.set(.45, .6, 1.0);
+  faca.add(malha(new THREE.BoxGeometry(.05, .45, .13), mat('#DDE3E8', { metalness: .9, roughness: .15 }), 0, .32, 0));
+  faca.add(malha(new THREE.BoxGeometry(.08, .22, .1), mat('#3A2A1E'), 0, .65, 0));
   chef.add(faca); chef.faca = faca;
-  chef.position.set(0, .41, -8.3);
+  chef.position.set(0, .41, -8.25);
   cena.add(chef);
 })();
 
 // Lugares dos clientes
 const LUGARES = [
-  { x: -2.9, z: -13.35, lado: -1, cima: true },
-  { x: 2.9,  z: -13.35, lado: 1,  cima: true },
-  { x: -2.9, z: -1.85,  lado: -1, cima: false },
-  { x: 2.9,  z: -1.85,  lado: 1,  cima: false },
+  { x: -2.6, z: -12.6, lado: -1, cima: true },
+  { x: 2.6,  z: -12.6, lado: 1,  cima: true },
+  { x: -3.4, z: -1.75, lado: -1, cima: false },
+  { x: 3.4,  z: -1.75, lado: 1,  cima: false },
 ];
 const TAM_CLIENTE = 2.5;
 const camada = $('camada');
@@ -616,7 +926,6 @@ for (const L of LUGARES) {
     if (d < dist) { dist = d; melhor = s; }
   }
   L.s = melhor;
-  // balão
   L.balao = document.createElement('div'); L.balao.className = 'balao esconde';
   L.balao.innerHTML = '<img alt=""><span class="qtd"></span>';
   camada.appendChild(L.balao);
@@ -634,8 +943,7 @@ function naTela(x, y, z) {
   return { x: (_v.x + 1) / 2 * larg, y: (1 - _v.y) / 2 * alt };
 }
 function posicionaBarra() {
-  const p = naTela(0, .2, -.75);
-  $('barra').style.top = p.y + 'px';
+  $('barra').style.top = naTela(0, .3, -.95).y + 'px';
 }
 function coracoes(px, py, n) {
   for (let i = 0; i < n; i++) {
@@ -689,12 +997,12 @@ function vibra(padrao) {
 }
 
 // ---------- Estado do jogo ----------
-let estado = 'menu', faseAtual = 0, P = FASES[0];
-let colunas = [], slots = [], espaco = 1, deslocamento = 0, segurando = -1;
+let estado = 'menu', faseAtual = 0, P_ = FASES[0];
+let colunas = [], slots = [], espaco = 1, deslocamento = 0, segurando = -1, naEsteira = 0;
 let tempoRestante = 0, feitos = 0, totalGeral = 0, relogio = 0, mostrouDica = false;
 const voando = [];
 
-function tiposDaFase() { return TIPOS.slice(0, P.tipos); }
+function tiposDaFase() { return TIPOS.slice(0, P_.tipos); }
 function tiposPedidos() { return LUGARES.filter(L => L.pedido && L.resta > 0).map(L => L.pedido.tipo); }
 
 function novoBloco(col) {
@@ -702,14 +1010,15 @@ function novoBloco(col) {
   const ult = col.itens.length ? col.itens[col.itens.length - 1].tipo : null;
   let tipo;
   for (let tent = 0; tent < 6; tent++) {
-    tipo = pedidos.length && Math.random() < P.foco ? sorteia(pedidos) : sorteia(tiposDaFase());
+    tipo = pedidos.length && Math.random() < P_.foco ? sorteia(pedidos) : sorteia(tiposDaFase());
     if (tipo !== ult) break;
   }
-  const n = aleat(P.bloco[0], P.bloco[1]);
+  const n = aleat(P_.bloco[0], P_.bloco[1]);
   for (let k = 0; k < n; k++) {
     const j = col.itens.length;
-    const m = pegaSushi(tipo);
+    const m = pegaIngrediente(tipo);
     m.scale.setScalar(COL.escala);
+    m.rotation.y = (Math.random() - .5) * .3;
     m.position.set(col.x, COL.y, COL.z0 + (j + 1.5) * COL.passo);
     col.itens.push({ tipo, malha: m });
   }
@@ -717,19 +1026,19 @@ function novoBloco(col) {
 function completaColuna(col) { while (col.itens.length < COL.visiveis + 2) novoBloco(col); }
 
 function limpaTudo() {
-  for (const c of colunas) for (const it of c.itens) devolveSushi(it.malha, it.tipo);
-  for (const s of slots) if (s) devolveSushi(s.malha, s.tipo);
-  for (const v of voando) devolveSushi(v.malha, v.tipo);
+  for (const c of colunas) for (const it of c.itens) devolve(it.malha, it.tipo);
+  for (const s of slots) if (s) devolve(s.malha, s.tipo);
+  for (const v of voando) devolve(v.malha, v.tipo);
   voando.length = 0;
 }
 
 function montaFase(n) {
   limpaTudo();
-  faseAtual = n; P = FASES[n];
-  feitos = 0; tempoRestante = P.tempo; deslocamento = 0; segurando = -1;
-  espaco = COMPR / P.capacidade;
-  slots = new Array(P.capacidade).fill(null);
-  criaPlacas(P.capacidade);
+  faseAtual = n; P_ = FASES[n];
+  feitos = 0; tempoRestante = P_.tempo; deslocamento = 0; segurando = -1; naEsteira = 0;
+  espaco = COMPR / P_.capacidade;
+  slots = new Array(P_.capacidade).fill(null);
+  criaPlacas(P_.capacidade);
   const livres = [...PESSOAS].sort(() => Math.random() - .5);
   LUGARES.forEach((L, i) => {
     vestir(L, livres[i % livres.length]);
@@ -748,9 +1057,10 @@ function novoPedido(L) {
   const outros = LUGARES.filter(o => o !== L && o.pedido).map(o => o.pedido.tipo);
   let opcoes = tiposDaFase().filter(t => !outros.includes(t));
   if (!opcoes.length) opcoes = tiposDaFase();
-  L.pedido = { tipo: sorteia(opcoes), qtd: aleat(P.qtd[0], P.qtd[1]) };
+  L.pedido = { tipo: sorteia(opcoes), qtd: aleat(P_.qtd[0], P_.qtd[1]) };
   L.resta = L.pedido.qtd; L.aCaminho = 0;
-  L.balao.querySelector('img').src = ICONE[L.pedido.tipo];
+  const img = L.balao.querySelector('img');
+  img.src = ICONE_PRATO[L.pedido.tipo]; img.alt = INFO[L.pedido.tipo].prato;
   L.balao.classList.remove('esconde', 'ok');
   atualizaBalao(L, true);
 }
@@ -792,7 +1102,7 @@ function colunaEm(ev) {
   const r = cv.getBoundingClientRect();
   _ndc.set((ev.clientX - r.left) / r.width * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
   raio.setFromCamera(_ndc, camera);
-  if (!raio.ray.intersectPlane(plano, _pt) || _pt.z < -1.2) return -1;
+  if (!raio.ray.intersectPlane(plano, _pt) || _pt.z < -1.4) return -1;
   const i = Math.round((_pt.x - COL.xs[0]) / 2.1);
   return Math.max(0, Math.min(4, i));
 }
@@ -818,9 +1128,8 @@ function atualiza(dt) {
   relogio += dt;
   const jogando = estado === 'jogando';
 
-  // chef cortando
-  chef.faca.position.y = .65 + Math.abs(Math.sin(relogio * 6)) * .3;
-  chef.corpo.position.y = .2 + Math.sin(relogio * 3.5) * .03;
+  chef.faca.position.y = .6 + Math.abs(Math.sin(relogio * 6)) * .28;
+  chef.corpo.position.y = .15 + Math.sin(relogio * 3.5) * .03;
 
   // clientes
   for (const L of LUGARES) {
@@ -853,6 +1162,7 @@ function atualiza(dt) {
       const alvo = COL.z0 + j * COL.passo;
       it.malha.position.z += (alvo - it.malha.position.z) * Math.min(1, dt * 16);
       it.malha.visible = j < COL.visiveis + 1;
+      it.malha.castShadow = j < 3; // sombra só no topo das colunas (economiza no celular)
     });
   }
   brilhoColuna.forEach((b, i) => {
@@ -875,10 +1185,12 @@ function atualiza(dt) {
   if (jogando) {
     tempoRestante -= dt;
     if (tempoRestante <= 0) { tempoRestante = 0; atualizaHud(); return fimDaFase(); }
-    deslocamento = (deslocamento + P.velocidade * dt) % COMPR;
+    // quanto mais cheia, mais devagar
+    const vel = P_.velocidade * (1 - P_.freio * naEsteira / P_.capacidade);
+    deslocamento = (deslocamento + vel * dt) % COMPR;
 
-    // clientes pegam o que pediram
-    const N = P.capacidade;
+    // clientes pegam o ingrediente do prato que pediram
+    const N = P_.capacidade;
     for (let i = 0; i < N; i++) {
       const it = slots[i];
       if (!it) continue;
@@ -911,7 +1223,7 @@ function atualiza(dt) {
     }
   }
 
-  // posição dos sushis na esteira
+  // posição dos ingredientes na esteira
   for (let i = 0; i < slots.length; i++) {
     const it = slots[i];
     if (!it) continue;
@@ -925,10 +1237,11 @@ function atualiza(dt) {
     } else {
       it.malha.position.copy(_p);
       it.malha.scale.setScalar(ESC_ESTEIRA);
+      it.malha.castShadow = true;
     }
   }
 
-  // sushis voando até o cliente
+  // ingredientes voando até o cliente
   for (let i = voando.length - 1; i >= 0; i--) {
     const v = voando[i];
     v.t += dt / .35;
@@ -939,7 +1252,7 @@ function atualiza(dt) {
     v.malha.scale.setScalar(ESC_ESTEIRA * (1 - k * .6));
     if (k >= 1) {
       voando.splice(i, 1);
-      devolveSushi(v.malha, v.tipo);
+      devolve(v.malha, v.tipo);
       L.aCaminho--; L.pulo = 1;
       atualizaBalao(L, true);
       if (L.cabecaTela) coracoes(L.cabecaTela.x, L.cabecaTela.y - 20 * larg / 390, 2);
@@ -948,26 +1261,26 @@ function atualiza(dt) {
   }
 
   if (jogando) {
-    const naEsteira = slots.reduce((n, x) => n + (x ? 1 : 0), 0);
+    naEsteira = slots.reduce((n, x) => n + (x ? 1 : 0), 0);
     atualizaBarra(naEsteira);
-    if (naEsteira >= P.capacidade) return perde();
+    if (naEsteira >= P_.capacidade) return perde();
     atualizaHud();
   }
 }
 
 // ---------- HUD ----------
 function atualizaHud() {
-  $('hudFase').textContent = P.nome.toUpperCase();
+  $('hudFase').textContent = P_.nome.toUpperCase();
   $('hudPedidos').textContent = feitos;
   const seg = Math.ceil(tempoRestante);
   $('hudTempo').textContent = `⏱ ${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
   $('hudTempo').classList.toggle('urgente', estado === 'jogando' && tempoRestante < 10);
 }
 function atualizaBarra(n) {
-  const f = n / P.capacidade;
+  const f = n / P_.capacidade;
   $('barraEnche').style.width = `calc(${Math.max(f, .001) * 100}% - ${6 * f}px)`;
   $('barraEnche').style.backgroundColor = f > .8 ? '#E0402F' : f > .6 ? '#F2A12E' : '#4CB83A';
-  $('barraTexto').textContent = `${n}/${P.capacidade}`;
+  $('barraTexto').textContent = `${n}/${P_.capacidade}`;
 }
 
 // ---------- Telas ----------
@@ -978,22 +1291,28 @@ function introFase(n) {
   montaFase(n);
   estado = 'intro';
   atualizaBarra(0);
-  $('faseEmoji').textContent = P.emoji;
-  $('faseTitulo').textContent = `${P.nome} de ${FASES.length}`;
-  $('faseTexto').textContent = P.texto;
+  $('faseEmoji').textContent = P_.emoji;
+  $('faseTitulo').textContent = `${P_.nome} de ${FASES.length}`;
+  $('faseTexto').textContent = P_.texto;
   $('faseDetalhes').innerHTML =
-    `<span>⏱ ${tempoTexto(P.tempo)}</span><span>🍣 ${P.tipos} tipos</span><span>🛤️ esteira: ${P.capacidade}</span>` +
-    `<span>⭐ ${P.estrelas[0]} · ⭐⭐ ${P.estrelas[1]} · ⭐⭐⭐ ${P.estrelas[2]} pedidos</span>`;
+    `<span>⏱ ${tempoTexto(P_.tempo)}</span><span>🛤️ esteira: ${P_.capacidade}</span>` +
+    `<span>⭐ ${P_.estrelas[0]} · ⭐⭐ ${P_.estrelas[1]} · ⭐⭐⭐ ${P_.estrelas[2]} pedidos</span>`;
+  const anteriores = n ? FASES[n - 1].tipos : 0;
+  $('faseCardapio').innerHTML = tiposDaFase().map((t, i) => `
+    <div class="par${i >= anteriores && n ? ' novo' : ''}">
+      <img src="${ICONE_PRATO[t]}" alt=""><span class="seta">←</span><img src="${ICONE_ING[t]}" alt="">
+      <span class="nome">${INFO[t].prato}<small>${INFO[t].ing}</small></span>
+    </div>`).join('');
   mostra('telaFase');
 }
-function estrelas() { return P.estrelas.filter(e => feitos >= e).length; }
+function estrelas() { return P_.estrelas.filter(e => feitos >= e).length; }
 
 function fimDaFase() {
   estado = 'fim'; segurando = -1;
   som.vitoria(); vibra([40, 60, 40, 60, 80]);
   const ultima = faseAtual === FASES.length - 1, n = estrelas();
   $('fimEmoji').textContent = ultima ? '🏆' : '🎉';
-  $('fimTitulo').textContent = ultima ? 'Você sobreviveu ao rush!' : `${P.nome} concluída!`;
+  $('fimTitulo').textContent = ultima ? 'Você sobreviveu ao rush!' : `${P_.nome} concluída!`;
   $('fimEstrelas').textContent = '⭐'.repeat(n) + '☆'.repeat(3 - n);
   $('fimEstrelas').hidden = false;
   $('fimTexto').textContent = ultima
@@ -1009,13 +1328,15 @@ function perde() {
   $('fimEmoji').textContent = '😵';
   $('fimTitulo').textContent = 'A esteira lotou!';
   $('fimEstrelas').hidden = true;
-  $('fimTexto').textContent = 'Dica: segure só as colunas que têm no topo o sushi que alguém está pedindo.';
+  $('fimTexto').textContent = 'Dica: segure só as colunas que têm no topo o ingrediente de algum prato pedido.';
   $('btnFim').textContent = 'Tentar de novo';
   $('btnFim').onclick = () => { totalGeral -= feitos; introFase(faseAtual); };
   mostra('telaFim');
 }
 
-$('btnInicio').onclick = () => { iniciaAudio(); introFase(0); };
+// ?fase=2 ou ?fase=3 no link começa direto naquela fase
+const faseInicial = Math.min(FASES.length, Math.max(1, +new URLSearchParams(location.search).get('fase') || 1)) - 1;
+$('btnInicio').onclick = () => { iniciaAudio(); introFase(faseInicial); };
 $('btnFase').onclick = () => {
   iniciaAudio(); mostra(null); estado = 'jogando';
   $('dica').hidden = mostrouDica;
@@ -1027,10 +1348,28 @@ redimensiona();
 montaFase(0);
 atualizaBarra(0);
 $('carregando').remove();
-let ultimo = performance.now();
+// Qualidade automática: se o aparelho não mantiver ~40 quadros/s,
+// primeiro baixa a resolução e depois desliga as sombras.
+let ultimo = performance.now(), quadros = 0, tempoQuadros = 0;
+function ajustaQualidade(dtReal) {
+  // só mede durante a partida (no carregamento os shaders ainda estão compilando)
+  if (qualidade === 0 || document.hidden || estado !== 'jogando' || dtReal > .5) return;
+  quadros++; tempoQuadros += dtReal;
+  if (quadros < 90) return;
+  const fps = quadros / tempoQuadros;
+  quadros = 0; tempoQuadros = 0;
+  if (fps >= 40) return;
+  qualidade--;
+  if (qualidade === 1) redimensiona();
+  else {
+    renderer.shadowMap.enabled = false;
+    cena.traverse(o => { if (o.material) [].concat(o.material).forEach(m => m.needsUpdate = true); });
+  }
+}
 function quadro(t) {
-  const dt = Math.min(.05, (t - ultimo) / 1000);
+  const dtReal = (t - ultimo) / 1000, dt = Math.min(.05, dtReal);
   ultimo = t;
+  ajustaQualidade(dtReal);
   atualiza(dt);
   renderer.render(cena, camera);
   requestAnimationFrame(quadro);
