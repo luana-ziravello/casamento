@@ -36,59 +36,80 @@
   canvas { display: block; width: 100%; height: 100%; }
   .camada { position: absolute; inset: 0; pointer-events: none; }
 
-  /* Placar do topo */
+  /* Placar do topo (faixa de ~8,5% da altura útil) */
   .hud {
-    position: absolute; left: calc(var(--u) * 10px); right: calc(var(--u) * 10px); top: calc(var(--u) * 12px);
-    display: flex; align-items: center; justify-content: space-between;
+    position: absolute; left: calc(var(--u) * 10px); right: calc(var(--u) * 10px);
+    top: calc(var(--seguro-topo, 0px) + var(--u) * 10px);
+    height: calc(var(--u) * 40px);
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   }
+  .hud > :first-child { justify-self: start; }
+  .hud > :last-child { justify-self: end; }
   .pilula {
-    min-width: calc(var(--u) * 82px);
-    background: rgba(74, 44, 22, .72);
-    color: #fff; text-align: center;
-    font-size: calc(var(--u) * 16px); font-weight: 700; letter-spacing: .02em;
+    min-width: calc(var(--u) * 72px);
+    height: calc(var(--u) * 30px);
+    display: inline-flex; align-items: center; justify-content: center; gap: calc(var(--u) * 4px);
+    background: rgba(74, 44, 22, .78);
+    color: #fff;
+    font-size: calc(var(--u) * 14px); font-weight: 700; letter-spacing: .03em; line-height: 1;
     border-radius: 999px;
-    padding: calc(var(--u) * 6px) calc(var(--u) * 12px);
+    padding: 0 calc(var(--u) * 12px);
     box-shadow: inset 0 calc(var(--u) * -2px) 0 rgba(0,0,0,.2);
   }
   .pilula.urgente { background: #D63A2E; animation: pisca .5s ease-in-out infinite alternate; }
-  @keyframes pisca { to { transform: scale(1.08); } }
+  @keyframes pisca { to { transform: scale(1.06); } }
   .placar { display: flex; align-items: center; }
   .placar .check {
-    width: calc(var(--u) * 50px); height: calc(var(--u) * 50px);
-    background: #fff; border-radius: calc(var(--u) * 13px);
-    box-shadow: 0 calc(var(--u) * 3px) 0 #D9CBB6;
+    width: calc(var(--u) * 38px); height: calc(var(--u) * 38px);
+    background: #fff; border-radius: calc(var(--u) * 10px);
+    box-shadow: 0 calc(var(--u) * 2px) 0 #D9CBB6;
     display: grid; place-items: center; position: relative; z-index: 1;
   }
   .placar .check svg { width: 70%; height: 70%; }
   .placar .num {
-    margin-left: calc(var(--u) * -12px);
-    padding-left: calc(var(--u) * 20px); padding-right: calc(var(--u) * 16px);
-    min-width: calc(var(--u) * 70px);
-    font-size: calc(var(--u) * 22px);
+    margin-left: calc(var(--u) * -10px);
+    padding-left: calc(var(--u) * 16px);
+    min-width: calc(var(--u) * 56px);
+    font-size: calc(var(--u) * 17px);
   }
   .placar.pulsa .check { animation: pulsa .35s ease-out; }
-  @keyframes pulsa { 40% { transform: scale(1.25) rotate(-6deg); } }
+  @keyframes pulsa { 40% { transform: scale(1.2) rotate(-6deg); } }
 
-  /* Balões de pedido */
+  /* Balões de pedido: ~13% da largura; ícone com margem e selo de
+     quantidade DENTRO do balão; a "ponta" aponta para o cliente */
   .balao {
     position: absolute; transform: translate(-50%, -50%);
-    width: calc(var(--u) * 58px); height: calc(var(--u) * 58px);
-    background: #fff; border-radius: 50%;
-    box-shadow: 0 calc(var(--u) * 3px) calc(var(--u) * 6px) rgba(60, 30, 10, .3);
-    display: grid; place-items: center;
+    width: calc(var(--u) * 50px); height: calc(var(--u) * 46px);
+    background: #fff; border-radius: calc(var(--u) * 14px);
+    box-shadow: 0 calc(var(--u) * 2px) calc(var(--u) * 5px) rgba(60, 30, 10, .3);
     transition: opacity .2s;
   }
-  .balao img { width: 86%; height: 86%; object-fit: contain; margin-top: -8%; }
+  /* ponta: à esquerda do balão (cliente à esquerda); .esq = balão à esquerda do cliente */
+  .balao::before {
+    content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+    left: calc(var(--u) * -6px);
+    border-top: calc(var(--u) * 6px) solid transparent; border-bottom: calc(var(--u) * 6px) solid transparent;
+    border-right: calc(var(--u) * 7px) solid #fff;
+  }
+  .balao.esq::before { left: auto; right: calc(var(--u) * -6px); border-right: 0; border-left: calc(var(--u) * 7px) solid #fff; }
+  .balao img {
+    position: absolute; left: calc(var(--u) * 4px); top: calc(var(--u) * 2px);
+    width: calc(var(--u) * 36px); height: calc(var(--u) * 36px); object-fit: contain;
+  }
   .balao .qtd {
-    position: absolute; right: calc(var(--u) * -4px); bottom: calc(var(--u) * -2px);
-    font-size: calc(var(--u) * 21px); font-weight: 700; color: #3A2A1E;
-    text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff;
+    position: absolute; right: calc(var(--u) * 3px); bottom: calc(var(--u) * 3px);
+    min-width: calc(var(--u) * 18px); height: calc(var(--u) * 18px);
+    padding: 0 calc(var(--u) * 4px);
+    display: grid; place-items: center;
+    background: #3A2A1E; color: #fff; border-radius: 999px;
+    font-size: calc(var(--u) * 12px); font-weight: 700; line-height: 1;
   }
   .balao.ok { background: #4CB83A; }
+  .balao.ok::before { border-left-color: #4CB83A; border-right-color: #4CB83A; }
   .balao.ok img, .balao.ok .qtd { display: none; }
-  .balao.ok::after { content: '✓'; color: #fff; font-size: calc(var(--u) * 34px); font-weight: 700; }
+  .balao.ok::after { content: '✓'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: calc(var(--u) * 26px); font-weight: 700; }
   .balao.pula { animation: pula .25s ease-out; }
-  @keyframes pula { 50% { transform: translate(-50%, -50%) scale(1.18); } }
+  @keyframes pula { 50% { transform: translate(-50%, -50%) scale(1.15); } }
   .balao.esconde { opacity: 0; }
 
   .hum {
@@ -112,47 +133,49 @@
   }
   @keyframes sobe { to { transform: translate(var(--dx), calc(var(--u) * -70px)) scale(1.3); opacity: 0; } }
 
-  /* Contador da esteira */
+  /* Contador da esteira (entre a cena e as colunas) */
   .barra {
-    position: absolute; left: 12%; width: 76%;
-    height: calc(var(--u) * 26px); transform: translateY(-50%);
+    position: absolute; left: 18%; width: 64%;
+    height: calc(var(--u) * 18px); transform: translateY(-50%);
     background: #5A3A22; border-radius: 999px;
-    box-shadow: inset 0 calc(var(--u) * 2px) calc(var(--u) * 3px) rgba(0,0,0,.35), 0 calc(var(--u) * 2px) 0 rgba(255,255,255,.35);
+    box-shadow: inset 0 calc(var(--u) * 2px) calc(var(--u) * 3px) rgba(0,0,0,.35), 0 calc(var(--u) * 1px) 0 rgba(255,255,255,.35);
     overflow: hidden;
   }
   .barra .enche {
-    position: absolute; left: calc(var(--u) * 3px); top: calc(var(--u) * 3px); bottom: calc(var(--u) * 3px);
+    position: absolute; left: calc(var(--u) * 2px); top: calc(var(--u) * 2px); bottom: calc(var(--u) * 2px);
     border-radius: 999px; background: #4CB83A;
     transition: width .15s, background-color .3s;
   }
   .barra .texto {
     position: absolute; inset: 0; display: grid; place-items: center;
-    color: #fff; font-size: calc(var(--u) * 16px); font-weight: 700;
+    color: #fff; font-size: calc(var(--u) * 12px); font-weight: 700; line-height: 1;
     text-shadow: 0 1px 2px rgba(0,0,0,.5);
   }
 
+  /* Dica: pílula pequena acima da barra, some no primeiro toque */
   .dica {
-    position: absolute; left: 0; right: 0; bottom: 14%;
-    text-align: center; color: #fff;
-    font-size: calc(var(--u) * 32px); font-weight: 700; line-height: 1.05;
-    -webkit-text-stroke: calc(var(--u) * 2px) #3A2A1E; paint-order: stroke fill;
-    text-shadow: 0 calc(var(--u) * 3px) 0 #3A2A1E;
+    position: absolute; left: 50%; transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: calc(var(--u) * 6px);
+    background: rgba(58, 42, 30, .88); color: #fff;
+    font-size: calc(var(--u) * 13px); font-weight: 600; white-space: nowrap;
+    padding: calc(var(--u) * 5px) calc(var(--u) * 12px);
+    border-radius: 999px;
     animation: respira 1s ease-in-out infinite alternate;
   }
-  .dica .mao { display: block; font-size: calc(var(--u) * 44px); -webkit-text-stroke: 0; text-shadow: none; animation: aperta 1s ease-in-out infinite; }
-  @keyframes respira { to { opacity: .7; } }
-  @keyframes aperta { 50% { transform: translateY(calc(var(--u) * 8px)) scale(.9); } }
+  .dica .mao { font-size: calc(var(--u) * 16px); animation: aperta 1s ease-in-out infinite; }
+  @keyframes respira { to { opacity: .8; } }
+  @keyframes aperta { 50% { transform: translateY(calc(var(--u) * 3px)); } }
 
   /* Telas */
   .tela {
     position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; overflow-y: auto; /* cartão centralizado por margin:auto; rola se não couber */
     background: rgba(42, 29, 20, .5);
     backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
     padding: 7%;
   }
   .cartao {
-    width: 100%;
+    width: 100%; margin: auto;
     background: #FFF8EC;
     border: calc(var(--u) * 4px) solid #8A5A34;
     border-radius: calc(var(--u) * 26px);
@@ -224,7 +247,7 @@
       <div class="pilula" id="hudTempo">⏱ 1:00</div>
     </div>
     <div class="barra" id="barra"><div class="enche" id="barraEnche"></div><div class="texto" id="barraTexto">0/50</div></div>
-    <div class="dica" id="dica" hidden><span class="mao">👆</span>SEGURE PARA<br>JOGAR</div>
+    <div class="dica" id="dica" hidden><span class="mao">👆</span>Segure uma coluna para jogar</div>
   </div>
 
   <div class="tela" id="telaInicio">
@@ -306,10 +329,12 @@ const FASES = [
 ];
 
 // Quem pode aparecer como cliente (é só acrescentar desenhos aqui)
+// escala = ajuste para todas as cabeças parecerem do mesmo tamanho
+// (medido pela largura da cabeça/cabelo em cada desenho)
 const PESSOAS = [
-  'cliente-noiva', 'cliente-noivo', 'cliente-vestido-vinho', 'cliente-terno-claro',
-  'cliente-gravata-rosa', 'cliente-gravata-laranja', 'cliente-rosa', 'cliente-gato',
-].map(nome => ({ foto: `imagens/jogo/${nome}.png` }));
+  ['cliente-noiva', .9], ['cliente-noivo', 1.0], ['cliente-vestido-vinho', .85], ['cliente-terno-claro', .93],
+  ['cliente-gravata-rosa', 1.1], ['cliente-gravata-laranja', 1.1], ['cliente-rosa', .82], ['cliente-gato', .92],
+].map(([nome, escala]) => ({ foto: `imagens/jogo/${nome}.png`, escala }));
 const FOTO_CHEF = 'imagens/jogo/chef.png';
 
 // ---------- Palco, renderizador e câmera ----------
@@ -320,6 +345,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.autoUpdate = false; // atualizada uma vez por quadro (há duas câmeras)
 
 const cena = new THREE.Scene();
 cena.background = new THREE.Color('#F3D9B0');
@@ -327,29 +353,77 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 cena.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
 cena.environmentIntensity = .55;
 
-// Câmera em perspectiva. O quadro "virtual" tem a proporção da tela mais
-// estreita aceita (0,42); telas mais largas mostram a parte de cima dele
-// (setViewOffset), então o topo da cena fica sempre no lugar.
-const ASPECTO = .42;
-const camera = new THREE.PerspectiveCamera(38, ASPECTO, 1, 200);
-const ALVO = new THREE.Vector3(0, 0, -.8), INCL = THREE.MathUtils.degToRad(58), DIST = 35;
-camera.position.copy(ALVO).add(new THREE.Vector3(0, Math.sin(INCL), Math.cos(INCL)).multiplyScalar(DIST));
-camera.lookAt(ALVO);
-camera.updateMatrixWorld();
+// ---------- Layout ----------
+// Todas as medidas de tela ficam aqui, em frações da ALTURA ÚTIL
+// (altura do palco menos as áreas seguras do aparelho). A cena e as
+// colunas têm câmeras próprias, cada uma ajustada à sua faixa da tela
+// sem distorcer (mesma escala nos dois eixos).
+// Valores para tela alongada (≈ 9:19,5) e para tela curta (9:16);
+// entre as duas, interpolamos pela proporção largura/altura.
+const LAYOUT_ALTA = { hud: .085, cenaFim: .552, barra: .576, colunas: .6 };
+const LAYOUT_CURTA = { hud: .095, cenaFim: .598, barra: .624, colunas: .65 };
+const LAYOUT = { ...LAYOUT_ALTA };
+function ajustaLayout(proporcao) {
+  const k = Math.max(0, Math.min(1, (proporcao - .46) / (.5625 - .46)));
+  for (const c in LAYOUT) LAYOUT[c] = LAYOUT_ALTA[c] + (LAYOUT_CURTA[c] - LAYOUT_ALTA[c]) * k;
+}
+// Caixa da cena no mundo: dos clientes de trás até os da frente
+const CAIXA_CENA = { x: 4.6, zFundo: -10.75, yFundo: 3.5, zFrente: -2.6 };
+const INCL = THREE.MathUtils.degToRad(55), SEN = Math.sin(INCL), COS = Math.cos(INCL);
+const DIR = new THREE.Vector3(0, SEN, COS); // da cena para a câmera
+const camCena = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
+const camColunas = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
+// As colunas ficam longe da esteira no mundo (x = 100): a câmera da cena
+// nunca as vê, e a câmera das colunas só vê as colunas.
+const COLUNAS_X = 100, LARGURA_COLUNAS = 10.6;
+function orienta(cam, alvo) { cam.position.copy(alvo).addScaledVector(DIR, 60); cam.lookAt(alvo); cam.updateMatrixWorld(); }
+orienta(camCena, new THREE.Vector3(0, 0, 0));
 
 let larg = 390, alt = 844, qualidade = 2;
+const tela = { topo: 0, util: 844, escCena: .023, escColunas: .027, topoColunas: 506 };
+const Y = (f) => tela.topo + f * tela.util;
+const sonda = document.createElement('div');
+sonda.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+document.body.appendChild(sonda);
+
 function redimensiona() {
   let h = window.innerHeight, w = Math.min(window.innerWidth, h * .62);
-  if (w / h < ASPECTO) h = w / ASPECTO;
+  if (w / h < .42) h = w / .42;
   larg = w; alt = h;
   palco.style.width = w + 'px'; palco.style.height = h + 'px';
   palco.style.setProperty('--u', w / 390);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, qualidade >= 2 ? 2 : 1));
   renderer.setSize(w, h, false);
-  camera.aspect = ASPECTO;
-  camera.setViewOffset(w, w / ASPECTO, 0, 0, w, h);
-  camera.updateProjectionMatrix();
-  posicionaBarra();
+  // área segura (notch, barra de gestos) só conta quando o palco ocupa a tela toda
+  const cs = getComputedStyle(sonda), cheio = h >= window.innerHeight - 1;
+  const segTopo = cheio ? parseFloat(cs.paddingTop) || 0 : 0, segBase = cheio ? parseFloat(cs.paddingBottom) || 0 : 0;
+  tela.topo = segTopo; tela.util = h - segTopo - segBase;
+  ajustaLayout(w / tela.util);
+  palco.style.setProperty('--seguro-topo', segTopo + 'px');
+
+  // cena: a caixa cabe na largura e na faixa entre HUD e barra, centralizada
+  const vTopo = CAIXA_CENA.yFundo * COS - CAIXA_CENA.zFundo * SEN, vBase = -CAIXA_CENA.zFrente * SEN;
+  const fTopo = Y(LAYOUT.hud), fFim = Y(LAYOUT.cenaFim);
+  const e = Math.max(2 * CAIXA_CENA.x / w, (vTopo - vBase) / (fFim - fTopo));
+  const vCentro = (vTopo + vBase) / 2, yCentro = (fTopo + fFim) / 2;
+  Object.assign(camCena, { left: -w / 2 * e, right: w / 2 * e, top: vCentro + yCentro * e });
+  camCena.bottom = camCena.top - h * e;
+  camCena.updateProjectionMatrix();
+  tela.escCena = e;
+
+  // colunas: largura total das 5 colunas = largura da tela; o topo da
+  // primeira peça fica no início da faixa das colunas
+  const ec = LARGURA_COLUNAS / w;
+  tela.escColunas = ec; tela.topoColunas = Y(LAYOUT.colunas);
+  orienta(camColunas, new THREE.Vector3(COLUNAS_X, 0, COL.zTopo));
+  Object.assign(camColunas, { left: -w / 2 * ec, right: w / 2 * ec, top: tela.topoColunas * ec });
+  camColunas.bottom = camColunas.top - h * ec;
+  camColunas.updateProjectionMatrix();
+  // quantas peças cabem por coluna (meta: 10 a 13)
+  COL.visiveis = Math.ceil((h - tela.topoColunas) * ec / (COL.passo * SEN)) + 1;
+
+  $('barra').style.top = Y(LAYOUT.barra) + 'px';
+  $('dica').style.top = (Y(LAYOUT.barra) - 34 * w / 390) + 'px';
 }
 
 // ---------- Luz ----------
@@ -412,17 +486,17 @@ const chao = malha(new THREE.PlaneGeometry(44, 60), mat('#FFFFFF', {
 chao.rotation.x = -Math.PI / 2;
 cena.add(chao);
 cena.add(malha(new THREE.PlaneGeometry(40, 12), mat('#FFFFFF', {
-  map: texCanvas(512, 256, tabuas(['#F6DDB5', '#F2D6AA', '#F6DDB5', '#F0D3A6', '#F6DDB5', '#F2D6AA']), { rep: [4, 1] }) }), 0, 6, -12.6, { sombra: false }));
-cena.add(malha(new THREE.BoxGeometry(40, .7, .3), mat('#9A5B2C'), 0, .35, -12.45));
-cena.add(malha(new THREE.BoxGeometry(40, .25, .5), mat('#B9733C'), 0, 2.4, -12.4));
-for (const [x, z] of [[-5.4, -6.4], [5.4, -6.4]]) {
+  map: texCanvas(512, 256, tabuas(['#F6DDB5', '#F2D6AA', '#F6DDB5', '#F0D3A6', '#F6DDB5', '#F2D6AA']), { rep: [4, 1] }) }), 0, 6, -12.3, { sombra: false }));
+cena.add(malha(new THREE.BoxGeometry(40, .7, .3), mat('#9A5B2C'), 0, .35, -12.15));
+cena.add(malha(new THREE.BoxGeometry(40, .25, .5), mat('#B9733C'), 0, 2.6, -12.1));
+for (const [x, z] of [[-4.95, -7.0], [4.95, -7.0]]) {
   cena.add(malha(new THREE.CylinderGeometry(.45, .35, .7, 16), mat('#7A4A26'), x, .35, z));
   for (const [dx, dy, r] of [[0, 1.05, .5], [-.3, .85, .38], [.32, .9, .4]]) cena.add(malha(new THREE.SphereGeometry(r, 14, 10), mat('#4E8A3A'), x + dx, dy, z));
 }
 
 // ---------- Esteira ----------
-// Pista larga e cozinha pequena no meio, para a esteira ser o destaque.
-const EST = { L: -3.3, R: 3.3, T: -8.9, B: -4.0, r: 1.1, larg: 2.0, y: .47 };
+// Abertura central ≈ 63% da largura externa (como no jogo de referência).
+const EST = { L: -3.5, R: 3.5, T: -9.6, B: -4.2, r: 1.0, larg: 1.6, y: .47 };
 const segs = [];
 (function montaCaminho() {
   const { L, R, T, B, r } = EST, cx = 0;
@@ -457,21 +531,38 @@ function pontoEm(s, alvo = new THREE.Vector3()) {
 (function constroiEsteira() {
   const { L, R, T, B, larg, r } = EST, m = larg / 2;
   const metal = mat('#C9CFD3', { roughness: .3, metalness: .6 }), borda = mat('#8D959B', { metalness: .7, roughness: .3 });
-  const base = new THREE.Shape(retArredondado(L - m - .25, T - m - .25, R + m + .25, B + m + .35, r + m + .25).getPoints(48));
+  const ri = .35; // raio dos cantos da abertura
+  const base = retArredondado(L - m - .25, T - m - .25, R + m + .25, B + m + .35, r + m + .25);
+  base.holes.push(retArredondado(L + m, T + m, R - m, B - m, ri));
   cena.add(malha(extrudaChao(base, .3, .06), mat('#C2372B', { roughness: .45 }), 0, 0, 0));
   const anel = retArredondado(L - m, T - m, R + m, B + m, r + m);
-  anel.holes.push(retArredondado(L + m, T + m, R - m, B - m, .35));
+  anel.holes.push(retArredondado(L + m, T + m, R - m, B - m, ri));
   cena.add(malha(extrudaChao(anel, .1, .03), metal, 0, .34, 0));
   const bordaExt = retArredondado(L - m - .1, T - m - .1, R + m + .1, B + m + .1, r + m + .1);
   bordaExt.holes.push(retArredondado(L - m + .05, T - m + .05, R + m - .05, B + m - .05, r + m - .05));
   cena.add(malha(extrudaChao(bordaExt, .22, .02), borda, 0, .34, 0));
-  const bordaInt = retArredondado(L + m - .05, T + m - .05, R - m + .05, B - m + .05, .4);
-  bordaInt.holes.push(retArredondado(L + m + .1, T + m + .1, R - m - .1, B - m - .1, .3));
+  const bordaInt = retArredondado(L + m - .05, T + m - .05, R - m + .05, B - m + .05, ri + .05);
+  bordaInt.holes.push(retArredondado(L + m + .1, T + m + .1, R - m - .1, B - m - .1, ri - .05));
   cena.add(malha(extrudaChao(bordaInt, .22, .02), borda, 0, .34, 0));
 
-  // cozinha pequena no centro
-  const piso = malha(new THREE.ShapeGeometry(retArredondado(L + m + .05, T + m + .05, R - m - .05, B - m - .05, .3)), mat('#2E3F66'), 0, .41, 0, { sombra: false });
+  // estação do chef: um "poço" com paredes internas, chão, armário ao fundo
+  const x1 = L + m, x2 = R - m, z1 = T + m, z2 = B - m;
+  const parede = retArredondado(x1, z1, x2, z2, ri);
+  parede.holes.push(retArredondado(x1 + .06, z1 + .06, x2 - .06, z2 - .06, ri - .05));
+  cena.add(malha(extrudaChao(parede, .44, 0), mat('#3D4C72'), 0, 0, 0, { sombra: false }));
+  const piso = malha(new THREE.ShapeGeometry(retArredondado(x1, z1, x2, z2, ri)), mat('#2E3F66'), 0, .005, 0, { sombra: false });
   piso.rotation.x = -Math.PI / 2; cena.add(piso);
+  cena.add(malha(new THREE.BoxGeometry(x2 - x1 - .3, 1.15, .12), mat('#A9302A'), 0, .58, z1 + .14, { sombra: false }));
+  cena.add(malha(new THREE.BoxGeometry(2.4, .7, .45), mat('#E4E9EC', { roughness: .4 }), -1.1, .35, z1 + .45));
+  for (const [x, rr, hh] of [[-1.9, .17, .22], [-1.45, .14, .16]]) cena.add(malha(new THREE.CylinderGeometry(rr, rr, hh, 18), mat('#B83A2E', { roughness: .4 }), x, .7 + hh / 2, z1 + .45));
+  // vitrine na frente da estação (borda frontal, na frente do chef)
+  const zv = z2 - .5;
+  cena.add(malha(new RoundedBoxGeometry(3.1, .42, .62, 2, .05), mat('#B9C3C9', { metalness: .4, roughness: .35 }), 0, .21, zv));
+  ['#DD3346', '#F3713D', '#F6C431', '#F7C9D0', '#8A4520', '#DD3346'].forEach((c, i) =>
+    cena.add(malha(new RoundedBoxGeometry(.4, .13, .4, 2, .05), mat(c, { roughness: .35 }), -1.1 + i * .44, .49, zv)));
+  cena.add(malha(new THREE.BoxGeometry(2.9, .05, .5), mat('#5DBB46'), 0, .43, zv, { sombra: false }));
+  const vidro = new THREE.Mesh(new RoundedBoxGeometry(3.1, .4, .62, 2, .06), new THREE.MeshPhysicalMaterial({ color: '#DDF6F5', transparent: true, opacity: .3, roughness: .05, metalness: 0, clearcoat: 1 }));
+  vidro.position.set(0, .62, zv); cena.add(vidro);
 })();
 
 let placas = null;
@@ -483,21 +574,26 @@ function criaPlacas(n) {
 }
 
 // ---------- Mesa das colunas ----------
-const COL = { xs: [-4.2, -2.1, 0, 2.1, 4.2], z0: -.1, passo: .92, escala: 1.5, y: .14, visiveis: 10 };
+// Medidas no mundo das colunas (x = COLUNAS_X). passo = distância entre
+// peças; a quantidade visível é calculada no layout.
+const COL = {
+  xs: [-2, -1, 0, 1, 2].map(i => COLUNAS_X + i * LARGURA_COLUNAS / 5),
+  zTopo: -.62, z0: 0, passo: .9, escala: 1.45, y: .14, visiveis: 12,
+};
 (function constroiMesa() {
-  cena.add(malha(new THREE.BoxGeometry(12, .2, 16), mat('#D9A86C'), 0, -.02, 7, { sombra: false }));
-  const tex = texCanvas(128, 512, tabuas(['#B8743A', '#C27E42', '#B06D35']), { rep: [1, 3] });
+  const lc = LARGURA_COLUNAS / 5;
+  cena.add(malha(new THREE.BoxGeometry(LARGURA_COLUNAS + 2, .2, 22), mat('#D9A86C'), COLUNAS_X, -.02, 10, { sombra: false }));
+  const tex = texCanvas(128, 512, tabuas(['#B8743A', '#C27E42', '#B06D35']), { rep: [1, 4] });
   COL.xs.forEach((x, i) => {
     const t = tex.clone(); t.needsUpdate = true; t.offset.x = i * .3;
-    cena.add(malha(new THREE.BoxGeometry(1.95, .14, 15.5), mat('#FFFFFF', { map: t }), x, .07, 7.2, { sombra: false }));
+    cena.add(malha(new THREE.BoxGeometry(lc - .14, .14, 21.5), mat('#FFFFFF', { map: t }), x, .07, 10, { sombra: false, recebe: false }));
   });
-  for (let i = 0; i < 6; i++) cena.add(malha(new THREE.BoxGeometry(.12, .26, 15.5), mat('#7A4524'), -5.25 + i * 2.1, .13, 7.2, { sombra: false }));
-  cena.add(malha(new THREE.BoxGeometry(12, .3, .3), mat('#7A4524'), 0, .15, -.75, { sombra: false }));
+  for (let i = 0; i <= 5; i++) cena.add(malha(new THREE.BoxGeometry(.12, .26, 21.5), mat('#7A4524'), COLUNAS_X - LARGURA_COLUNAS / 2 + i * lc, .13, 10, { sombra: false, recebe: false }));
 })();
 const ESC_ESTEIRA = 1.1;
 const brilhoColuna = COL.xs.map((x) => {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 15.4), new THREE.MeshBasicMaterial({ color: '#FFF3C4', transparent: true, opacity: 0, depthWrite: false }));
-  m.rotation.x = -Math.PI / 2; m.position.set(x, .15, 7.2); cena.add(m); return m;
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(LARGURA_COLUNAS / 5 - .14, 21.4), new THREE.MeshBasicMaterial({ color: '#FFF3C4', transparent: true, opacity: 0, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.position.set(x, .15, 10); cena.add(m); return m;
 });
 
 // ---------- Texturas dos alimentos ----------
@@ -689,7 +785,10 @@ function monta(partes, larguraAlvo) {
   const geo = mergeGeometries(geos, true);
   // normaliza: centraliza em x/z, base em y = 0 e largura padrão
   geo.computeBoundingBox();
-  const b = geo.boundingBox, esc = larguraAlvo / Math.max(b.max.x - b.min.x, b.max.z - b.min.z);
+  // tamanho visual equilibrado: considera o maior lado e também a área ocupada,
+  // para um pepino comprido e um bloco de peixe parecerem da mesma escala
+  const b = geo.boundingBox, dx = b.max.x - b.min.x, dz = b.max.z - b.min.z;
+  const esc = larguraAlvo / Math.max(dx, dz, 1.25 * Math.sqrt(dx * dz));
   geo.translate(-(b.min.x + b.max.x) / 2, -b.min.y, -(b.min.z + b.max.z) / 2);
   geo.scale(esc, esc, esc);
   return { geo, mats };
@@ -775,9 +874,9 @@ const INGREDIENTES = {
     P(new THREE.SphereGeometry(.2, 24, 16), 'ovo', { p: [.2, .2, .04], s: [1, 1.28, 1], r: [0, .6, 1.45] })],
   // pepino com uma rodela cortada
   kappa: () => [
-    P(new THREE.CapsuleGeometry(.13, .55, 8, 18), 'pepino', { p: [-.05, .13, -.05], r: [0, .2, Math.PI / 2] }),
-    P(new THREE.CylinderGeometry(.13, .13, .05, 20, 1, true), 'pepino', { p: [.3, .025, .2] }),
-    P(new THREE.CircleGeometry(.13, 20), 'pepinoCorte', { p: [.3, .051, .2], r: [-Math.PI / 2, 0, 0] })],
+    P(new THREE.CapsuleGeometry(.16, .34, 8, 18), 'pepino', { p: [-.08, .16, -.06], r: [0, .25, Math.PI / 2] }),
+    P(new THREE.CylinderGeometry(.15, .15, .06, 20, 1, true), 'pepino', { p: [.24, .03, .2] }),
+    P(new THREE.CircleGeometry(.15, 20), 'pepinoCorte', { p: [.24, .061, .2], r: [-Math.PI / 2, 0, 0] })],
   // camarão inteiro, curvado, com rabo e antenas
   ebi: () => {
     const raio = (t) => .135 - .085 * t;
@@ -806,7 +905,7 @@ const INGREDIENTES = {
   unagi: () => {
     const raio = (t) => t < .75 ? .12 : .12 - (t - .75) * .38;
     const pts = [];
-    for (let i = 0; i <= 10; i++) { const t = i / 10, x = -.5 + t; pts.push(new THREE.Vector3(x, .12, .13 * Math.sin(x * 6.5))); }
+    for (let i = 0; i <= 10; i++) { const t = i / 10, x = -.36 + t * .72; pts.push(new THREE.Vector3(x, .12, .15 * Math.sin(x * 8.5))); }
     const { g } = tuboAfinando(pts, raio, 48, 12);
     return [{ g, m: 'enguiaPele' },
       P(new THREE.SphereGeometry(.13, 14, 10), 'enguiaPele', { p: [pts[0].x, .12, pts[0].z], s: [1.4, .9, 1] }),
@@ -867,8 +966,7 @@ const ICONE_PRATO = {}, ICONE_ING = {};
 })();
 
 // ---------- Personagens ----------
-// Cada personagem é o próprio desenho (busto recortado) como sprite,
-// sempre virado para a câmera e "em pé" a partir da base (center y = 0).
+// Cada personagem é o próprio desenho (busto recortado).
 const carregaTex = new THREE.TextureLoader();
 const texturas = new Map();
 function textura(src) {
@@ -879,43 +977,52 @@ function textura(src) {
   }
   return texturas.get(src);
 }
+// Plano EM PÉ (não um sprite): assim a esteira, o piso e as bancadas
+// escondem a parte de baixo do personagem com a profundidade certa.
+// A altura é compensada pela inclinação da câmera (÷ COS) para o desenho
+// aparecer na tela sem achatar; a origem fica na base (gira pela base).
+const GEO_BUSTO = new THREE.PlaneGeometry(1, 1).translate(0, .5, 0);
 function busto(src, tam) {
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: textura(src), transparent: true, alphaTest: .05 }));
-  s.center.set(.5, 0);
-  s.scale.set(tam, tam, 1);
-  return s;
+  const m = new THREE.Mesh(GEO_BUSTO, new THREE.MeshBasicMaterial({ map: textura(src), transparent: true, alphaTest: .05, toneMapped: false }));
+  m.scale.set(tam, tam / COS, 1);
+  return m;
 }
 PESSOAS.forEach(p => textura(p.foto));
 
 // Chef no centro, com a tábua e a faca cortando
 const chef = new THREE.Group();
 (function constroiChef() {
-  const corpo = busto(FOTO_CHEF, 1.75);
-  corpo.position.set(0, .15, 0); chef.add(corpo); chef.corpo = corpo;
-  chef.add(malha(new RoundedBoxGeometry(1.3, .12, .6, 2, .04), mat('#D9A86C'), 0, .5, .85));
-  const peixe = malha(GEO_ING.sake.geo, GEO_ING.sake.mats, -.2, .56, .85); peixe.scale.setScalar(.7); chef.add(peixe);
-  const faca = new THREE.Group(); faca.position.set(.4, .6, .85);
+  // o busto "nasce" abaixo do piso da estação: o piso e a bancada escondem a
+  // parte de baixo, então ele parece em pé atrás da bancada
+  const corpo = busto(FOTO_CHEF, 3.1);
+  corpo.position.set(0, -1.0, 0); chef.add(corpo); chef.corpo = corpo;
+  chef.add(malha(new THREE.BoxGeometry(2.3, .5, .6), mat('#C9D1D6', { metalness: .3, roughness: .4 }), 0, .25, .95));
+  chef.add(malha(new RoundedBoxGeometry(1.3, .1, .52, 2, .04), mat('#D9A86C'), 0, .55, .95));
+  const peixe = malha(GEO_ING.sake.geo, GEO_ING.sake.mats, -.2, .6, .95); peixe.scale.setScalar(.75); chef.add(peixe);
+  const faca = new THREE.Group(); faca.position.set(.42, .62, .95);
   faca.add(malha(new THREE.BoxGeometry(.05, .45, .13), mat('#DDE3E8', { metalness: .9, roughness: .15 }), 0, .32, 0));
   faca.add(malha(new THREE.BoxGeometry(.08, .22, .1), mat('#3A2A1E'), 0, .65, 0));
   chef.add(faca); chef.faca = faca;
-  chef.position.set(0, .41, -7.15);
+  chef.position.set(0, 0, -7.55);
   cena.add(chef);
 })();
 
 // Lugares dos clientes
 const LUGARES = [
-  { x: -2.4, z: -10.7, lado: -1, cima: true },
-  { x: 2.4,  z: -10.7, lado: 1,  cima: true },
-  { x: -3.1, z: -1.85, lado: -1, cima: false },
-  { x: 3.1,  z: -1.85, lado: 1,  cima: false },
+  // de trás: parte de baixo escondida atrás da esteira (base abaixo do piso)
+  { x: -2.35, z: -10.75, y: -.55, lado: -1, cima: true },
+  { x: 2.35,  z: -10.75, y: -.55, lado: 1,  cima: true },
+  // da frente: nos cantos frontais, sobrepondo a quina da esteira
+  { x: -2.75, z: -2.75, y: -.15, lado: -1, cima: false },
+  { x: 2.75,  z: -2.75, y: -.15, lado: 1,  cima: false },
 ];
-const TAM_CLIENTE = 2.5;
+const TAM_CLIENTE = 2.35, CABECA = .63; // CABECA: altura do centro do rosto no desenho (fração)
 const camada = $('camada');
 for (const L of LUGARES) {
   const grupo = new THREE.Group();
   L.corpo = busto(PESSOAS[0].foto, TAM_CLIENTE);
   grupo.add(L.corpo);
-  grupo.position.set(L.x, L.cima ? .05 : .25, L.z);
+  grupo.position.set(L.x, L.y, L.z);
   cena.add(grupo); L.grupo = grupo;
   // ponto da esteira onde o cliente pega
   let melhor = 0, dist = Infinity; const p = new THREE.Vector3();
@@ -936,12 +1043,17 @@ function vestir(L, pessoa) {
 
 // ---------- Projeção 3D → tela ----------
 const _v = new THREE.Vector3();
-function naTela(x, y, z) {
-  _v.set(x, y, z).project(camera);
+function naTela(x, y, z, cam = camCena) {
+  _v.set(x, y, z).project(cam);
   return { x: (_v.x + 1) / 2 * larg, y: (1 - _v.y) / 2 * alt };
 }
-function posicionaBarra() {
-  $('barra').style.top = naTela(0, .3, -.95).y + 'px';
+// ponto da tela → ponto da cena numa altura y (para a peça "sair" da coluna)
+const _ray = new THREE.Raycaster(), _plano = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _ndc = new THREE.Vector2();
+function telaParaCena(px, py, y, alvo) {
+  _ndc.set(px / larg * 2 - 1, -(py / alt) * 2 + 1);
+  _ray.setFromCamera(_ndc, camCena);
+  _plano.constant = -y;
+  return _ray.ray.intersectPlane(_plano, alvo);
 }
 function coracoes(px, py, n) {
   for (let i = 0; i < n; i++) {
@@ -1016,7 +1128,7 @@ function novoBloco(col) {
     const j = col.itens.length;
     const m = pegaIngrediente(tipo);
     m.scale.setScalar(COL.escala);
-    m.rotation.y = (Math.random() - .5) * .3;
+    m.rotation.y = (Math.random() - .5) * .12;
     m.position.set(col.x, COL.y, COL.z0 + (j + 1.5) * COL.passo);
     col.itens.push({ tipo, malha: m });
   }
@@ -1066,12 +1178,28 @@ function atualizaBalao(L, pula) {
   L.balao.querySelector('.qtd').textContent = L.resta;
   if (pula) { L.balao.classList.remove('pula'); void L.balao.offsetWidth; L.balao.classList.add('pula'); }
 }
+// Balão ao lado da cabeça (para fora da mesa). O cálculo usa o tamanho
+// inteiro do balão: nunca encosta na borda, não cobre o rosto e não
+// invade o HUD nem a barra.
+const BALAO = { larg: 50, alt: 46, margem: 6, folga: 6 }; // em unidades de 390
 function posicionaBalao(L) {
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + 1.8, L.z);
+  const tam = TAM_CLIENTE * L.pessoa.escala;
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + tam / COS * CABECA, L.z);
   L.cabecaTela = p;
-  const u = larg / 390;
-  L.balao.style.left = Math.max(32 * u, Math.min(larg - 32 * u, p.x + L.lado * 60 * u)) + 'px';
-  L.balao.style.top = (p.y - 22 * u) + 'px';
+  const u = larg / 390, bl = BALAO.larg * u, ba = BALAO.alt * u;
+  const raioCabeca = tam * .2 / tela.escCena;               // px
+  let x = p.x + L.lado * (raioCabeca + bl / 2 + BALAO.folga * u);
+  let y = p.y - (L.cima ? .35 : .9) * raioCabeca;
+  const xMin = BALAO.margem * u + bl / 2, xMax = larg - BALAO.margem * u - bl / 2;
+  if (x < xMin || x > xMax) {
+    // sem espaço do lado: sobe para cima da cabeça, puxado para o lado
+    x = Math.max(xMin, Math.min(xMax, x));
+    y = p.y - raioCabeca - ba / 2 - BALAO.folga * u;
+  }
+  const yMin = Y(LAYOUT.hud) + ba / 2, yMax = Y(LAYOUT.cenaFim) - ba / 2;
+  y = Math.max(yMin, Math.min(yMax, y));
+  L.balao.style.left = x + 'px'; L.balao.style.top = y + 'px';
+  L.balao.classList.toggle('esq', x < p.x);
 }
 function trocaPessoa(L) {
   const ocupadas = LUGARES.map(o => o.pessoa);
@@ -1083,7 +1211,7 @@ function pedidoCompleto(L) {
   feitos++; totalGeral++;
   L.estado = 'hum'; L.t = 0;
   L.balao.classList.add('ok'); atualizaBalao(L, true);
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + 2.7, L.z);
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + TAM_CLIENTE * L.pessoa.escala / COS * .95, L.z);
   const hum = document.createElement('div'); hum.className = 'hum'; hum.textContent = 'Hummmm! 😋';
   hum.style.left = p.x + 'px'; hum.style.top = p.y + 'px';
   camada.appendChild(hum); setTimeout(() => hum.remove(), 1400);
@@ -1095,14 +1223,13 @@ function pedidoCompleto(L) {
 }
 
 // ---------- Entrada (segurar coluna) ----------
-const raio = new THREE.Raycaster(), plano = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _ndc = new THREE.Vector2(), _pt = new THREE.Vector3();
+// área de toque = a coluna inteira (independe do tamanho das peças),
+// começando um pouco acima, na altura da barra
 function colunaEm(ev) {
   const r = cv.getBoundingClientRect();
-  _ndc.set((ev.clientX - r.left) / r.width * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-  raio.setFromCamera(_ndc, camera);
-  if (!raio.ray.intersectPlane(plano, _pt) || _pt.z < -1.4) return -1;
-  const i = Math.round((_pt.x - COL.xs[0]) / 2.1);
-  return Math.max(0, Math.min(4, i));
+  const x = (ev.clientX - r.left) / r.width * larg, y = (ev.clientY - r.top) / r.height * alt;
+  if (y < Y(LAYOUT.barra) - 10) return -1;
+  return Math.max(0, Math.min(4, Math.floor(x / (larg / 5))));
 }
 cv.addEventListener('pointerdown', (ev) => {
   iniciaAudio();
@@ -1110,6 +1237,7 @@ cv.addEventListener('pointerdown', (ev) => {
   cv.setPointerCapture(ev.pointerId);
   segurando = colunaEm(ev);
   if (segurando !== -1) vibra(12);
+  if (!mostrouDica) { mostrouDica = true; $('dica').hidden = true; }
 });
 cv.addEventListener('pointermove', (ev) => {
   if (estado !== 'jogando' || segurando === -1) return;
@@ -1127,7 +1255,7 @@ function atualiza(dt) {
   const jogando = estado === 'jogando';
 
   chef.faca.position.y = .6 + Math.abs(Math.sin(relogio * 6)) * .28;
-  chef.corpo.position.y = .15 + Math.sin(relogio * 3.5) * .03;
+  chef.corpo.position.y = -1.0 + Math.sin(relogio * 3.5) * .03;
 
   // clientes
   for (const L of LUGARES) {
@@ -1149,8 +1277,9 @@ function atualiza(dt) {
       if (k >= 1) { trocaPessoa(L); L.estado = 'chegando'; L.t = 0; }
     }
     const pulo = Math.sin(L.pulo * Math.PI);
-    L.corpo.material.rotation = rot;
-    L.corpo.scale.set(TAM_CLIENTE * (1 + pulo * .06), TAM_CLIENTE * (escY + pulo * .1), 1);
+    L.corpo.rotation.z = rot;
+    const tam = TAM_CLIENTE * (L.pessoa ? L.pessoa.escala : 1);
+    L.corpo.scale.set(tam * (1 + pulo * .06), tam / COS * (escY + pulo * .1), 1);
     if (L.estado === 'esperando' || L.estado === 'hum') posicionaBalao(L);
   }
 
@@ -1160,7 +1289,7 @@ function atualiza(dt) {
       const alvo = COL.z0 + j * COL.passo;
       it.malha.position.z += (alvo - it.malha.position.z) * Math.min(1, dt * 16);
       it.malha.visible = j < COL.visiveis + 1;
-      it.malha.castShadow = j < 3; // sombra só no topo das colunas (economiza no celular)
+      it.malha.castShadow = false; // as colunas ficam fora da área de sombra
     });
   }
   brilhoColuna.forEach((b, i) => {
@@ -1213,9 +1342,14 @@ function atualiza(dt) {
       const iEntrada = ((-Math.floor(deslocamento / espaco)) % N + N) % N;
       if (!slots[iEntrada] && col.itens.length) {
         const it = col.itens.shift();
-        slots[iEntrada] = { tipo: it.tipo, malha: it.malha, s: (iEntrada * espaco + deslocamento) % COMPR, voo: 0, de: it.malha.position.clone() };
+        // a peça passa do "mundo das colunas" para a cena: parte do mesmo ponto
+        // e do mesmo tamanho na tela, e voa até a esteira
+        const q = naTela(it.malha.position.x, it.malha.position.y, it.malha.position.z, camColunas);
+        const de = telaParaCena(q.x, q.y, EST.y, new THREE.Vector3()) || pontoEm(iEntrada * espaco + deslocamento);
+        const escDe = COL.escala * tela.escCena / tela.escColunas;
+        it.malha.position.copy(de); it.malha.scale.setScalar(escDe);
+        slots[iEntrada] = { tipo: it.tipo, malha: it.malha, s: (iEntrada * espaco + deslocamento) % COMPR, voo: 0, de, escDe };
         completaColuna(col);
-        if (!mostrouDica) { mostrouDica = true; $('dica').hidden = true; }
         som.sai(); vibra(8);
       }
     }
@@ -1231,7 +1365,7 @@ function atualiza(dt) {
       const k = suave(it.voo);
       it.malha.position.lerpVectors(it.de, _p, k);
       it.malha.position.y += Math.sin(k * Math.PI) * 1.2;
-      it.malha.scale.setScalar(COL.escala + (ESC_ESTEIRA - COL.escala) * k);
+      it.malha.scale.setScalar(it.escDe + (ESC_ESTEIRA - it.escDe) * k);
     } else {
       it.malha.position.copy(_p);
       it.malha.scale.setScalar(ESC_ESTEIRA);
@@ -1244,7 +1378,7 @@ function atualiza(dt) {
     const v = voando[i];
     v.t += dt / .35;
     const k = Math.min(1, v.t), L = v.L;
-    _p.set(L.grupo.position.x, L.grupo.position.y + 1.3, L.z + .3);
+    _p.set(L.grupo.position.x, L.grupo.position.y + TAM_CLIENTE * L.pessoa.escala / COS * .5, L.z + .3);
     v.malha.position.lerpVectors(v.de, _p, suave(k));
     v.malha.position.y += Math.sin(k * Math.PI) * 1.4;
     v.malha.scale.setScalar(ESC_ESTEIRA * (1 - k * .6));
@@ -1369,7 +1503,14 @@ function quadro(t) {
   ultimo = t;
   ajustaQualidade(dtReal);
   atualiza(dt);
-  renderer.render(cena, camera);
+  // cena inteira, depois as colunas por cima, só na faixa delas
+  renderer.shadowMap.needsUpdate = true;
+  renderer.setScissorTest(false);
+  renderer.render(cena, camCena);
+  renderer.setScissorTest(true);
+  renderer.setScissor(0, 0, larg, alt - tela.topoColunas);
+  renderer.render(cena, camColunas);
+  renderer.setScissorTest(false);
   requestAnimationFrame(quadro);
 }
 requestAnimationFrame(quadro);
