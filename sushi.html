@@ -28,8 +28,7 @@
   }
   #palco {
     --u: 1;
-    position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
+    position: fixed; left: 0; top: 0; /* posição e tamanho vêm da área visível (visualViewport) */
     overflow: hidden;
     background: #F3D9B0;
   }
@@ -133,38 +132,27 @@
   }
   @keyframes sobe { to { transform: translate(var(--dx), calc(var(--u) * -70px)) scale(1.3); opacity: 0; } }
 
-  /* Contador da esteira (entre a cena e as colunas) */
+  /* Contador da esteira (faixa reservada entre a cena e as colunas,
+     da largura das 5 colunas). No início ele mostra a dica de como jogar. */
   .barra {
-    position: absolute; left: 18%; width: 64%;
-    height: calc(var(--u) * 18px); transform: translateY(-50%);
+    position: absolute; left: 3%; width: 94%;
+    height: calc(var(--u) * 22px); transform: translateY(-50%);
     background: #5A3A22; border-radius: 999px;
     box-shadow: inset 0 calc(var(--u) * 2px) calc(var(--u) * 3px) rgba(0,0,0,.35), 0 calc(var(--u) * 1px) 0 rgba(255,255,255,.35);
     overflow: hidden;
   }
   .barra .enche {
-    position: absolute; left: calc(var(--u) * 2px); top: calc(var(--u) * 2px); bottom: calc(var(--u) * 2px);
+    position: absolute; left: calc(var(--u) * 3px); top: calc(var(--u) * 3px); bottom: calc(var(--u) * 3px);
     border-radius: 999px; background: #4CB83A;
     transition: width .15s, background-color .3s;
   }
   .barra .texto {
     position: absolute; inset: 0; display: grid; place-items: center;
-    color: #fff; font-size: calc(var(--u) * 12px); font-weight: 700; line-height: 1;
+    color: #fff; font-size: calc(var(--u) * 13px); font-weight: 700; line-height: 1; white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0,0,0,.5);
   }
-
-  /* Dica: pílula pequena acima da barra, some no primeiro toque */
-  .dica {
-    position: absolute; left: 50%; transform: translate(-50%, -50%);
-    display: flex; align-items: center; gap: calc(var(--u) * 6px);
-    background: rgba(58, 42, 30, .88); color: #fff;
-    font-size: calc(var(--u) * 13px); font-weight: 600; white-space: nowrap;
-    padding: calc(var(--u) * 5px) calc(var(--u) * 12px);
-    border-radius: 999px;
-    animation: respira 1s ease-in-out infinite alternate;
-  }
-  .dica .mao { font-size: calc(var(--u) * 16px); animation: aperta 1s ease-in-out infinite; }
-  @keyframes respira { to { opacity: .8; } }
-  @keyframes aperta { 50% { transform: translateY(calc(var(--u) * 3px)); } }
+  .barra.dica .texto { font-weight: 600; animation: respira .8s ease-in-out infinite alternate; }
+  @keyframes respira { to { opacity: .6; } }
 
   /* Telas */
   .tela {
@@ -247,7 +235,6 @@
       <div class="pilula" id="hudTempo">⏱ 1:00</div>
     </div>
     <div class="barra" id="barra"><div class="enche" id="barraEnche"></div><div class="texto" id="barraTexto">0/50</div></div>
-    <div class="dica" id="dica" hidden><span class="mao">👆</span>Segure uma coluna para jogar</div>
   </div>
 
   <div class="tela" id="telaInicio">
@@ -329,12 +316,20 @@ const FASES = [
 ];
 
 // Quem pode aparecer como cliente (é só acrescentar desenhos aqui)
-// escala = ajuste para todas as cabeças parecerem do mesmo tamanho
-// (medido pela largura da cabeça/cabelo em cada desenho)
+// Equilíbrio pelo ROSTO (medido em cada desenho de 384 px):
+//   escala: iguala a largura do rosto (gato: só a cara, sem orelhas/bigodes)
+//   rosto:  altura do centro do rosto a partir da base do desenho (fração)
+//   cabeca: meia-largura da cabeça com cabelo/orelhas (fração), para os balões
 const PESSOAS = [
-  ['cliente-noiva', .9], ['cliente-noivo', 1.0], ['cliente-vestido-vinho', .85], ['cliente-terno-claro', .93],
-  ['cliente-gravata-rosa', 1.1], ['cliente-gravata-laranja', 1.1], ['cliente-rosa', .82], ['cliente-gato', .92],
-].map(([nome, escala]) => ({ foto: `imagens/jogo/${nome}.png`, escala }));
+  ['cliente-noiva',           1.08, .62, .33],
+  ['cliente-noivo',           .93,  .60, .28],
+  ['cliente-vestido-vinho',   1.12, .66, .37],
+  ['cliente-terno-claro',     .94,  .61, .31],
+  ['cliente-gravata-rosa',    .97,  .58, .24],
+  ['cliente-gravata-laranja', .98,  .60, .24],
+  ['cliente-rosa',            1.0,  .60, .39],
+  ['cliente-gato',            .9,   .48, .32],
+].map(([nome, escala, rosto, cabeca]) => ({ foto: `imagens/jogo/${nome}.png`, escala, rosto, cabeca }));
 const FOTO_CHEF = 'imagens/jogo/chef.png';
 
 // ---------- Palco, renderizador e câmera ----------
@@ -368,7 +363,7 @@ function ajustaLayout(proporcao) {
   for (const c in LAYOUT) LAYOUT[c] = LAYOUT_ALTA[c] + (LAYOUT_CURTA[c] - LAYOUT_ALTA[c]) * k;
 }
 // Caixa da cena no mundo: dos clientes de trás até os da frente
-const CAIXA_CENA = { x: 4.6, zFundo: -10.75, yFundo: 3.5, zFrente: -2.6 };
+const CAIXA_CENA = { x: 4.45, zFundo: -10.75, yFundo: 3.3, zFrente: -2.35 };
 const INCL = THREE.MathUtils.degToRad(55), SEN = Math.sin(INCL), COS = Math.cos(INCL);
 const DIR = new THREE.Vector3(0, SEN, COS); // da cena para a câmera
 const camCena = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 200);
@@ -386,16 +381,24 @@ const sonda = document.createElement('div');
 sonda.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
 document.body.appendChild(sonda);
 
+// O palco acompanha a área REALMENTE visível (sem as barras do navegador,
+// que aparecem/somem ao rolar ou girar o celular).
+function areaVisivel() {
+  const vv = window.visualViewport;
+  return vv ? { w: vv.width, h: vv.height, x: vv.offsetLeft, y: vv.offsetTop } : { w: window.innerWidth, h: window.innerHeight, x: 0, y: 0 };
+}
 function redimensiona() {
-  let h = window.innerHeight, w = Math.min(window.innerWidth, h * .62);
+  const av = areaVisivel();
+  let h = av.h, w = Math.min(av.w, h * .62);
   if (w / h < .42) h = w / .42;
   larg = w; alt = h;
   palco.style.width = w + 'px'; palco.style.height = h + 'px';
+  palco.style.left = (av.x + (av.w - w) / 2) + 'px'; palco.style.top = (av.y + (av.h - h) / 2) + 'px';
   palco.style.setProperty('--u', w / 390);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, qualidade >= 2 ? 2 : 1));
   renderer.setSize(w, h, false);
   // área segura (notch, barra de gestos) só conta quando o palco ocupa a tela toda
-  const cs = getComputedStyle(sonda), cheio = h >= window.innerHeight - 1;
+  const cs = getComputedStyle(sonda), cheio = h >= av.h - 1;
   const segTopo = cheio ? parseFloat(cs.paddingTop) || 0 : 0, segBase = cheio ? parseFloat(cs.paddingBottom) || 0 : 0;
   tela.topo = segTopo; tela.util = h - segTopo - segBase;
   ajustaLayout(w / tela.util);
@@ -423,7 +426,6 @@ function redimensiona() {
   COL.visiveis = Math.ceil((h - tela.topoColunas) * ec / (COL.passo * SEN)) + 1;
 
   $('barra').style.top = Y(LAYOUT.barra) + 'px';
-  $('dica').style.top = (Y(LAYOUT.barra) - 34 * w / 390) + 'px';
 }
 
 // ---------- Luz ----------
@@ -495,8 +497,10 @@ for (const [x, z] of [[-4.95, -7.0], [4.95, -7.0]]) {
 }
 
 // ---------- Esteira ----------
-// Abertura central ≈ 63% da largura externa (como no jogo de referência).
-const EST = { L: -3.5, R: 3.5, T: -9.6, B: -4.2, r: 1.0, larg: 1.6, y: .47 };
+// Caminho dos alimentos (centro da pista). A pista tem meia-largura mL
+// nas laterais/fundo e mF na frente (faixa frontal mais fina); a abertura
+// central fica ≈ 67% da largura externa e cresce para baixo.
+const EST = { L: -3.5, R: 3.5, T: -9.6, B: -4.05, r: 1.0, mL: .7, mF: .55, larg: 1.1, y: .47 };
 const segs = [];
 (function montaCaminho() {
   const { L, R, T, B, r } = EST, cx = 0;
@@ -529,46 +533,74 @@ function pontoEm(s, alvo = new THREE.Vector3()) {
 }
 
 (function constroiEsteira() {
-  const { L, R, T, B, larg, r } = EST, m = larg / 2;
+  const { L, R, T, B, r, mL, mF } = EST;
+  // bordas externa e interna da pista
+  const ex1 = L - mL, ex2 = R + mL, ez1 = T - mL, ez2 = B + mF;
+  const ix1 = L + mL, ix2 = R - mL, iz1 = T + mL, iz2 = B - mF;
+  const rExt = r + mL, ri = .32;
   const metal = mat('#C9CFD3', { roughness: .3, metalness: .6 }), borda = mat('#8D959B', { metalness: .7, roughness: .3 });
-  const ri = .35; // raio dos cantos da abertura
-  const base = retArredondado(L - m - .25, T - m - .25, R + m + .25, B + m + .35, r + m + .25);
-  base.holes.push(retArredondado(L + m, T + m, R - m, B - m, ri));
-  cena.add(malha(extrudaChao(base, .3, .06), mat('#C2372B', { roughness: .45 }), 0, 0, 0));
-  const anel = retArredondado(L - m, T - m, R + m, B + m, r + m);
-  anel.holes.push(retArredondado(L + m, T + m, R - m, B - m, ri));
+  const base = retArredondado(ex1 - .22, ez1 - .22, ex2 + .22, ez2 + .3, rExt + .22);
+  base.holes.push(retArredondado(ix1, iz1, ix2, iz2, ri));
+  cena.add(malha(extrudaChao(base, .3, .05), mat('#C2372B', { roughness: .45 }), 0, 0, 0));
+  const anel = retArredondado(ex1, ez1, ex2, ez2, rExt);
+  anel.holes.push(retArredondado(ix1, iz1, ix2, iz2, ri));
   cena.add(malha(extrudaChao(anel, .1, .03), metal, 0, .34, 0));
-  const bordaExt = retArredondado(L - m - .1, T - m - .1, R + m + .1, B + m + .1, r + m + .1);
-  bordaExt.holes.push(retArredondado(L - m + .05, T - m + .05, R + m - .05, B + m - .05, r + m - .05));
+  const bordaExt = retArredondado(ex1 - .1, ez1 - .1, ex2 + .1, ez2 + .1, rExt + .1);
+  bordaExt.holes.push(retArredondado(ex1 + .05, ez1 + .05, ex2 - .05, ez2 - .05, rExt - .05));
   cena.add(malha(extrudaChao(bordaExt, .22, .02), borda, 0, .34, 0));
-  const bordaInt = retArredondado(L + m - .05, T + m - .05, R - m + .05, B - m + .05, ri + .05);
-  bordaInt.holes.push(retArredondado(L + m + .1, T + m + .1, R - m - .1, B - m - .1, ri - .05));
+  const bordaInt = retArredondado(ix1 - .05, iz1 - .05, ix2 + .05, iz2 + .05, ri + .05);
+  bordaInt.holes.push(retArredondado(ix1 + .08, iz1 + .08, ix2 - .08, iz2 - .08, ri - .05));
   cena.add(malha(extrudaChao(bordaInt, .22, .02), borda, 0, .34, 0));
 
-  // estação do chef: um "poço" com paredes internas, chão, armário ao fundo
-  const x1 = L + m, x2 = R - m, z1 = T + m, z2 = B - m;
-  const parede = retArredondado(x1, z1, x2, z2, ri);
-  parede.holes.push(retArredondado(x1 + .06, z1 + .06, x2 - .06, z2 - .06, ri - .05));
-  cena.add(malha(extrudaChao(parede, .44, 0), mat('#3D4C72'), 0, 0, 0, { sombra: false }));
-  const piso = malha(new THREE.ShapeGeometry(retArredondado(x1, z1, x2, z2, ri)), mat('#2E3F66'), 0, .005, 0, { sombra: false });
+  // ----- estação do chef (de trás para a frente) -----
+  // piso e paredes internas do "poço"
+  const piso = malha(new THREE.ShapeGeometry(retArredondado(ix1, iz1, ix2, iz2, ri)), mat('#FFFFFF', {
+    map: texCanvas(128, 128, (g, w, h) => {
+      g.fillStyle = '#34466F'; g.fillRect(0, 0, w, h);
+      g.strokeStyle = 'rgba(255,255,255,.06)'; g.lineWidth = 2;
+      for (let i = 0; i <= w; i += 32) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, h); g.moveTo(0, i); g.lineTo(w, i); g.stroke(); }
+    }, { rep: [3, 2] }), roughness: .8 }), 0, .005, 0, { sombra: false });
   piso.rotation.x = -Math.PI / 2; cena.add(piso);
-  cena.add(malha(new THREE.BoxGeometry(x2 - x1 - .3, 1.15, .12), mat('#A9302A'), 0, .58, z1 + .14, { sombra: false }));
-  cena.add(malha(new THREE.BoxGeometry(2.4, .7, .45), mat('#E4E9EC', { roughness: .4 }), -1.1, .35, z1 + .45));
-  for (const [x, rr, hh] of [[-1.9, .17, .22], [-1.45, .14, .16]]) cena.add(malha(new THREE.CylinderGeometry(rr, rr, hh, 18), mat('#B83A2E', { roughness: .4 }), x, .7 + hh / 2, z1 + .45));
-  // vitrine na frente da estação (borda frontal, na frente do chef)
-  const zv = z2 - .5;
-  cena.add(malha(new RoundedBoxGeometry(3.1, .42, .62, 2, .05), mat('#B9C3C9', { metalness: .4, roughness: .35 }), 0, .21, zv));
-  ['#DD3346', '#F3713D', '#F6C431', '#F7C9D0', '#8A4520', '#DD3346'].forEach((c, i) =>
-    cena.add(malha(new RoundedBoxGeometry(.4, .13, .4, 2, .05), mat(c, { roughness: .35 }), -1.1 + i * .44, .49, zv)));
-  cena.add(malha(new THREE.BoxGeometry(2.9, .05, .5), mat('#5DBB46'), 0, .43, zv, { sombra: false }));
-  const vidro = new THREE.Mesh(new RoundedBoxGeometry(3.1, .4, .62, 2, .06), new THREE.MeshPhysicalMaterial({ color: '#DDF6F5', transparent: true, opacity: .3, roughness: .05, metalness: 0, clearcoat: 1 }));
-  vidro.position.set(0, .62, zv); cena.add(vidro);
+  const parede = retArredondado(ix1, iz1, ix2, iz2, ri);
+  parede.holes.push(retArredondado(ix1 + .06, iz1 + .06, ix2 - .06, iz2 - .06, ri - .05));
+  cena.add(malha(extrudaChao(parede, .44, 0), mat('#3A4870'), 0, 0, 0, { sombra: false }));
+  // fundo: parede vermelha com azulejos e armário apoiado no piso
+  const fundoTex = texCanvas(256, 128, (g, w, h) => {
+    g.fillStyle = '#B4362C'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 2;
+    for (let x = 0; x <= w; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+    for (let y = 0; y <= h; y += 32) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  });
+  cena.add(malha(new THREE.BoxGeometry(ix2 - ix1 - .2, 1.6, .1), mat('#FFFFFF', { map: fundoTex, roughness: .6 }), 0, .8, iz1 + .1, { sombra: false }));
+  const armario = new THREE.Group();
+  armario.add(malha(new RoundedBoxGeometry(2.6, .95, .55, 2, .05), mat('#E7ECEF', { roughness: .45 }), 0, .475, 0));
+  armario.add(malha(new THREE.BoxGeometry(2.62, .06, .58), mat('#9AA4AB', { metalness: .4, roughness: .35 }), 0, .97, 0));
+  for (const x of [-.65, .65]) armario.add(malha(new THREE.BoxGeometry(1.2, .7, .02), mat('#D6DDE1', { roughness: .5 }), x, .45, .28, { sombra: false }));
+  for (const [x, rr, hh] of [[-.9, .17, .24], [-.45, .14, .18], [.85, .15, .3]]) armario.add(malha(new THREE.CylinderGeometry(rr, rr * .9, hh, 18), mat('#B83A2E', { roughness: .35 }), x, 1.0 + hh / 2, 0));
+  armario.position.set(-.9, 0, iz1 + .42);
+  cena.add(armario);
+  // vitrine encostada na borda frontal (a frente da estação)
+  const zv = iz2 - .42;
+  cena.add(malha(new RoundedBoxGeometry(3.4, .55, .6, 2, .05), mat('#B9C3C9', { metalness: .4, roughness: .35 }), 0, .275, zv));
+  cena.add(malha(new THREE.BoxGeometry(3.2, .05, .48), mat('#5DBB46'), 0, .56, zv, { sombra: false }));
+  ['#DD3346', '#F3713D', '#F6C431', '#F7C9D0', '#8A4520', '#DD3346', '#F3713D'].forEach((c, i) =>
+    cena.add(malha(new RoundedBoxGeometry(.38, .13, .38, 2, .05), mat(c, { roughness: .35 }), -1.26 + i * .42, .64, zv)));
+  const vidro = new THREE.Mesh(new RoundedBoxGeometry(3.4, .38, .6, 2, .06), new THREE.MeshPhysicalMaterial({ color: '#DDF6F5', transparent: true, opacity: .28, roughness: .05, clearcoat: 1 }));
+  vidro.position.set(0, .74, zv); cena.add(vidro);
+
+  // balcão de madeira na frente da cena: os clientes de baixo ficam atrás
+  // dele, e o topo do balcão esconde o corte inferior dos desenhos
+  const balcao = new THREE.Group();
+  balcao.add(malha(new THREE.BoxGeometry(12, .5, .3), mat('#A8652F', { roughness: .6 }), 0, .25, 0));
+  balcao.add(malha(new THREE.BoxGeometry(12, .07, .4), mat('#C98A4E', { roughness: .5 }), 0, .535, 0));
+  balcao.position.set(0, 0, -2.52);
+  cena.add(balcao);
 })();
 
 let placas = null;
 function criaPlacas(n) {
   if (placas) { cena.remove(placas); placas.geometry.dispose(); }
-  placas = new THREE.InstancedMesh(new THREE.BoxGeometry(.06, .02, EST.larg - .14), mat('#6F777D', { metalness: .6, roughness: .35 }), n);
+  placas = new THREE.InstancedMesh(new THREE.BoxGeometry(.06, .02, EST.larg), mat('#6F777D', { metalness: .6, roughness: .35 }), n);
   placas.receiveShadow = true;
   cena.add(placas);
 }
@@ -578,7 +610,7 @@ function criaPlacas(n) {
 // peças; a quantidade visível é calculada no layout.
 const COL = {
   xs: [-2, -1, 0, 1, 2].map(i => COLUNAS_X + i * LARGURA_COLUNAS / 5),
-  zTopo: -.62, z0: 0, passo: .9, escala: 1.45, y: .14, visiveis: 12,
+  zTopo: -.5, z0: 0, passo: .76, escala: 1.13, y: .14, visiveis: 14,
 };
 (function constroiMesa() {
   const lc = LARGURA_COLUNAS / 5;
@@ -992,37 +1024,55 @@ PESSOAS.forEach(p => textura(p.foto));
 // Chef no centro, com a tábua e a faca cortando
 const chef = new THREE.Group();
 (function constroiChef() {
-  // o busto "nasce" abaixo do piso da estação: o piso e a bancada escondem a
-  // parte de baixo, então ele parece em pé atrás da bancada
-  const corpo = busto(FOTO_CHEF, 3.1);
-  corpo.position.set(0, -1.0, 0); chef.add(corpo); chef.corpo = corpo;
-  chef.add(malha(new THREE.BoxGeometry(2.3, .5, .6), mat('#C9D1D6', { metalness: .3, roughness: .4 }), 0, .25, .95));
-  chef.add(malha(new RoundedBoxGeometry(1.3, .1, .52, 2, .04), mat('#D9A86C'), 0, .55, .95));
-  const peixe = malha(GEO_ING.sake.geo, GEO_ING.sake.mats, -.2, .6, .95); peixe.scale.setScalar(.75); chef.add(peixe);
-  const faca = new THREE.Group(); faca.position.set(.42, .62, .95);
-  faca.add(malha(new THREE.BoxGeometry(.05, .45, .13), mat('#DDE3E8', { metalness: .9, roughness: .15 }), 0, .32, 0));
-  faca.add(malha(new THREE.BoxGeometry(.08, .22, .1), mat('#3A2A1E'), 0, .65, 0));
-  chef.add(faca); chef.faca = faca;
-  chef.position.set(0, 0, -7.55);
+  // O desenho do chef é só um busto (sem braços nem mãos). A bancada de
+  // preparo fica logo à frente e mais alta que o fim do desenho, então o
+  // corte horizontal nunca aparece; duas mãos 3D completam a cena.
+  const corpo = busto(FOTO_CHEF, 3.0);
+  corpo.position.set(0, -1.05, 0); chef.add(corpo); chef.corpo = corpo;
+  const zb = .5; // centro da bancada, à frente do chef
+  chef.add(malha(new RoundedBoxGeometry(3.0, .95, .62, 2, .04), mat('#C3CCD2', { metalness: .35, roughness: .4 }), 0, .475, zb));
+  chef.add(malha(new THREE.BoxGeometry(3.04, .06, .66), mat('#E2E7EA', { metalness: .5, roughness: .25 }), 0, .98, zb));
+  chef.add(malha(new RoundedBoxGeometry(1.3, .08, .46, 2, .03), mat('#D9A86C', { roughness: .6 }), .1, 1.05, zb));
+  const peixe = malha(GEO_ING.sake.geo, GEO_ING.sake.mats, -.15, 1.09, zb); peixe.scale.setScalar(.62); chef.add(peixe);
+  const pele = mat('#E9A26C', { roughness: .6 }), manga = mat('#9C9C9C', { roughness: .9 });
+  const mao = (x) => {
+    const g = new THREE.Group();
+    g.add(malha(new THREE.CapsuleGeometry(.12, .28, 4, 10), manga, 0, .08, -.22, { recebe: false }));
+    g.children[0].rotation.x = Math.PI / 2;
+    g.add(malha(new THREE.SphereGeometry(.13, 14, 10), pele, 0, .08, 0, { recebe: false }));
+    g.position.set(x, 1.05, zb - .05);
+    return g;
+  };
+  chef.add(mao(-.75));
+  const direita = mao(.6);
+  const faca = new THREE.Group();
+  faca.add(malha(new THREE.BoxGeometry(.05, .12, .5), mat('#DDE3E8', { metalness: .9, roughness: .15 }), 0, .02, .3));
+  faca.add(malha(new THREE.BoxGeometry(.07, .08, .2), mat('#3A2A1E'), 0, .06, 0));
+  direita.add(faca);
+  chef.add(direita); chef.maoFaca = direita;
+  chef.position.set(0, 0, -7.25);
   cena.add(chef);
 })();
 
 // Lugares dos clientes
 const LUGARES = [
-  // de trás: parte de baixo escondida atrás da esteira (base abaixo do piso)
-  { x: -2.35, z: -10.75, y: -.55, lado: -1, cima: true },
-  { x: 2.35,  z: -10.75, y: -.55, lado: 1,  cima: true },
-  // da frente: nos cantos frontais, sobrepondo a quina da esteira
-  { x: -2.75, z: -2.75, y: -.15, lado: -1, cima: false },
-  { x: 2.75,  z: -2.75, y: -.15, lado: 1,  cima: false },
+  // yRosto: altura (no mundo) do centro do rosto; quem está no mesmo plano
+  // fica com os olhos na mesma linha. De trás: o corte some atrás da
+  // esteira (o piso esconde a base exatamente na borda dela).
+  { x: -2.35, z: -10.75, yRosto: 1.7, baseMax: -.02, lado: -1, cima: true },
+  { x: 2.35,  z: -10.75, yRosto: 1.7, baseMax: -.02, lado: 1,  cima: true },
+  // da frente: atrás do balcão de madeira, que esconde o corte do desenho
+  { x: -2.75, z: -2.75, yRosto: 2.3, baseMax: .3, lado: -1, cima: false },
+  { x: 2.75,  z: -2.75, yRosto: 2.3, baseMax: .3, lado: 1,  cima: false },
 ];
-const TAM_CLIENTE = 2.35, CABECA = .63; // CABECA: altura do centro do rosto no desenho (fração)
+const TAM_CLIENTE = 2.3;
+const tamDe = (pessoa) => TAM_CLIENTE * pessoa.escala;
 const camada = $('camada');
 for (const L of LUGARES) {
   const grupo = new THREE.Group();
   L.corpo = busto(PESSOAS[0].foto, TAM_CLIENTE);
   grupo.add(L.corpo);
-  grupo.position.set(L.x, L.y, L.z);
+  grupo.position.set(L.x, 0, L.z);
   cena.add(grupo); L.grupo = grupo;
   // ponto da esteira onde o cliente pega
   let melhor = 0, dist = Infinity; const p = new THREE.Vector3();
@@ -1037,6 +1087,9 @@ for (const L of LUGARES) {
 }
 function vestir(L, pessoa) {
   L.pessoa = pessoa;
+  // olhos na mesma linha da fileira; se o desenho for "baixo" (gato),
+  // ele desce um pouco para o corte continuar escondido
+  L.grupo.position.y = Math.min(L.baseMax, L.yRosto - tamDe(pessoa) / COS * pessoa.rosto);
   L.corpo.material.map = textura(pessoa.foto);
   L.corpo.material.needsUpdate = true;
 }
@@ -1178,25 +1231,26 @@ function atualizaBalao(L, pula) {
   L.balao.querySelector('.qtd').textContent = L.resta;
   if (pula) { L.balao.classList.remove('pula'); void L.balao.offsetWidth; L.balao.classList.add('pula'); }
 }
-// Balão ao lado da cabeça (para fora da mesa). O cálculo usa o tamanho
-// inteiro do balão: nunca encosta na borda, não cobre o rosto e não
-// invade o HUD nem a barra.
-const BALAO = { larg: 50, alt: 46, margem: 6, folga: 6 }; // em unidades de 390
+// Balão ao lado da cabeça (para fora da mesa), a uma distância fixa da
+// borda do cabelo/orelhas. O cálculo usa o tamanho inteiro do balão:
+// nunca encosta na borda, não cobre o rosto e não invade HUD nem barra.
+const BALAO = { larg: 50, alt: 46, margem: 6, folga: 5 }; // em unidades de 390
 function posicionaBalao(L) {
-  const tam = TAM_CLIENTE * L.pessoa.escala;
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + tam / COS * CABECA, L.z);
+  const tam = tamDe(L.pessoa);
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + tamDe(L.pessoa) / COS * L.pessoa.rosto, L.z);
   L.cabecaTela = p;
   const u = larg / 390, bl = BALAO.larg * u, ba = BALAO.alt * u;
-  const raioCabeca = tam * .2 / tela.escCena;               // px
-  let x = p.x + L.lado * (raioCabeca + bl / 2 + BALAO.folga * u);
-  let y = p.y - (L.cima ? .35 : .9) * raioCabeca;
+  const meiaCabeca = tam * L.pessoa.cabeca / tela.escCena;   // px
+  let x = p.x + L.lado * (meiaCabeca + bl / 2 + BALAO.folga * u);
+  let y = p.y - .25 * meiaCabeca;
   const xMin = BALAO.margem * u + bl / 2, xMax = larg - BALAO.margem * u - bl / 2;
   if (x < xMin || x > xMax) {
-    // sem espaço do lado: sobe para cima da cabeça, puxado para o lado
+    // sem espaço do lado: sobe para a diagonal de cima, para fora
     x = Math.max(xMin, Math.min(xMax, x));
-    y = p.y - raioCabeca - ba / 2 - BALAO.folga * u;
+    const sobra = Math.abs(x - p.x) - bl / 2;               // quanto do balão fica fora da cabeça
+    y = p.y - Math.sqrt(Math.max(0, (meiaCabeca + BALAO.folga * u) ** 2 - Math.max(0, sobra) ** 2)) - ba / 2;
   }
-  const yMin = Y(LAYOUT.hud) + ba / 2, yMax = Y(LAYOUT.cenaFim) - ba / 2;
+  const yMin = Y(LAYOUT.hud) + ba / 2 + 2 * u, yMax = Y(LAYOUT.cenaFim) - ba / 2;
   y = Math.max(yMin, Math.min(yMax, y));
   L.balao.style.left = x + 'px'; L.balao.style.top = y + 'px';
   L.balao.classList.toggle('esq', x < p.x);
@@ -1211,7 +1265,7 @@ function pedidoCompleto(L) {
   feitos++; totalGeral++;
   L.estado = 'hum'; L.t = 0;
   L.balao.classList.add('ok'); atualizaBalao(L, true);
-  const p = naTela(L.grupo.position.x, L.grupo.position.y + TAM_CLIENTE * L.pessoa.escala / COS * .95, L.z);
+  const p = naTela(L.grupo.position.x, L.grupo.position.y + tamDe(L.pessoa) / COS * (L.pessoa.rosto + .3), L.z);
   const hum = document.createElement('div'); hum.className = 'hum'; hum.textContent = 'Hummmm! 😋';
   hum.style.left = p.x + 'px'; hum.style.top = p.y + 'px';
   camada.appendChild(hum); setTimeout(() => hum.remove(), 1400);
@@ -1237,7 +1291,7 @@ cv.addEventListener('pointerdown', (ev) => {
   cv.setPointerCapture(ev.pointerId);
   segurando = colunaEm(ev);
   if (segurando !== -1) vibra(12);
-  if (!mostrouDica) { mostrouDica = true; $('dica').hidden = true; }
+  if (!mostrouDica) { mostrouDica = true; atualizaBarra(naEsteira); }
 });
 cv.addEventListener('pointermove', (ev) => {
   if (estado !== 'jogando' || segurando === -1) return;
@@ -1254,8 +1308,9 @@ function atualiza(dt) {
   relogio += dt;
   const jogando = estado === 'jogando';
 
-  chef.faca.position.y = .6 + Math.abs(Math.sin(relogio * 6)) * .28;
-  chef.corpo.position.y = -1.0 + Math.sin(relogio * 3.5) * .03;
+  chef.maoFaca.position.y = 1.05 + Math.abs(Math.sin(relogio * 6)) * .18;
+  chef.maoFaca.rotation.x = -Math.abs(Math.sin(relogio * 6)) * .35;
+  chef.corpo.position.y = -1.05 + Math.sin(relogio * 3.5) * .03;
 
   // clientes
   for (const L of LUGARES) {
@@ -1278,7 +1333,7 @@ function atualiza(dt) {
     }
     const pulo = Math.sin(L.pulo * Math.PI);
     L.corpo.rotation.z = rot;
-    const tam = TAM_CLIENTE * (L.pessoa ? L.pessoa.escala : 1);
+    const tam = tamDe(L.pessoa);
     L.corpo.scale.set(tam * (1 + pulo * .06), tam / COS * (escY + pulo * .1), 1);
     if (L.estado === 'esperando' || L.estado === 'hum') posicionaBalao(L);
   }
@@ -1378,7 +1433,7 @@ function atualiza(dt) {
     const v = voando[i];
     v.t += dt / .35;
     const k = Math.min(1, v.t), L = v.L;
-    _p.set(L.grupo.position.x, L.grupo.position.y + TAM_CLIENTE * L.pessoa.escala / COS * .5, L.z + .3);
+    _p.set(L.grupo.position.x, L.grupo.position.y + tamDe(L.pessoa) / COS * L.pessoa.rosto - .3, L.z + .3);
     v.malha.position.lerpVectors(v.de, _p, suave(k));
     v.malha.position.y += Math.sin(k * Math.PI) * 1.4;
     v.malha.scale.setScalar(ESC_ESTEIRA * (1 - k * .6));
@@ -1412,7 +1467,9 @@ function atualizaBarra(n) {
   const f = n / P_.capacidade;
   $('barraEnche').style.width = `calc(${Math.max(f, .001) * 100}% - ${6 * f}px)`;
   $('barraEnche').style.backgroundColor = f > .8 ? '#E0402F' : f > .6 ? '#F2A12E' : '#4CB83A';
-  $('barraTexto').textContent = `${n}/${P_.capacidade}`;
+  const dica = estado === 'jogando' && !mostrouDica;
+  $('barra').classList.toggle('dica', dica);
+  $('barraTexto').textContent = dica ? '👆 Segure uma coluna para jogar' : `${n}/${P_.capacidade}`;
 }
 
 // ---------- Telas ----------
@@ -1471,11 +1528,12 @@ const faseInicial = Math.min(FASES.length, Math.max(1, +new URLSearchParams(loca
 $('btnInicio').onclick = () => { iniciaAudio(); introFase(faseInicial); };
 $('btnFase').onclick = () => {
   iniciaAudio(); mostra(null); estado = 'jogando';
-  $('dica').hidden = mostrouDica;
+  atualizaBarra(0);
 };
 
 // ---------- Laço principal ----------
 window.addEventListener('resize', redimensiona);
+if (window.visualViewport) { visualViewport.addEventListener('resize', redimensiona); visualViewport.addEventListener('scroll', redimensiona); }
 redimensiona();
 montaFase(0);
 atualizaBarra(0);
