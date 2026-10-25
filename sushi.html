@@ -44,6 +44,7 @@
   }
   .hud > :first-child { justify-self: start; }
   .hud > :last-child { justify-self: end; }
+  .hud .pilula { min-width: calc(var(--u) * 64px); }
   .pilula {
     min-width: calc(var(--u) * 72px);
     height: calc(var(--u) * 30px);
@@ -53,6 +54,14 @@
     font-size: calc(var(--u) * 14px); font-weight: 700; letter-spacing: .03em; line-height: 1;
     border-radius: 999px;
     padding: 0 calc(var(--u) * 12px);
+    box-shadow: inset 0 calc(var(--u) * -2px) 0 rgba(0,0,0,.2);
+  }
+  .hud-dir { display: flex; align-items: center; gap: calc(var(--u) * 6px); }
+  .btn-som {
+    pointer-events: auto; cursor: pointer;
+    width: calc(var(--u) * 30px); height: calc(var(--u) * 30px); border-radius: 50%;
+    border: none; background: rgba(74, 44, 22, .78); color: #fff;
+    font-size: calc(var(--u) * 14px); line-height: 1; display: grid; place-items: center;
     box-shadow: inset 0 calc(var(--u) * -2px) 0 rgba(0,0,0,.2);
   }
   .pilula.urgente { background: #D63A2E; animation: pisca .5s ease-in-out infinite alternate; }
@@ -131,6 +140,16 @@
     animation: brilha .7s ease-out forwards;
   }
   @keyframes brilha { from { transform: translate(-50%, -50%) scale(.4); opacity: 1; } to { transform: translate(-50%, -150%) scale(1.3); opacity: 0; } }
+  /* Humor dos clientes: 💢 quando esperam demais; 😮 → 😍 ao comer */
+  .humor {
+    position: absolute; transform: translate(-50%, -50%) scale(var(--s, 1));
+    font-size: calc(var(--u) * 20px); line-height: 1; transition: opacity .2s;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+  }
+  .humor.bravo { animation: lateja .45s ease-in-out infinite alternate; }
+  @keyframes lateja { to { transform: translate(-50%, -50%) scale(calc(var(--s, 1) * 1.25)); } }
+  .humor.reage { animation: reage .35s cubic-bezier(.2, 1.6, .5, 1); }
+  @keyframes reage { from { transform: translate(-50%, -50%) scale(.2); } }
   .coracao {
     position: absolute; color: #FF5C8A; font-size: calc(var(--u) * 20px);
     animation: sobe 1.1s ease-out forwards;
@@ -237,7 +256,7 @@
         <div class="check"><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6" fill="none" stroke="#46B236" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="pilula num" id="hudPedidos">0</div>
       </div>
-      <div class="pilula" id="hudTempo">⏱ 1:00</div>
+      <div class="hud-dir"><div class="pilula" id="hudTempo">⏱ 1:00</div><button class="btn-som" id="btnSom" aria-label="Desligar som">🔊</button></div>
     </div>
     <div class="barra" id="barra"><div class="enche" id="barraEnche"></div><div class="texto" id="barraTexto">0/50</div></div>
   </div>
@@ -781,6 +800,9 @@ for (const L of LUGARES) {
   L.balao = document.createElement('div'); L.balao.className = 'balao esconde';
   L.balao.innerHTML = '<img alt=""><span class="qtd"></span>';
   camada.appendChild(L.balao);
+  L.humor = document.createElement('div'); L.humor.className = 'humor'; L.humor.hidden = true;
+  camada.appendChild(L.humor);
+  L.espera = 0; L.reacao = null;
 }
 function vestir(L, pessoa) {
   L.pessoa = pessoa;
@@ -816,32 +838,127 @@ function coracoes(px, py, n) {
 }
 
 // ---------- Áudio e vibração ----------
-let audio = null;
+// Todos os sons são sintetizados (Web Audio), sem arquivos. Efeitos e
+// música têm volumes separados; o botão 🔊 silencia tudo.
+let audio = null, saidaSfx = null, saidaMusica = null, ruidoBuf = null;
+let mudo = false;
+try { mudo = localStorage.getItem('sushi-mudo') === '1'; } catch (e) { /* sem armazenamento */ }
 function iniciaAudio() {
   if (audio) { if (audio.state === 'suspended') audio.resume(); return; }
-  try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; }
+  try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audio = null; return; }
+  const geral = audio.createGain(); geral.gain.value = mudo ? 0 : 1; geral.connect(audio.destination);
+  saidaSfx = audio.createGain(); saidaSfx.gain.value = 1; saidaSfx.connect(geral);
+  saidaMusica = audio.createGain(); saidaMusica.gain.value = .55; saidaMusica.connect(geral);
+  audio.geral = geral;
+  ruidoBuf = audio.createBuffer(1, audio.sampleRate * .5, audio.sampleRate);
+  const d = ruidoBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
 }
-function tom(freq, dur, tipo = 'sine', vol = .12, atraso = 0, freqFim) {
+function silencia(v) {
+  mudo = v;
+  try { localStorage.setItem('sushi-mudo', v ? '1' : '0'); } catch (e) { /* sem armazenamento */ }
+  if (audio) audio.geral.gain.setTargetAtTime(v ? 0 : 1, audio.currentTime, .05);
+  $('btnSom').textContent = v ? '🔇' : '🔊';
+  $('btnSom').setAttribute('aria-label', v ? 'Ligar som' : 'Desligar som');
+}
+function tom(freq, dur, tipo = 'sine', vol = .12, atraso = 0, freqFim, saida = saidaSfx) {
   if (!audio) return;
   const t0 = audio.currentTime + atraso;
   const o = audio.createOscillator(), v = audio.createGain();
   o.type = tipo; o.frequency.setValueAtTime(freq, t0);
   if (freqFim) o.frequency.exponentialRampToValueAtTime(freqFim, t0 + dur);
-  v.gain.setValueAtTime(0, t0); v.gain.linearRampToValueAtTime(vol, t0 + .01);
+  v.gain.setValueAtTime(0, t0); v.gain.linearRampToValueAtTime(vol, t0 + .008);
   v.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
-  o.connect(v); v.connect(audio.destination); o.start(t0); o.stop(t0 + dur + .02);
+  o.connect(v); v.connect(saida); o.start(t0); o.stop(t0 + dur + .02);
 }
+// rajada de ruído filtrado (faca, mordida)
+function ruido(dur, freq, q, vol, atraso = 0, tipo = 'bandpass') {
+  if (!audio) return;
+  const t0 = audio.currentTime + atraso;
+  const f = audio.createBufferSource(); f.buffer = ruidoBuf;
+  const filtro = audio.createBiquadFilter(); filtro.type = tipo; filtro.frequency.value = freq; filtro.Q.value = q;
+  const v = audio.createGain();
+  v.gain.setValueAtTime(vol, t0); v.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  f.connect(filtro); filtro.connect(v); v.connect(saidaSfx);
+  f.start(t0, Math.random() * .3); f.stop(t0 + dur + .02);
+}
+// sino (campainha): parcial principal + harmônicos inarmônicos que somem rápido
+function sino(freq, atraso, vol) {
+  tom(freq, 1.1, 'sine', vol, atraso);
+  tom(freq * 2.76, .45, 'sine', vol * .35, atraso);
+  tom(freq * 5.4, .2, 'sine', vol * .15, atraso);
+}
+let ultimaCampainha = -9;
 const som = {
-  sai: () => tom(520 + Math.random() * 80, .06, 'sine', .06, 0, 760),
-  prepara: () => { tom(1200, .04, 'square', .04); tom(900, .05, 'square', .035, .06); tom(1500, .12, 'triangle', .06, .1); },
-  pega: () => { tom(880, .09, 'triangle', .1); tom(1320, .12, 'triangle', .08, .05); },
-  hum: () => { tom(330, .5, 'sine', .1, 0, 260); tom(392, .45, 'sine', .07, .08, 300); },
-  completo: () => [660, 880, 1100, 1320].forEach((f, i) => tom(f, .16, 'triangle', .1, i * .07)),
+  sai: () => tom(520 + Math.random() * 80, .06, 'sine', .05, 0, 760),
+  // faca batendo na tábua: estalo agudo + "toc" grave da madeira
+  faca: (forte) => {
+    const v = forte ? 1 : .35;
+    ruido(.035, 3200, 1.2, .25 * v);
+    tom(190, .07, 'sine', .16 * v, 0, 95);
+    ruido(.05, 700, 2, .12 * v, .004);
+  },
+  prepara: () => { som.faca(true); setTimeout(() => som.faca(true), 90); tom(1500, .14, 'triangle', .05, .18); },
+  pega: () => tom(700, .08, 'sine', .04, 0, 1000),
+  // "nhac": estalo crocante (ruído) + vogal curta descendo
+  nhac: () => {
+    ruido(.05, 2400, .9, .35); ruido(.04, 1600, 1.1, .25, .045);
+    tom(330, .11, 'triangle', .07, .01, 190);
+    tom(520, .09, 'sine', .04, .02, 300);
+  },
+  // check positivo: dois toques claros subindo + brilho
+  check: () => { tom(988, .14, 'sine', .14); tom(1319, .28, 'sine', .14, .1); tom(2637, .25, 'sine', .04, .12); },
+  hum: () => { tom(330, .5, 'sine', .08, 0, 260); tom(392, .45, 'sine', .05, .08, 300); },
+  // campainha de porta: "dim-dom"
+  campainha: () => {
+    if (!audio || audio.currentTime - ultimaCampainha < .7) return;
+    ultimaCampainha = audio.currentTime;
+    sino(1318.5, 0, .1); sino(1046.5, .32, .1);
+  },
   vitoria: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tom(f, .22, 'triangle', .12, i * .12)),
   derrota: () => [440, 370, 311, 262].forEach((f, i) => tom(f, .3, 'sawtooth', .05, i * .16)),
 };
-// Android: API de vibração. iPhone (iOS 18+): não tem a API, mas tocar num
-// <input switch> dispara o retorno tátil do sistema (só durante um toque).
+
+// Música de fundo: melodia suave em escala pentatônica (clima japonês),
+// com baixo e acorde sustentado; agendada um pouco à frente e em loop.
+const NOTA = { D4: 293.66, E4: 329.63, G4: 392, A4: 440, B4: 493.88, D5: 587.33, E5: 659.25, G5: 783.99 };
+const MELODIA = ['B4', 0, 'A4', 0, 'G4', 'A4', 0, 0, 'D5', 0, 'B4', 'A4', 'B4', 0, 0, 0,
+                 'G4', 0, 'E4', 0, 'G4', 'A4', 0, 'B4', 'A4', 0, 'G4', 0, 'E4', 0, 0, 0,
+                 'D5', 0, 'E5', 'D5', 'B4', 0, 'A4', 0, 'B4', 0, 'D5', 0, 'A4', 0, 0, 0,
+                 'G4', 0, 'A4', 'B4', 'A4', 0, 'G4', 'E4', 'D4', 0, 'E4', 0, 'G4', 0, 0, 0];
+const BAIXO = [146.83, 196, 164.81, 146.83, 196, 220, 146.83, 196];  // um por compasso (8 colcheias)
+const musica = { tocando: false, prox: 0, passo: 0, timer: 0 };
+const COLCHEIA = 60 / 80 / 2;
+function notaMusical(freq, t, dur, vol, tipo = 'triangle') {
+  const o = audio.createOscillator(), v = audio.createGain();
+  o.type = tipo; o.frequency.value = freq;
+  v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol, t + .03);
+  v.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(v); v.connect(saidaMusica); o.start(t); o.stop(t + dur + .05);
+}
+function agendaMusica() {
+  while (musica.prox < audio.currentTime + .3) {
+    const i = musica.passo % MELODIA.length, t = musica.prox;
+    if (MELODIA[i]) notaMusical(NOTA[MELODIA[i]], t, COLCHEIA * 2.4, .05);
+    if (i % 8 === 0) {
+      const b = BAIXO[(i / 8) % BAIXO.length];
+      notaMusical(b, t, COLCHEIA * 7.5, .055, 'sine');
+      notaMusical(b * 1.5, t, COLCHEIA * 7.5, .02, 'sine');
+    }
+    musica.prox += COLCHEIA; musica.passo++;
+  }
+}
+function tocaMusica() {
+  if (!audio || musica.tocando) return;
+  musica.tocando = true; musica.prox = audio.currentTime + .1;
+  musica.timer = setInterval(agendaMusica, 90);
+}
+
+// Vibração.
+// Android: navigator.vibrate funciona a qualquer momento depois do primeiro toque.
+// iPhone (iOS 18+): não existe vibrate; o único jeito é "clicar" num
+// <input switch>, e o iOS só aceita isso DENTRO de um gesto que conta como
+// ativação (soltar o dedo / click). Por isso no iPhone a vibração acontece
+// ao soltar o dedo da coluna; eventos sem toque (cliente chegando) não vibram.
 const temVibracao = typeof navigator.vibrate === 'function';
 let switchIOS = null;
 if (!temVibracao) {
@@ -851,11 +968,13 @@ if (!temVibracao) {
   const inp = document.createElement('input');
   inp.type = 'checkbox'; inp.setAttribute('switch', '');
   switchIOS.appendChild(inp);
-  document.body.appendChild(switchIOS);
+  document.head.appendChild(switchIOS);
 }
 function vibra(padrao) {
   try { if (temVibracao) navigator.vibrate(padrao); else switchIOS.click(); } catch (e) { /* sem vibração */ }
 }
+// chamado dentro de um gesto (soltar o dedo / clicar): funciona também no iPhone
+function vibraToque(padrao = 15) { vibra(padrao); }
 
 // ---------- Estado do jogo ----------
 let estado = 'menu', faseAtual = 0, P_ = FASES[0];
@@ -902,7 +1021,7 @@ function montaFase(n) {
   const livres = [...PESSOAS].sort(() => Math.random() - .5);
   LUGARES.forEach((L, i) => {
     vestir(L, livres[i % livres.length]);
-    L.pedido = null; L.resta = 0; L.aCaminho = 0;
+    L.pedido = null; L.resta = 0; L.aCaminho = 0; L.espera = 0; L.reacao = null; L.humor.hidden = true;
     L.estado = 'chegando'; L.t = -.3 - i * .25; L.pulo = 0;
     L.grupo.position.x = L.x + L.lado * 7;
     L.balao.classList.add('esconde'); L.balao.classList.remove('ok');
@@ -923,6 +1042,8 @@ function novoPedido(L) {
   img.src = IMG_PRATO[L.pedido.tipo]; img.alt = INFO[L.pedido.tipo].prato;
   L.balao.classList.remove('esconde', 'ok');
   atualizaBalao(L, true);
+  L.espera = 0;
+  som.campainha(); vibra([30, 40, 30]);
 }
 function atualizaBalao(L, pula) {
   L.balao.querySelector('.qtd').textContent = L.resta;
@@ -970,6 +1091,30 @@ function prepara(it) {
   b.style.left = p.x + 'px'; b.style.top = p.y + 'px';
   camada.appendChild(b); setTimeout(() => b.remove(), 700);
 }
+// Humor: reação ao comer (😮 surpresa → 😍 muito feliz) tem prioridade;
+// senão, 💢 cresce com a raiva. Fica do lado oposto ao balão do pedido.
+const ESPERA_BRAVO = 12; // segundos esperando até começar a ficar bravo
+function atualizaHumor(L, raiva, dt) {
+  let txt = '', classe = '', esc = 1;
+  if (L.reacao) {
+    L.reacao.t += dt;
+    if (L.reacao.t < .4) { txt = '😮'; classe = 'reage'; }
+    else if (L.reacao.t < 1.2) { txt = '😍'; classe = 'reage'; }
+    else L.reacao = null;
+  }
+  if (!txt && raiva > 0) { txt = '💢'; classe = 'bravo'; esc = .8 + raiva * .6; }
+  if (!txt || L.estado === 'chegando' || L.estado === 'saindo') { L.humor.hidden = true; return; }
+  const tam = tamDe(L.pessoa), base = L.grupo.position.y + tam / COS * L.pessoa.rosto;
+  const p = naTela(L.grupo.position.x, base, L.z), meia = tam * L.pessoa.cabeca / tela.escCena;
+  L.humor.hidden = false;
+  if (L.humor.textContent !== txt) {
+    L.humor.textContent = txt;
+    L.humor.className = 'humor ' + classe;
+  }
+  L.humor.style.setProperty('--s', esc);
+  L.humor.style.left = (p.x - L.lado * meia * .95) + 'px';
+  L.humor.style.top = (p.y - meia * 1.05) + 'px';
+}
 function pedidoCompleto(L) {
   feitos++; totalGeral++;
   L.estado = 'hum'; L.t = 0;
@@ -979,8 +1124,9 @@ function pedidoCompleto(L) {
   hum.style.left = p.x + 'px'; hum.style.top = p.y + 'px';
   camada.appendChild(hum); setTimeout(() => hum.remove(), 1400);
   coracoes(p.x, p.y + 20 * larg / 390, 6);
-  som.hum(); setTimeout(som.completo, 250);
+  som.check(); setTimeout(som.hum, 300);
   vibra([25, 40, 25]);
+  L.espera = 0; L.reacao = null; L.humor.hidden = true;
   const placar = $('placar'); placar.classList.remove('pulsa'); void placar.offsetWidth; placar.classList.add('pulsa');
   atualizaHud();
 }
@@ -999,7 +1145,7 @@ cv.addEventListener('pointerdown', (ev) => {
   if (estado !== 'jogando') return;
   cv.setPointerCapture(ev.pointerId);
   segurando = colunaEm(ev);
-  if (segurando !== -1) vibra(12);
+  if (segurando !== -1 && temVibracao) vibra(15);
   if (!mostrouDica) { mostrouDica = true; atualizaBarra(naEsteira); }
 });
 cv.addEventListener('pointermove', (ev) => {
@@ -1008,6 +1154,12 @@ cv.addEventListener('pointermove', (ev) => {
   if (i !== -1) segurando = i;
 });
 ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => cv.addEventListener(t, () => { segurando = -1; }));
+// iPhone: o retorno tátil só é aceito ao soltar o dedo (touchend conta como gesto)
+cv.addEventListener('touchend', (ev) => {
+  if (temVibracao || estado !== 'jogando') return;
+  const t = ev.changedTouches[0];
+  if (t && colunaEm(t) !== -1) vibraToque();
+});
 cv.addEventListener('contextmenu', e => e.preventDefault());
 
 // ---------- Atualização ----------
@@ -1018,7 +1170,10 @@ function atualiza(dt) {
   const jogando = estado === 'jogando';
 
   chef.ritmo = Math.max(0, (chef.ritmo || 0) - dt);
-  chef.fase = (chef.fase || 0) + dt * (chef.ritmo > 0 ? 18 : 6);
+  const faseAnt = chef.fase || 0;
+  chef.fase = faseAnt + dt * (chef.ritmo > 0 ? 18 : 6);
+  // a faca encosta na tábua quando |sen| passa pelo zero: som de faca na madeira
+  if (jogando && Math.floor(chef.fase / Math.PI) !== Math.floor(faseAnt / Math.PI)) som.faca(chef.ritmo > 0);
   chef.maoFaca.position.y = 1.05 + Math.abs(Math.sin(chef.fase)) * .18;
   chef.maoFaca.rotation.x = -Math.abs(Math.sin(chef.fase)) * .35;
   chef.corpo.position.y = -1.05 + Math.sin(relogio * 3.5) * .03;
@@ -1042,6 +1197,12 @@ function atualiza(dt) {
       g.position.x = L.x + L.lado * 7 * k * k;
       if (k >= 1) { trocaPessoa(L); L.estado = 'chegando'; L.t = 0; }
     }
+    // espera longa → raiva: avermelha, treme e mostra 💢
+    if (L.estado === 'esperando' && jogando) L.espera += dt;
+    const raiva = L.estado === 'esperando' ? Math.max(0, Math.min(1, (L.espera - ESPERA_BRAVO) / 10)) : 0;
+    if (raiva > 0) rot += Math.sin(relogio * 38) * .025 * raiva;
+    L.corpo.material.color.setRGB(1, 1 - .38 * raiva, 1 - .45 * raiva);
+    atualizaHumor(L, raiva, dt);
     const pulo = Math.sin(L.pulo * Math.PI);
     L.corpo.rotation.z = rot;
     const tam = tamDe(L.pessoa);
@@ -1154,6 +1315,7 @@ function atualiza(dt) {
       voando.splice(i, 1);
       devolve(v.malha, v.tipo);
       L.aCaminho--; L.pulo = 1;
+      som.nhac(); L.espera = 0; L.reacao = { t: 0 };
       atualizaBalao(L, true);
       if (L.cabecaTela) coracoes(L.cabecaTela.x, L.cabecaTela.y - 20 * larg / 390, 2);
       if (L.resta === 0 && L.aCaminho === 0 && L.estado === 'esperando') pedidoCompleto(L);
@@ -1238,8 +1400,11 @@ function perde() {
 
 // ?fase=2 ou ?fase=3 no link começa direto naquela fase
 const faseInicial = Math.min(FASES.length, Math.max(1, +new URLSearchParams(location.search).get('fase') || 1)) - 1;
-$('btnInicio').onclick = () => { iniciaAudio(); introFase(faseInicial); };
+$('btnInicio').onclick = () => { iniciaAudio(); tocaMusica(); vibraToque(); introFase(faseInicial); };
+$('btnSom').onclick = () => { iniciaAudio(); tocaMusica(); silencia(!mudo); };
+silencia(mudo);
 $('btnFase').onclick = () => {
+  vibraToque(); tocaMusica();
   iniciaAudio(); mostra(null); estado = 'jogando';
   atualizaBarra(0);
 };
@@ -1285,7 +1450,10 @@ function quadro(t) {
   requestAnimationFrame(quadro);
 }
 requestAnimationFrame(quadro);
-document.addEventListener('visibilitychange', () => { ultimo = performance.now(); segurando = -1; });
+document.addEventListener('visibilitychange', () => {
+  ultimo = performance.now(); segurando = -1;
+  if (audio) { if (document.hidden) audio.suspend(); else audio.resume(); }
+});
 </script>
 </body>
 </html>
