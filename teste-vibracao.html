@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de vibração</title>
+<meta name="robots" content="noindex">
+<style>
+  body { font-family: -apple-system, sans-serif; padding: 24px; line-height: 1.5; color: #3A2A1E; background: #FFF8EC; }
+  h1 { font-size: 22px; }
+  .bloco { background: #fff; border-radius: 14px; padding: 16px; margin: 16px 0; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  label { display: flex; align-items: center; gap: 12px; font-size: 18px; }
+  button { font-size: 17px; padding: 10px 16px; border-radius: 10px; border: 1px solid #ccc; background: #f4f4f4; }
+  pre { white-space: pre-wrap; word-break: break-word; font-size: 13px; background: #f3ece0; padding: 10px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Teste de vibração</h1>
+
+<div class="bloco">
+  <p><b>Teste 1:</b> toque no interruptor abaixo (sem nenhum estilo).</p>
+  <label><input type="checkbox" switch> Interruptor</label>
+</div>
+
+<div class="bloco">
+  <p><b>Teste 2:</b> toque no botão (o site "aperta" um interruptor escondido).</p>
+  <button id="btn">Vibrar</button>
+</div>
+
+<div class="bloco">
+  <p><b>O que este navegador informa:</b></p>
+  <pre id="info"></pre>
+</div>
+
+<script>
+  const label = document.createElement('label');
+  label.style.display = 'none';
+  const inp = document.createElement('input');
+  inp.type = 'checkbox'; inp.setAttribute('switch', '');
+  label.appendChild(inp); document.head.appendChild(label);
+  document.getElementById('btn').addEventListener('click', () => {
+    if (navigator.vibrate) navigator.vibrate(60); else label.click();
+  });
+  document.getElementById('info').textContent = [
+    'Interruptor nativo (switch): ' + ('switch' in HTMLInputElement.prototype ? 'sim' : 'NÃO'),
+    'navigator.vibrate: ' + (typeof navigator.vibrate === 'function' ? 'sim' : 'não (normal no iPhone)'),
+    'Navegador: ' + navigator.userAgent,
+  ].join('\n');
+</script>
+</body>
+</html>
