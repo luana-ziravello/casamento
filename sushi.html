@@ -237,6 +237,20 @@
     text-shadow: 0 2px 0 rgba(0,0,0,.2);
   }
   .botao:active { transform: translateY(calc(var(--u) * 4px)); box-shadow: 0 calc(var(--u) * 2px) 0 #2C7A22; }
+  .toques {
+    position: absolute; left: 0; right: 0; bottom: 0; top: 60%;
+    display: flex; touch-action: none;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+  }
+  .toque { flex: 1; display: block; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .toque input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .opcao-vibra {
+    display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 10px);
+    margin-top: calc(var(--u) * 6px); font-size: calc(var(--u) * 15px); font-weight: 600; text-align: left;
+    cursor: pointer;
+  }
+  .opcao-vibra small { display: block; font-size: calc(var(--u) * 12px); font-weight: 500; opacity: .7; }
+  .opcao-vibra input { width: calc(var(--u) * 44px); height: calc(var(--u) * 26px); accent-color: #4CB83A; flex: none; }
   .carregando { position: absolute; inset: 0; display: grid; place-items: center; color: #8A5A34; font-size: 20px; font-weight: 600; }
 </style>
 <script type="importmap">
@@ -248,6 +262,16 @@
 <div id="palco">
   <div class="carregando" id="carregando">Preparando o sushi…</div>
   <canvas id="jogo"></canvas>
+  <!-- Área de toque das 5 colunas. Cada coluna é um <label> com um
+       interruptor nativo (input switch): no iPhone, o próprio toque do
+       dedo no interruptor gera o retorno tátil do sistema. -->
+  <div class="toques" id="toques">
+    <label class="toque"><input type="checkbox" switch tabindex="-1" aria-hidden="true"></label>
+    <label class="toque"><input type="checkbox" switch tabindex="-1" aria-hidden="true"></label>
+    <label class="toque"><input type="checkbox" switch tabindex="-1" aria-hidden="true"></label>
+    <label class="toque"><input type="checkbox" switch tabindex="-1" aria-hidden="true"></label>
+    <label class="toque"><input type="checkbox" switch tabindex="-1" aria-hidden="true"></label>
+  </div>
 
   <div class="camada" id="camada">
     <div class="hud">
@@ -269,6 +293,10 @@
       <p>Os clientes pedem o <b>prato pronto</b>, mas das colunas saem <b>ingredientes</b>: para o nigiri de polvo, mande um tentáculo; para o de salmão, o filé clarinho; para o de atum, o bloco vermelho…</p>
       <p>O ingrediente dá <b>uma volta inteira</b> e, ao passar de novo pelo chef, vira o prato. Só aí o cliente pega.</p>
       <p>Sobreviva até o fim do tempo <b>sem deixar a esteira lotar</b>. Quanto mais cheia, mais devagar ela anda!</p>
+      <label class="opcao-vibra">
+        <input type="checkbox" switch id="chkVibra" checked>
+        <span>📳 Vibração <small>toque para testar: o celular deve vibrar</small></span>
+      </label>
       <button class="botao" id="btnInicio">Jogar</button>
     </div>
   </div>
@@ -457,6 +485,7 @@ function redimensiona() {
   COL.visiveis = Math.ceil((h - tela.topoColunas) * ec / (COL.passo * SEN)) + 1;
 
   $('barra').style.top = Y(LAYOUT.barra) + 'px';
+  $('toques').style.top = (Y(LAYOUT.barra) - 10) + 'px';
 }
 
 // ---------- Luz ----------
@@ -960,6 +989,8 @@ function tocaMusica() {
 // ativação (soltar o dedo / click). Por isso no iPhone a vibração acontece
 // ao soltar o dedo da coluna; eventos sem toque (cliente chegando) não vibram.
 const temVibracao = typeof navigator.vibrate === 'function';
+let vibracaoLigada = true;
+try { vibracaoLigada = localStorage.getItem('sushi-vibra') !== '0'; } catch (e) { /* sem armazenamento */ }
 let switchIOS = null;
 if (!temVibracao) {
   switchIOS = document.createElement('label');
@@ -971,7 +1002,15 @@ if (!temVibracao) {
   document.head.appendChild(switchIOS);
 }
 function vibra(padrao) {
+  if (!vibracaoLigada) return;
   try { if (temVibracao) navigator.vibrate(padrao); else switchIOS.click(); } catch (e) { /* sem vibração */ }
+}
+function ajustaVibracao(v) {
+  vibracaoLigada = v;
+  try { localStorage.setItem('sushi-vibra', v ? '1' : '0'); } catch (e) { /* sem armazenamento */ }
+  $('chkVibra').checked = v;
+  // sem vibração, os interruptores das colunas ficam desativados (não vibram)
+  document.querySelectorAll('.toque input').forEach(i => { i.disabled = !v; });
 }
 // chamado dentro de um gesto (soltar o dedo / clicar): funciona também no iPhone
 function vibraToque(padrao = 15) { vibra(padrao); }
@@ -1140,27 +1179,23 @@ function colunaEm(ev) {
   if (y < Y(LAYOUT.barra) - 10) return -1;
   return Math.max(0, Math.min(4, Math.floor(x / (larg / 5))));
 }
-cv.addEventListener('pointerdown', (ev) => {
+const toques = $('toques');
+toques.addEventListener('pointerdown', (ev) => {
   iniciaAudio();
   if (estado !== 'jogando') return;
-  cv.setPointerCapture(ev.pointerId);
   segurando = colunaEm(ev);
-  if (segurando !== -1 && temVibracao) vibra(15);
+  if (segurando !== -1 && temVibracao && vibracaoLigada) vibra(15);
   if (!mostrouDica) { mostrouDica = true; atualizaBarra(naEsteira); }
 });
-cv.addEventListener('pointermove', (ev) => {
+toques.addEventListener('pointermove', (ev) => {
   if (estado !== 'jogando' || segurando === -1) return;
   const i = colunaEm(ev);
   if (i !== -1) segurando = i;
 });
-['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => cv.addEventListener(t, () => { segurando = -1; }));
-// iPhone: o retorno tátil só é aceito ao soltar o dedo (touchend conta como gesto)
-cv.addEventListener('touchend', (ev) => {
-  if (temVibracao || estado !== 'jogando') return;
-  const t = ev.changedTouches[0];
-  if (t && colunaEm(t) !== -1) vibraToque();
-});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(t => toques.addEventListener(t, () => { segurando = -1; }));
+toques.addEventListener('contextmenu', e => e.preventDefault());
 cv.addEventListener('contextmenu', e => e.preventDefault());
+toques.addEventListener('selectstart', e => e.preventDefault());
 
 // ---------- Atualização ----------
 const _p = new THREE.Vector3(), _q = new THREE.Vector3(), _m4 = new THREE.Matrix4(), _quat = new THREE.Quaternion(), _um = new THREE.Vector3(1, 1, 1), _eixoY = new THREE.Vector3(0, 1, 0);
@@ -1402,6 +1437,8 @@ function perde() {
 const faseInicial = Math.min(FASES.length, Math.max(1, +new URLSearchParams(location.search).get('fase') || 1)) - 1;
 $('btnInicio').onclick = () => { iniciaAudio(); tocaMusica(); vibraToque(); introFase(faseInicial); };
 $('btnSom').onclick = () => { iniciaAudio(); tocaMusica(); silencia(!mudo); };
+$('chkVibra').addEventListener('change', (e) => { ajustaVibracao(e.target.checked); if (e.target.checked && temVibracao) navigator.vibrate(40); });
+ajustaVibracao(vibracaoLigada);
 silencia(mudo);
 $('btnFase').onclick = () => {
   vibraToque(); tocaMusica();
